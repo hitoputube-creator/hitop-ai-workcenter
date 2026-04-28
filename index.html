@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>하이탑 AI 부동산 업무센터</title>
+<style>
+:root{
+  --bg:#071024; --panel:#101b34; --panel2:#16264d;
+  --gold:#d6ad35; --gold2:#ffd75a; --text:#f8fafc; --muted:#aab7d4;
+  --line:rgba(214,173,53,.42); --white:#fff; --ink:#172033;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;background:linear-gradient(180deg,#101b34,#071024 45%,#050914);color:var(--text);min-height:100vh}
+a{text-decoration:none;color:inherit}
+.wrap{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:34px 0 60px}
+.header{display:flex;justify-content:space-between;gap:18px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-mark{width:52px;height:52px;border:1px solid var(--line);border-radius:16px;display:grid;place-items:center;color:var(--gold2);font-weight:900;background:rgba(214,173,53,.12)}
+h1{margin:0;font-size:30px;letter-spacing:-1px}
+.sub{margin-top:6px;color:var(--muted);font-size:14px}
+.btn{border:1px solid var(--line);border-radius:999px;background:#0b142c;color:var(--text);padding:10px 14px;font-weight:800;cursor:pointer}
+.btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111827;border:0}
+.hero{background:linear-gradient(145deg,#182544,#0d1831);border:1px solid var(--line);border-radius:26px;padding:28px;margin-bottom:26px;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+.hero h2{margin:0 0 10px;font-size:32px;letter-spacing:-1px}
+.hero p{margin:0;color:var(--muted);line-height:1.7}
+.section-title{margin:28px 0 14px;font-size:18px;color:var(--gold2)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.card{min-height:155px;border:1px solid rgba(214,173,53,.28);border-radius:22px;background:linear-gradient(145deg,#16264d,#0b1630);padding:20px;display:flex;flex-direction:column;justify-content:space-between;transition:.2s}
+.card:hover{transform:translateY(-3px);border-color:var(--gold2);box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.icon{font-size:26px;margin-bottom:14px}
+.card h3{margin:0;font-size:20px}
+.card p{margin:8px 0 0;color:var(--muted);font-size:13.5px;line-height:1.5}
+.go{color:var(--gold2);font-weight:900;font-size:13px;margin-top:18px}
+.panel{background:#fff;color:var(--ink);border-radius:24px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.24);border:1px solid #dce5f5}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{font-size:13px;font-weight:900;color:#41506c;display:block;margin-bottom:7px}
+input,select,textarea{width:100%;border:1px solid #ccd7ec;border-radius:12px;padding:13px 14px;font-size:15px;outline:none;background:#f7f9fd}
+textarea{min-height:120px;resize:vertical}
+.result{margin-top:20px;background:linear-gradient(145deg,#101b34,#16264d);color:white;border-radius:20px;padding:22px;border:1px solid var(--line)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.kpi{background:rgba(255,255,255,.08);border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,.12)}
+.kpi small{color:#b8c5df;font-weight:800}
+.kpi strong{display:block;margin-top:7px;font-size:20px;color:var(--gold2)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.footer{margin-top:30px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:13px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.form-grid,.kpis{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.wrap{width:calc(100% - 22px);padding-top:22px}h1{font-size:24px}.hero h2{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">HT</div>
+      <div>
+        <h1>하이탑 AI 부동산 업무센터</h1>
+        <div class="sub">기존 매물관리 프로그램은 그대로 두고, 새 기능은 독립형으로 실행합니다.</div>
+      </div>
+    </div>
+    <a class="btn gold" href="https://hitoputube-creator.github.io/haitop-realty-system/" target="_blank">기존 매물관리 열기</a>
+  </header>
+
+  <section class="hero">
+    <h2>필요한 업무로 바로 이동합니다.</h2>
+    <p>대시보드는 가볍게 유지하고, 계약문자·수익률·중개보수·업무일지 같은 기능은 별도 페이지로 분리했습니다.</p>
+  </section>
+
+  <h2 class="section-title">콘텐츠 자동화</h2>
+  <div class="grid">
+    <a class="card" href="shorts/index.html"><div><div class="icon">🎬</div><h3>숏츠 제작</h3><p>매물·상권 내용을 짧은 영상 구성으로 정리</p></div><div class="go">바로 실행 →</div></a>
+    <a class="card" href="blog/index.html"><div><div class="icon">✍️</div><h3>블로그 생성</h3><p>매물 정보를 블로그 글·제목·태그로 변환</p></div><div class="go">바로 실행 →</div></a>
+    <a class="card" href="cafe/index.html"><div><div class="icon">☕</div><h3>카페글 생성</h3><p>지역 카페 홍보용 글 자동 구성</p></div><div class="go">바로 실행 →</div></a>
+  </div>
+
+  <h2 class="section-title">중개 실무 도구</h2>
+  <div class="grid">
+    <a class="card" href="contract-message/index.html"><div><div class="icon">📩</div><h3>계약문자</h3><p>계약 조건을 고객 발송 문자로 정리</p></div><div class="go">바로 실행 →</div></a>
+    <a class="card" href="brokerage/index.html"><div><div class="icon">🧾</div><h3>중개보수</h3><p>매매·전세·월세 중개보수 계산</p></div><div class="go">바로 실행 →</div></a>
+    <a class="card" href="quote/index.html"><div><div class="icon">📊</div><h3>수익률 견적서</h3><p>상가 투자 수익률과 제안서 생성</p></div><div class="go">바로 실행 →</div></a>
+    <a class="card" href="estimate/index.html"><div><div class="icon">📑</div><h3>견적서</h3><p>상가·오피스텔 상담용 견적서</p></div><div class="go">바로 실행 →</div></a>
+  </div>
+
+  <h2 class="section-title">관리 시스템</h2>
+  <div class="grid">
+    <a class="card" href="https://hitoputube-creator.github.io/haitop-realty-system/" target="_blank"><div><div class="icon">🏢</div><h3>매물관리</h3><p>기존 하이탑 매물관리 본체로 이동</p></div><div class="go">기존 프로그램 →</div></a>
+    <a class="card" href="calendar/index.html"><div><div class="icon">📅</div><h3>캘린더</h3><p>상담·계약·업무 일정을 관리</p></div><div class="go">바로 실행 →</div></a>
+    <a class="card" href="journal/index.html"><div><div class="icon">📝</div><h3>업무일지</h3><p>상담·방문·계약 진행 상황 기록</p></div><div class="go">바로 실행 →</div></a>
+  </div>
+
+  <div class="footer">하이탑부동산 · 031-949-8969 · 새 기능은 이 업무센터 안에서 하나씩 확장</div>
+</div>
+</body>
+</html>

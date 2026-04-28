@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>블로그 생성</title>
+<style>
+:root{
+  --bg:#071024; --panel:#101b34; --panel2:#16264d;
+  --gold:#d6ad35; --gold2:#ffd75a; --text:#f8fafc; --muted:#aab7d4;
+  --line:rgba(214,173,53,.42); --white:#fff; --ink:#172033;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;background:linear-gradient(180deg,#101b34,#071024 45%,#050914);color:var(--text);min-height:100vh}
+a{text-decoration:none;color:inherit}
+.wrap{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:34px 0 60px}
+.header{display:flex;justify-content:space-between;gap:18px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-mark{width:52px;height:52px;border:1px solid var(--line);border-radius:16px;display:grid;place-items:center;color:var(--gold2);font-weight:900;background:rgba(214,173,53,.12)}
+h1{margin:0;font-size:30px;letter-spacing:-1px}
+.sub{margin-top:6px;color:var(--muted);font-size:14px}
+.btn{border:1px solid var(--line);border-radius:999px;background:#0b142c;color:var(--text);padding:10px 14px;font-weight:800;cursor:pointer}
+.btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111827;border:0}
+.hero{background:linear-gradient(145deg,#182544,#0d1831);border:1px solid var(--line);border-radius:26px;padding:28px;margin-bottom:26px;box-shadow:0 24px 70px rgba(0,0,0,.25)}
+.hero h2{margin:0 0 10px;font-size:32px;letter-spacing:-1px}
+.hero p{margin:0;color:var(--muted);line-height:1.7}
+.section-title{margin:28px 0 14px;font-size:18px;color:var(--gold2)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.card{min-height:155px;border:1px solid rgba(214,173,53,.28);border-radius:22px;background:linear-gradient(145deg,#16264d,#0b1630);padding:20px;display:flex;flex-direction:column;justify-content:space-between;transition:.2s}
+.card:hover{transform:translateY(-3px);border-color:var(--gold2);box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.icon{font-size:26px;margin-bottom:14px}
+.card h3{margin:0;font-size:20px}
+.card p{margin:8px 0 0;color:var(--muted);font-size:13.5px;line-height:1.5}
+.go{color:var(--gold2);font-weight:900;font-size:13px;margin-top:18px}
+.panel{background:#fff;color:var(--ink);border-radius:24px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.24);border:1px solid #dce5f5}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+label{font-size:13px;font-weight:900;color:#41506c;display:block;margin-bottom:7px}
+input,select,textarea{width:100%;border:1px solid #ccd7ec;border-radius:12px;padding:13px 14px;font-size:15px;outline:none;background:#f7f9fd}
+textarea{min-height:120px;resize:vertical}
+.result{margin-top:20px;background:linear-gradient(145deg,#101b34,#16264d);color:white;border-radius:20px;padding:22px;border:1px solid var(--line)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+.kpi{background:rgba(255,255,255,.08);border-radius:16px;padding:14px;border:1px solid rgba(255,255,255,.12)}
+.kpi small{color:#b8c5df;font-weight:800}
+.kpi strong{display:block;margin-top:7px;font-size:20px;color:var(--gold2)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.footer{margin-top:30px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:13px}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.form-grid,.kpis{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}}
+@media(max-width:560px){.grid{grid-template-columns:1fr}.wrap{width:calc(100% - 22px);padding-top:22px}h1{font-size:24px}.hero h2{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="header">
+    <a class="logo" href="../index.html">
+      <div class="logo-mark">HT</div>
+      <div>
+        <h1>블로그 생성</h1>
+        <div class="sub">하이탑 AI 부동산 업무센터</div>
+      </div>
+    </a>
+    <a class="btn" href="../index.html">대시보드</a>
+  </header>
+
+<section class="panel">
+  <h2 style="margin-top:0;color:#101d3d">블로그 생성</h2>
+  <p style="color:#4d5b73;line-height:1.7">매물 정보를 블로그 글, 제목, 태그로 정리하는 프롬프트 생성 페이지입니다.</p>
+  <label>기본 정보 입력</label>
+  <textarea id="input" placeholder="매물 정보, 가격, 위치, 특징을 입력하세요."></textarea>
+  <div class="actions"><button class="btn gold" onclick="makePrompt()">프롬프트 만들기</button><button class="btn" onclick="copyPrompt()">복사</button></div>
+</section>
+<section class="result"><h2 style="margin-top:0">Claude/ChatGPT에 붙여넣을 프롬프트</h2><textarea id="out"></textarea></section>
+
+<div class="footer">하이탑부동산 · 031-949-8969 · 파주/운정 상가·토지·오피스텔 전문</div>
+</div>
+
+<script>
+function makePrompt(){
+ const input=document.getElementById('input').value;
+ document.getElementById('out').value=`블로그 생성 작업을 해줘. 하이탑부동산 전문적이고 신뢰감 있는 톤으로 작성해줘.\n\n자료:\n${input}`;
+}
+function copyPrompt(){navigator.clipboard.writeText(document.getElementById('out').value); alert('복사되었습니다.')}
+</script>
+
+</body>
+</html>
