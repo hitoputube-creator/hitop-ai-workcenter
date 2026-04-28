@@ -61,31 +61,149 @@ textarea{min-height:120px;resize:vertical}
     <a class="btn gold" href="https://hitoputube-creator.github.io/haitop-realty-system/" target="_blank">기존 매물관리 열기</a>
   </header>
 
-
-
   <h2 class="section-title">콘텐츠 자동화</h2>
-  <div class="grid">
+  <div class="grid" data-category="콘텐츠 자동화">
     <a class="card" href="shorts/index.html"><div><div class="icon">🎬</div><h3>숏츠 제작</h3><p>매물·상권 내용을 짧은 영상 구성으로 정리</p></div><div class="go">바로 실행 →</div></a>
     <a class="card" href="blog/index.html"><div><div class="icon">✍️</div><h3>블로그 생성</h3><p>매물 정보를 블로그 글·제목·태그로 변환</p></div><div class="go">바로 실행 →</div></a>
     <a class="card" href="cafe/index.html"><div><div class="icon">☕</div><h3>카페글 생성</h3><p>지역 카페 홍보용 글 자동 구성</p></div><div class="go">바로 실행 →</div></a>
+    <button type="button" class="card add-workspace" data-category="콘텐츠 자동화" style="border-style:dashed;background:transparent;color:var(--muted);cursor:pointer;align-items:center;justify-content:center;text-align:center;font-family:inherit"><div><div class="icon">➕</div><h3 style="color:var(--gold2)">새 작업 추가</h3><p>카드 형태로 직접 등록</p></div><div class="go">＋ 추가하기</div></button>
   </div>
 
   <h2 class="section-title">중개 실무 도구</h2>
-  <div class="grid">
+  <div class="grid" data-category="중개 실무 도구">
     <a class="card" href="contract-message/index.html"><div><div class="icon">📩</div><h3>계약문자</h3><p>계약 조건을 고객 발송 문자로 정리</p></div><div class="go">바로 실행 →</div></a>
     <a class="card" href="brokerage/index.html"><div><div class="icon">🧾</div><h3>중개보수</h3><p>매매·전세·월세 중개보수 계산</p></div><div class="go">바로 실행 →</div></a>
     <a class="card" href="quote/index.html"><div><div class="icon">📊</div><h3>수익률 견적서</h3><p>상가 투자 수익률과 제안서 생성</p></div><div class="go">바로 실행 →</div></a>
     <a class="card" href="estimate/index.html"><div><div class="icon">📑</div><h3>견적서</h3><p>상가·오피스텔 상담용 견적서</p></div><div class="go">바로 실행 →</div></a>
+    <button type="button" class="card add-workspace" data-category="중개 실무 도구" style="border-style:dashed;background:transparent;color:var(--muted);cursor:pointer;align-items:center;justify-content:center;text-align:center;font-family:inherit"><div><div class="icon">➕</div><h3 style="color:var(--gold2)">새 작업 추가</h3><p>카드 형태로 직접 등록</p></div><div class="go">＋ 추가하기</div></button>
   </div>
 
   <h2 class="section-title">관리 시스템</h2>
-  <div class="grid">
+  <div class="grid" data-category="관리 시스템">
     <a class="card" href="https://hitoputube-creator.github.io/haitop-realty-system/" target="_blank"><div><div class="icon">🏢</div><h3>매물관리</h3><p>기존 하이탑 매물관리 본체로 이동</p></div><div class="go">기존 프로그램 →</div></a>
     <a class="card" href="calendar/index.html"><div><div class="icon">📅</div><h3>캘린더</h3><p>상담·계약·업무 일정을 관리</p></div><div class="go">바로 실행 →</div></a>
     <a class="card" href="journal/index.html"><div><div class="icon">📝</div><h3>업무일지</h3><p>상담·방문·계약 진행 상황 기록</p></div><div class="go">바로 실행 →</div></a>
+    <button type="button" class="card add-workspace" data-category="관리 시스템" style="border-style:dashed;background:transparent;color:var(--muted);cursor:pointer;align-items:center;justify-content:center;text-align:center;font-family:inherit"><div><div class="icon">➕</div><h3 style="color:var(--gold2)">새 작업 추가</h3><p>카드 형태로 직접 등록</p></div><div class="go">＋ 추가하기</div></button>
   </div>
 
   <div class="footer">하이탑부동산 · 031-949-8969 · 새 기능은 이 업무센터 안에서 하나씩 확장</div>
 </div>
+
+<script>
+(function(){
+  var STORAGE_KEY = 'hitopWorkspaces';
+
+  function getItems(){
+    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch(e){ return []; }
+  }
+  function saveItems(items){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+  function escapeHtml(s){
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  function normalizeLink(url){
+    var u = String(url || '').trim();
+    if(!u) return '';
+    if(/^(https?:|mailto:|tel:|\/|\.\/|\.\.\/)/i.test(u)) return u;
+    return 'https://' + u;
+  }
+
+  function addWorkspace(category){
+    var title = prompt('작업명을 입력하세요');
+    if(title === null) return;
+    title = title.trim();
+    if(!title){ alert('작업명은 필수입니다.'); return; }
+
+    var desc = prompt('설명을 입력하세요 (생략 가능)');
+    if(desc === null) return;
+
+    var icon = prompt('아이콘(이모지)을 입력하세요 (생략 시 📌)');
+    if(icon === null) return;
+    icon = (icon || '').trim() || '📌';
+
+    var link = prompt('링크 URL을 입력하세요 (예: https://... 또는 폴더/index.html)');
+    if(link === null) return;
+    link = link.trim();
+    if(!link){ alert('링크는 필수입니다.'); return; }
+
+    var item = {
+      id: 'ws_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      category: category,
+      title: title,
+      desc: desc || '',
+      icon: icon,
+      link: normalizeLink(link)
+    };
+    var items = getItems();
+    items.push(item);
+    saveItems(items);
+    render();
+  }
+
+  function deleteWorkspace(id){
+    if(!confirm('이 작업을 삭제하시겠습니까?')) return;
+    var items = getItems().filter(function(it){ return it.id !== id; });
+    saveItems(items);
+    render();
+  }
+
+  function buildCard(it){
+    var card = document.createElement('div');
+    card.className = 'card user-card';
+    card.dataset.id = it.id;
+    card.innerHTML =
+      '<div>' +
+        '<div class="icon">' + escapeHtml(it.icon) + '</div>' +
+        '<h3>' + escapeHtml(it.title) + '</h3>' +
+        (it.desc ? '<p>' + escapeHtml(it.desc) + '</p>' : '') +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:18px">' +
+        '<a class="go" href="' + escapeHtml(it.link) + '" target="_blank" rel="noopener" style="margin:0">바로 실행 →</a>' +
+        '<button type="button" class="ws-delete" data-id="' + escapeHtml(it.id) + '" style="background:transparent;border:1px solid rgba(255,255,255,.18);color:var(--muted);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit">삭제</button>' +
+      '</div>';
+    return card;
+  }
+
+  function render(){
+    document.querySelectorAll('.user-card').forEach(function(el){ el.remove(); });
+
+    var items = getItems();
+    items.forEach(function(it){
+      var grid = document.querySelector('.grid[data-category="' + it.category + '"]');
+      if(!grid) return;
+      var addBtn = grid.querySelector('.add-workspace');
+      var card = buildCard(it);
+      if(addBtn) grid.insertBefore(card, addBtn);
+      else grid.appendChild(card);
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    var addBtn = e.target.closest('.add-workspace');
+    if(addBtn){
+      e.preventDefault();
+      addWorkspace(addBtn.dataset.category);
+      return;
+    }
+    var delBtn = e.target.closest('.ws-delete');
+    if(delBtn){
+      e.preventDefault();
+      e.stopPropagation();
+      deleteWorkspace(delBtn.dataset.id);
+      return;
+    }
+  });
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', render);
+  } else {
+    render();
+  }
+})();
+</script>
 </body>
 </html>
