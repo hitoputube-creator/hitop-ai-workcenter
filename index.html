@@ -1,8 +1,8 @@
-<!doctype html>
-<html lang="ko">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///C:/Users/260226%20Win10-2/Downloads/index_3.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>하이탑 AI 부동산 업무센터</title>
 <style>
 :root{
@@ -16,7 +16,8 @@ html,body{height:100%}
 body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;background:linear-gradient(180deg,#101b34,#071024 45%,#050914);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
 a{text-decoration:none;color:inherit}
 
-.wrap{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:28px 0 40px;flex:1 0 auto;width:100%}
+/* ✅ 수정: width:100% 제거, min() 하나만 유지 */
+.wrap{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:28px 0 40px;flex:1 0 auto}
 
 /* Header */
 .header{display:flex;justify-content:space-between;gap:18px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:6px}
@@ -37,15 +38,17 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
 
 /* Grid + cards */
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+
+/* ✅ 수정: height 90px으로 줄이고 padding 제거 */
 .card{
   position:relative;
   border:1px solid rgba(214,173,53,.28);
   border-radius:14px;
   background:linear-gradient(145deg,#16264d,#0b1630);
-  padding:0 14px;
-  height:120px;
+  padding:0;
+  height:90px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:8px;
+  gap:6px;
   text-align:center;
   cursor:pointer;
   transition:transform .15s, box-shadow .15s, border-color .15s, background .15s;
@@ -58,7 +61,7 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
   background:linear-gradient(145deg,#1d3263,#10204a);
   box-shadow:0 10px 24px rgba(0,0,0,.3);
 }
-.card .icon{font-size:28px;line-height:1}
+.card .icon{font-size:24px;line-height:1}
 .card h3{margin:0;font-size:13px;font-weight:800;letter-spacing:-.2px;color:var(--text);word-break:keep-all}
 .card-edit{
   position:absolute;top:6px;right:6px;
@@ -129,7 +132,7 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
 }
 @media(max-width:560px){
   .grid{grid-template-columns:repeat(2,1fr)}
-  .wrap{width:calc(100% - 22px);padding-top:20px}
+  .wrap{padding-top:20px}
   h1{font-size:20px}
 }
 </style>
@@ -152,7 +155,7 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
       <h2>콘텐츠 자동화</h2>
       <button type="button" class="add-btn" data-category="콘텐츠 자동화">+ 작업 추가</button>
     </div>
-    <div class="grid" data-category="콘텐츠 자동화"></div>
+    <div class="grid" data-category="콘텐츠 자동화"><div class="card" data-id="def-shorts"><button type="button" class="card-edit" data-edit="def-shorts" title="수정" aria-label="수정">✏️</button><div class="icon">🎬</div><h3>숏츠 제작</h3></div><div class="card" data-id="def-blog"><button type="button" class="card-edit" data-edit="def-blog" title="수정" aria-label="수정">✏️</button><div class="icon">✍️</div><h3>블로그 생성</h3></div><div class="card" data-id="def-cafe"><button type="button" class="card-edit" data-edit="def-cafe" title="수정" aria-label="수정">✏️</button><div class="icon">☕</div><h3>카페글 생성</h3></div></div>
   </section>
 
   <section class="cat">
@@ -160,7 +163,7 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
       <h2>중개 실무 도구</h2>
       <button type="button" class="add-btn" data-category="중개 실무 도구">+ 작업 추가</button>
     </div>
-    <div class="grid" data-category="중개 실무 도구"></div>
+    <div class="grid" data-category="중개 실무 도구"><div class="card linked" data-id="def-contract"><button type="button" class="card-edit" data-edit="def-contract" title="수정" aria-label="수정">✏️</button><div class="icon">📩</div><h3>계약문자</h3></div><div class="card" data-id="def-broker"><button type="button" class="card-edit" data-edit="def-broker" title="수정" aria-label="수정">✏️</button><div class="icon">🧾</div><h3>중개보수</h3></div><div class="card" data-id="def-quote"><button type="button" class="card-edit" data-edit="def-quote" title="수정" aria-label="수정">✏️</button><div class="icon">📊</div><h3>수익률 견적서</h3></div><div class="card" data-id="def-estimate"><button type="button" class="card-edit" data-edit="def-estimate" title="수정" aria-label="수정">✏️</button><div class="icon">📑</div><h3>견적서</h3></div></div>
   </section>
 
   <section class="cat">
@@ -168,7 +171,7 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
       <h2>관리 시스템</h2>
       <button type="button" class="add-btn" data-category="관리 시스템">+ 작업 추가</button>
     </div>
-    <div class="grid" data-category="관리 시스템"></div>
+    <div class="grid" data-category="관리 시스템"><div class="card" data-id="def-realty"><button type="button" class="card-edit" data-edit="def-realty" title="수정" aria-label="수정">✏️</button><div class="icon">🏢</div><h3>매물관리</h3></div><div class="card" data-id="def-calendar"><button type="button" class="card-edit" data-edit="def-calendar" title="수정" aria-label="수정">✏️</button><div class="icon">📅</div><h3>캘린더</h3></div><div class="card" data-id="def-journal"><button type="button" class="card-edit" data-edit="def-journal" title="수정" aria-label="수정">✏️</button><div class="icon">📝</div><h3>업무일지</h3></div></div>
   </section>
 </div>
 
@@ -231,14 +234,11 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
     if(raw){
       try{
         var parsed = JSON.parse(raw);
-        // Ensure all categories exist
         CATEGORIES.forEach(function(c){ if(!Array.isArray(parsed[c])) parsed[c] = []; });
         return parsed;
       }catch(e){}
     }
-    // First-time init: deep clone defaults
     var init = JSON.parse(JSON.stringify(DEFAULT_DATA));
-    // Migrate legacy user-added cards
     try{
       var old = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]');
       if(Array.isArray(old)){
@@ -387,7 +387,6 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
 
   /* ---------- Event wiring ---------- */
   document.addEventListener('click', function(e){
-    // Edit button on card
     var edit = e.target.closest('.card-edit');
     if(edit){
       e.preventDefault(); e.stopPropagation();
@@ -397,14 +396,12 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
       if(found) openModal('edit', { id:id, item:found.item, category:found.category });
       return;
     }
-    // Add button (section header)
     var add = e.target.closest('.add-btn');
     if(add && add.dataset.category){
       e.preventDefault();
       openModal('add', { category: add.dataset.category });
       return;
     }
-    // Card click → open URL if present
     var card = e.target.closest('.card');
     if(card && card.classList.contains('linked')){
       var data2 = loadData();
@@ -438,5 +435,6 @@ section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.1
   }
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
