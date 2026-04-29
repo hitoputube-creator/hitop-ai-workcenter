@@ -8,41 +8,129 @@
 :root{
   --bg:#071024; --panel:#101b34; --panel2:#16264d;
   --gold:#d6ad35; --gold2:#ffd75a; --text:#f8fafc; --muted:#aab7d4;
-  --line:rgba(214,173,53,.42); --white:#fff; --ink:#172033;
+  --line:rgba(214,173,53,.42); --soft:rgba(214,173,53,.18);
+  --white:#fff; --ink:#172033; --danger:#ff7a7a;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;background:linear-gradient(180deg,#101b34,#071024 45%,#050914);color:var(--text);min-height:100vh}
+html,body{height:100%}
+body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;background:linear-gradient(180deg,#101b34,#071024 45%,#050914);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
 a{text-decoration:none;color:inherit}
-.wrap{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:28px 0 50px}
-.header{display:flex;justify-content:space-between;gap:18px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:22px}
+
+.wrap{width:min(1180px,calc(100% - 32px));margin:0 auto;padding:28px 0 40px;flex:1 0 auto;width:100%}
+
+/* Header */
+.header{display:flex;justify-content:space-between;gap:18px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:6px}
 .logo{display:flex;align-items:center;gap:14px}
-.logo-mark{width:46px;height:46px;border:1px solid var(--line);border-radius:14px;display:grid;place-items:center;color:var(--gold2);font-weight:900;background:rgba(214,173,53,.12)}
-h1{margin:0;font-size:24px;letter-spacing:-1px}
-.sub{margin-top:4px;color:var(--muted);font-size:13px}
-.btn{border:1px solid var(--line);border-radius:999px;background:#0b142c;color:var(--text);padding:8px 14px;font-weight:800;cursor:pointer;font-size:13px}
+.logo-mark{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;color:var(--gold2);font-weight:900;background:rgba(214,173,53,.12);font-size:14px}
+h1{margin:0;font-size:22px;letter-spacing:-1px}
+.sub{margin-top:3px;color:var(--muted);font-size:12.5px}
+.btn{border:1px solid var(--line);border-radius:999px;background:#0b142c;color:var(--text);padding:8px 14px;font-weight:800;cursor:pointer;font-size:13px;font-family:inherit}
 .btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111827;border:0}
 
-.section-header{display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px}
-.section-header h2{margin:0;font-size:15px;color:var(--gold2);font-weight:800;letter-spacing:.2px}
-.add-btn{border:1px solid var(--line);background:rgba(214,173,53,.08);color:var(--gold2);font-size:12px;font-weight:800;padding:5px 12px;border-radius:999px;cursor:pointer;font-family:inherit;transition:.15s}
-.add-btn:hover{background:rgba(214,173,53,.2);border-color:var(--gold2)}
+/* Section */
+section.cat{padding-top:18px}
+section.cat + section.cat{margin-top:6px;border-top:1px solid rgba(214,173,53,.12)}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin:14px 0 12px}
+.section-header h2{margin:0;font-size:15px;color:var(--gold2);font-weight:800;letter-spacing:.2px;text-align:left}
+.add-btn{border:1px solid var(--line);background:rgba(214,173,53,.08);color:var(--gold2);font-size:12px;font-weight:800;padding:6px 12px;border-radius:999px;cursor:pointer;font-family:inherit;transition:.15s}
+.add-btn:hover{background:rgba(214,173,53,.22);border-color:var(--gold2)}
 
-.grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
-.card{min-height:90px;border:1px solid rgba(214,173,53,.28);border-radius:12px;background:linear-gradient(145deg,#16264d,#0b1630);padding:14px;display:flex;flex-direction:column;justify-content:center;transition:.15s;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-2px);border-color:var(--gold2);box-shadow:0 10px 24px rgba(0,0,0,.28)}
-.card .icon{font-size:22px;margin-bottom:6px;line-height:1}
-.card h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.2px}
-.card p{display:none}
+/* Grid + cards */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.card{
+  position:relative;
+  border:1px solid rgba(214,173,53,.28);
+  border-radius:14px;
+  background:linear-gradient(145deg,#16264d,#0b1630);
+  padding:18px 14px;
+  min-height:108px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  transition:transform .15s, box-shadow .15s, border-color .15s, background .15s;
+  user-select:none;
+}
+.card.linked{cursor:pointer}
+.card:not(.linked){cursor:default;opacity:.85}
+.card:hover{
+  transform:translateY(-2px);
+  border-color:var(--gold2);
+  background:linear-gradient(145deg,#1d3263,#10204a);
+  box-shadow:0 10px 24px rgba(0,0,0,.3);
+}
+.card .icon{font-size:24px;line-height:1;margin-bottom:8px}
+.card h3{margin:0;font-size:14px;font-weight:800;letter-spacing:-.2px;color:var(--text);word-break:keep-all}
+.card-edit{
+  position:absolute;top:6px;right:6px;
+  background:rgba(0,0,0,.25);
+  border:1px solid rgba(214,173,53,.18);
+  color:var(--gold2);
+  width:24px;height:24px;border-radius:50%;
+  font-size:11px;line-height:1;
+  cursor:pointer;font-family:inherit;
+  display:inline-flex;align-items:center;justify-content:center;
+  opacity:0;transition:.15s;padding:0;
+}
+.card:hover .card-edit{opacity:1}
+.card-edit:hover{background:rgba(214,173,53,.2);border-color:var(--gold2)}
 
-.user-card .ws-delete{position:absolute;top:6px;right:6px;background:transparent;border:none;color:var(--muted);font-size:16px;line-height:1;cursor:pointer;width:22px;height:22px;border-radius:50%;display:none;align-items:center;justify-content:center;font-family:inherit;padding:0}
-.user-card:hover .ws-delete{display:inline-flex}
-.user-card .ws-delete:hover{background:rgba(255,255,255,.1);color:#ff7a7a}
+/* Footer */
+.footer{flex-shrink:0;border-top:1px solid var(--line);padding:14px 0;color:var(--muted);font-size:12px;text-align:center;background:rgba(7,16,36,.6)}
 
-.footer{margin-top:30px;border-top:1px solid var(--line);padding-top:16px;color:var(--muted);font-size:12px}
+/* Modal */
+.modal-backdrop{
+  position:fixed;inset:0;
+  background:rgba(5,9,20,.72);
+  display:none;align-items:center;justify-content:center;
+  z-index:200;backdrop-filter:blur(3px);
+  padding:16px;
+}
+.modal-backdrop.show{display:flex}
+.modal{
+  width:min(440px,100%);
+  background:linear-gradient(145deg,#182746,#0c1932);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:24px;
+  box-shadow:0 40px 100px rgba(0,0,0,.6);
+}
+.modal h3{margin:0 0 18px;color:var(--gold2);font-size:17px;letter-spacing:-.3px}
+.modal .form-row{margin-bottom:14px}
+.modal label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:800;letter-spacing:.2px}
+.modal input{
+  width:100%;
+  background:#0b142c;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:11px 13px;
+  color:var(--text);
+  font-size:14px;
+  font-family:inherit;
+  outline:none;
+  transition:border-color .15s;
+}
+.modal input:focus{border-color:var(--gold2)}
+.modal input::placeholder{color:#5e6c8a}
+.modal-actions{display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:8px}
+.modal-actions .m-right{display:flex;gap:8px;margin-left:auto}
+.modal button{font-family:inherit;border-radius:999px;padding:9px 18px;font-weight:800;font-size:13px;cursor:pointer;border:1px solid transparent;transition:.15s}
+.m-cancel{background:transparent;border-color:var(--line);color:var(--muted)}
+.m-cancel:hover{color:var(--text);border-color:var(--gold2)}
+.m-save{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111827;border:0}
+.m-save:hover{filter:brightness(1.05)}
+.m-delete{background:transparent;border:1px solid rgba(255,122,122,.4);color:var(--danger)}
+.m-delete:hover{background:rgba(255,122,122,.12)}
+.m-delete.hidden{display:none}
 
-@media(max-width:1024px){.grid{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:760px){.grid{grid-template-columns:repeat(3,1fr)}.header{align-items:flex-start;flex-direction:column}}
-@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}.wrap{width:calc(100% - 22px);padding-top:20px}h1{font-size:20px}}
+/* Responsive */
+@media(max-width:900px){
+  .grid{grid-template-columns:repeat(3,1fr)}
+  .header{align-items:flex-start;flex-direction:column;gap:12px}
+}
+@media(max-width:560px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .wrap{width:calc(100% - 22px);padding-top:20px}
+  h1{font-size:20px}
+}
 </style>
 </head>
 <body>
@@ -58,141 +146,287 @@ h1{margin:0;font-size:24px;letter-spacing:-1px}
     <a class="btn gold" href="https://hitoputube-creator.github.io/haitop-realty-system/" target="_blank">기존 매물관리</a>
   </header>
 
-  <div class="section-header">
-    <h2>콘텐츠 자동화</h2>
-    <button type="button" class="add-btn" data-category="콘텐츠 자동화">+ 작업 추가</button>
-  </div>
-  <div class="grid" data-category="콘텐츠 자동화">
-    <a class="card" href="shorts/index.html" title="매물·상권 내용을 짧은 영상 구성으로 정리"><div class="icon">🎬</div><h3>숏츠 제작</h3></a>
-    <a class="card" href="blog/index.html" title="매물 정보를 블로그 글·제목·태그로 변환"><div class="icon">✍️</div><h3>블로그 생성</h3></a>
-    <a class="card" href="cafe/index.html" title="지역 카페 홍보용 글 자동 구성"><div class="icon">☕</div><h3>카페글 생성</h3></a>
-  </div>
+  <section class="cat">
+    <div class="section-header">
+      <h2>콘텐츠 자동화</h2>
+      <button type="button" class="add-btn" data-category="콘텐츠 자동화">+ 작업 추가</button>
+    </div>
+    <div class="grid" data-category="콘텐츠 자동화"></div>
+  </section>
 
-  <div class="section-header">
-    <h2>중개 실무 도구</h2>
-    <button type="button" class="add-btn" data-category="중개 실무 도구">+ 작업 추가</button>
-  </div>
-  <div class="grid" data-category="중개 실무 도구">
-    <a class="card" href="contract-message/index.html" title="계약 조건을 고객 발송 문자로 정리"><div class="icon">📩</div><h3>계약문자</h3></a>
-    <a class="card" href="brokerage/index.html" title="매매·전세·월세 중개보수 계산"><div class="icon">🧾</div><h3>중개보수</h3></a>
-    <a class="card" href="quote/index.html" title="상가 투자 수익률과 제안서 생성"><div class="icon">📊</div><h3>수익률 견적서</h3></a>
-    <a class="card" href="estimate/index.html" title="상가·오피스텔 상담용 견적서"><div class="icon">📑</div><h3>견적서</h3></a>
-  </div>
+  <section class="cat">
+    <div class="section-header">
+      <h2>중개 실무 도구</h2>
+      <button type="button" class="add-btn" data-category="중개 실무 도구">+ 작업 추가</button>
+    </div>
+    <div class="grid" data-category="중개 실무 도구"></div>
+  </section>
 
-  <div class="section-header">
-    <h2>관리 시스템</h2>
-    <button type="button" class="add-btn" data-category="관리 시스템">+ 작업 추가</button>
-  </div>
-  <div class="grid" data-category="관리 시스템">
-    <a class="card" href="https://hitoputube-creator.github.io/haitop-realty-system/" target="_blank" title="기존 하이탑 매물관리 본체"><div class="icon">🏢</div><h3>매물관리</h3></a>
-    <a class="card" href="calendar/index.html" title="상담·계약·업무 일정 관리"><div class="icon">📅</div><h3>캘린더</h3></a>
-    <a class="card" href="journal/index.html" title="상담·방문·계약 진행 상황 기록"><div class="icon">📝</div><h3>업무일지</h3></a>
-  </div>
+  <section class="cat">
+    <div class="section-header">
+      <h2>관리 시스템</h2>
+      <button type="button" class="add-btn" data-category="관리 시스템">+ 작업 추가</button>
+    </div>
+    <div class="grid" data-category="관리 시스템"></div>
+  </section>
+</div>
 
-  <div class="footer">하이탑부동산 · 031-949-8969</div>
+<footer class="footer">하이탑부동산 · 031-949-8969</footer>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="modal-backdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h3 id="modal-title">작업 수정</h3>
+    <div class="form-row">
+      <label for="m-title">카드 이름</label>
+      <input type="text" id="m-title" placeholder="예: 계약문자" maxlength="40">
+    </div>
+    <div class="form-row">
+      <label for="m-icon">아이콘 (이모지)</label>
+      <input type="text" id="m-icon" placeholder="📌" maxlength="4">
+    </div>
+    <div class="form-row">
+      <label for="m-url">연결 URL</label>
+      <input type="url" id="m-url" placeholder="https://... (비워두면 클릭 비활성)">
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="m-delete" id="m-delete">삭제</button>
+      <div class="m-right">
+        <button type="button" class="m-cancel" id="m-cancel">취소</button>
+        <button type="button" class="m-save" id="m-save">저장</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 (function(){
-  var STORAGE_KEY = 'hitopWorkspaces';
+  var STORAGE_KEY = 'hitopDashboardData';
+  var LEGACY_KEY  = 'hitopWorkspaces';
 
-  function getItems(){
-    try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
-    catch(e){ return []; }
+  var DEFAULT_DATA = {
+    "콘텐츠 자동화": [
+      { id:'def-shorts',  title:'숏츠 제작',     icon:'🎬', url:'' },
+      { id:'def-blog',    title:'블로그 생성',   icon:'✍️', url:'' },
+      { id:'def-cafe',    title:'카페글 생성',   icon:'☕', url:'' }
+    ],
+    "중개 실무 도구": [
+      { id:'def-contract', title:'계약문자',     icon:'📩', url:'https://hitoputube-creator.github.io/Contract-Message/index.html' },
+      { id:'def-broker',   title:'중개보수',     icon:'🧾', url:'' },
+      { id:'def-quote',    title:'수익률 견적서', icon:'📊', url:'' },
+      { id:'def-estimate', title:'견적서',       icon:'📑', url:'' }
+    ],
+    "관리 시스템": [
+      { id:'def-realty',   title:'매물관리',     icon:'🏢', url:'' },
+      { id:'def-calendar', title:'캘린더',       icon:'📅', url:'' },
+      { id:'def-journal',  title:'업무일지',     icon:'📝', url:'' }
+    ]
+  };
+  var CATEGORIES = Object.keys(DEFAULT_DATA);
+
+  /* ---------- Data layer ---------- */
+  function loadData(){
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      try{
+        var parsed = JSON.parse(raw);
+        // Ensure all categories exist
+        CATEGORIES.forEach(function(c){ if(!Array.isArray(parsed[c])) parsed[c] = []; });
+        return parsed;
+      }catch(e){}
+    }
+    // First-time init: deep clone defaults
+    var init = JSON.parse(JSON.stringify(DEFAULT_DATA));
+    // Migrate legacy user-added cards
+    try{
+      var old = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]');
+      if(Array.isArray(old)){
+        old.forEach(function(it){
+          var cat = it.category;
+          if(init[cat]){
+            init[cat].push({
+              id:    it.id   || ('mig-' + Date.now() + '-' + Math.random().toString(36).slice(2,6)),
+              title: it.title || '제목 없음',
+              icon:  it.icon  || '📌',
+              url:   normalizeUrl(it.link || it.url || '')
+            });
+          }
+        });
+      }
+    }catch(e){}
+    saveData(init);
+    return init;
   }
-  function saveItems(items){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  function saveData(data){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
+  function newId(){
+    return 'ws-' + Date.now() + '-' + Math.random().toString(36).slice(2,7);
+  }
+
+  /* ---------- Helpers ---------- */
   function escapeHtml(s){
     return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
       return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
     });
   }
-  function normalizeLink(url){
+  function normalizeUrl(url){
     var u = String(url || '').trim();
     if(!u) return '';
     if(/^(https?:|mailto:|tel:|\/|\.\/|\.\.\/)/i.test(u)) return u;
     return 'https://' + u;
   }
-
-  function addWorkspace(category){
-    var title = prompt('작업명을 입력하세요');
-    if(title === null) return;
-    title = title.trim();
-    if(!title){ alert('작업명은 필수입니다.'); return; }
-
-    var desc = prompt('설명을 입력하세요 (생략 가능)');
-    if(desc === null) return;
-
-    var icon = prompt('아이콘(이모지)을 입력하세요 (생략 시 📌)');
-    if(icon === null) return;
-    icon = (icon || '').trim() || '📌';
-
-    var link = prompt('링크 URL을 입력하세요 (예: https://... 또는 폴더/index.html)');
-    if(link === null) return;
-    link = link.trim();
-    if(!link){ alert('링크는 필수입니다.'); return; }
-
-    var item = {
-      id: 'ws_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
-      category: category,
-      title: title,
-      desc: desc || '',
-      icon: icon,
-      link: normalizeLink(link)
-    };
-    var items = getItems();
-    items.push(item);
-    saveItems(items);
-    render();
+  function findItem(data, id){
+    for(var i=0;i<CATEGORIES.length;i++){
+      var arr = data[CATEGORIES[i]];
+      for(var j=0;j<arr.length;j++){
+        if(arr[j].id === id) return { category: CATEGORIES[i], index:j, item:arr[j] };
+      }
+    }
+    return null;
   }
 
-  function deleteWorkspace(id){
-    if(!confirm('이 작업을 삭제하시겠습니까?')) return;
-    var items = getItems().filter(function(it){ return it.id !== id; });
-    saveItems(items);
-    render();
-  }
-
-  function buildCard(it){
-    var card = document.createElement('a');
-    card.className = 'card user-card';
-    card.href = it.link || '#';
-    card.target = '_blank';
-    card.rel = 'noopener';
-    card.dataset.id = it.id;
-    if(it.desc) card.title = it.desc;
+  /* ---------- Render ---------- */
+  function buildCard(item){
+    var card = document.createElement('div');
+    card.className = 'card' + (item.url ? ' linked' : '');
+    card.dataset.id = item.id;
     card.innerHTML =
-      '<button type="button" class="ws-delete" data-id="' + escapeHtml(it.id) + '" title="삭제" aria-label="삭제">×</button>' +
-      '<div class="icon">' + escapeHtml(it.icon) + '</div>' +
-      '<h3>' + escapeHtml(it.title) + '</h3>';
+      '<button type="button" class="card-edit" data-edit="' + escapeHtml(item.id) + '" title="수정" aria-label="수정">✏️</button>' +
+      '<div class="icon">' + escapeHtml(item.icon || '📌') + '</div>' +
+      '<h3>' + escapeHtml(item.title) + '</h3>';
     return card;
   }
-
   function render(){
-    document.querySelectorAll('.user-card').forEach(function(el){ el.remove(); });
-
-    var items = getItems();
-    items.forEach(function(it){
-      var grid = document.querySelector('.grid[data-category="' + it.category + '"]');
+    var data = loadData();
+    CATEGORIES.forEach(function(cat){
+      var grid = document.querySelector('.grid[data-category="' + cat + '"]');
       if(!grid) return;
-      grid.appendChild(buildCard(it));
+      grid.innerHTML = '';
+      (data[cat] || []).forEach(function(item){
+        grid.appendChild(buildCard(item));
+      });
     });
   }
 
+  /* ---------- Modal ---------- */
+  var backdrop = document.getElementById('modal-backdrop');
+  var titleEl  = document.getElementById('modal-title');
+  var inTitle  = document.getElementById('m-title');
+  var inIcon   = document.getElementById('m-icon');
+  var inUrl    = document.getElementById('m-url');
+  var btnSave  = document.getElementById('m-save');
+  var btnCancel= document.getElementById('m-cancel');
+  var btnDelete= document.getElementById('m-delete');
+
+  var modalState = { mode:'add', category:null, id:null };
+
+  function openModal(mode, opts){
+    modalState.mode = mode;
+    modalState.category = opts.category || null;
+    modalState.id = opts.id || null;
+
+    if(mode === 'add'){
+      titleEl.textContent = '새 작업 추가 — ' + (opts.category || '');
+      inTitle.value = '';
+      inIcon.value  = '';
+      inUrl.value   = '';
+      btnDelete.classList.add('hidden');
+    } else {
+      titleEl.textContent = '작업 수정';
+      inTitle.value = opts.item.title || '';
+      inIcon.value  = opts.item.icon  || '';
+      inUrl.value   = opts.item.url   || '';
+      btnDelete.classList.remove('hidden');
+    }
+
+    backdrop.classList.add('show');
+    backdrop.setAttribute('aria-hidden', 'false');
+    setTimeout(function(){ inTitle.focus(); }, 30);
+  }
+  function closeModal(){
+    backdrop.classList.remove('show');
+    backdrop.setAttribute('aria-hidden', 'true');
+  }
+  function saveModal(){
+    var title = inTitle.value.trim();
+    if(!title){ alert('카드 이름은 필수입니다.'); inTitle.focus(); return; }
+    var icon = inIcon.value.trim() || '📌';
+    var url  = normalizeUrl(inUrl.value);
+
+    var data = loadData();
+    if(modalState.mode === 'add'){
+      var cat = modalState.category;
+      if(!data[cat]) data[cat] = [];
+      data[cat].push({ id:newId(), title:title, icon:icon, url:url });
+    } else {
+      var found = findItem(data, modalState.id);
+      if(found){
+        found.item.title = title;
+        found.item.icon  = icon;
+        found.item.url   = url;
+      }
+    }
+    saveData(data);
+    render();
+    closeModal();
+  }
+  function deleteFromModal(){
+    if(modalState.mode !== 'edit' || !modalState.id) return;
+    if(!confirm('이 카드를 삭제하시겠습니까?')) return;
+    var data = loadData();
+    var found = findItem(data, modalState.id);
+    if(found){
+      data[found.category].splice(found.index, 1);
+      saveData(data);
+      render();
+    }
+    closeModal();
+  }
+
+  /* ---------- Event wiring ---------- */
   document.addEventListener('click', function(e){
-    var delBtn = e.target.closest('.ws-delete');
-    if(delBtn){
-      e.preventDefault();
-      e.stopPropagation();
-      deleteWorkspace(delBtn.dataset.id);
+    // Edit button on card
+    var edit = e.target.closest('.card-edit');
+    if(edit){
+      e.preventDefault(); e.stopPropagation();
+      var id = edit.dataset.edit;
+      var data = loadData();
+      var found = findItem(data, id);
+      if(found) openModal('edit', { id:id, item:found.item, category:found.category });
       return;
     }
-    var addBtn = e.target.closest('.add-btn');
-    if(addBtn && addBtn.dataset.category){
+    // Add button (section header)
+    var add = e.target.closest('.add-btn');
+    if(add && add.dataset.category){
       e.preventDefault();
-      addWorkspace(addBtn.dataset.category);
+      openModal('add', { category: add.dataset.category });
       return;
+    }
+    // Card click → open URL if present
+    var card = e.target.closest('.card');
+    if(card && card.classList.contains('linked')){
+      var data2 = loadData();
+      var found2 = findItem(data2, card.dataset.id);
+      if(found2 && found2.item.url){
+        window.open(found2.item.url, '_blank', 'noopener');
+      }
+      return;
+    }
+  });
+
+  btnSave.addEventListener('click', saveModal);
+  btnCancel.addEventListener('click', closeModal);
+  btnDelete.addEventListener('click', deleteFromModal);
+  backdrop.addEventListener('click', function(e){
+    if(e.target === backdrop) closeModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(!backdrop.classList.contains('show')) return;
+    if(e.key === 'Escape') closeModal();
+    if(e.key === 'Enter' && (e.target === inTitle || e.target === inIcon || e.target === inUrl)){
+      e.preventDefault();
+      saveModal();
     }
   });
 
