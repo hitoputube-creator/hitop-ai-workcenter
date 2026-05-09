@@ -644,33 +644,55 @@ button{font-family:inherit}
     form.querySelector('.qce-name-inp').focus();
   }
 
-  /* ── 9. 오늘 일정 ───────────────────────────── */
-  function renderToday() {
+  /* ── 9. 오늘 일정 (Supabase 연동) ─────────── */
+  function renderTodayItems(items) {
     var box = document.getElementById('today-list'); if (!box) return;
-    var items = safeJson(KEY_SCHEDULE, []);
     var today = todayStr();
-    var todayItems = items.filter(function(it){ return it.date===today; });
-    todayItems.sort(function(a,b){ return (a.time||'99:99').localeCompare(b.time||'99:99'); });
-
-    if (!todayItems.length) {
+    items.sort(function(a,b){
+      return (a.schedule_time||'99:99').localeCompare(b.schedule_time||'99:99');
+    });
+    if (!items.length) {
       box.innerHTML = '<div class="panel-empty">오늘 등록된 일정이 없습니다</div>';
       return;
     }
     box.innerHTML = '<div class="sch-list">' +
-      todayItems.map(function(it){
-        var h = it.time ? parseInt(it.time.split(':')[0],10) : -1;
+      items.map(function(it){
+        var h = it.schedule_time ? parseInt(it.schedule_time.split(':')[0],10) : -1;
         var bar = h<0?'bar-none':h<12?'bar-morning':h<18?'bar-afternoon':'bar-evening';
-        var doneClass = it.done ? ' done' : '';
-        return '<div class="sch-row'+doneClass+'">' +
+        var doneClass = it.is_done ? ' done' : '';
+        return '<div class="sch-row'+doneClass+'" style="cursor:pointer" data-date="'+esc(today)+'">' +
           '<div class="sch-bar '+bar+'"></div>' +
           '<div class="sch-body">' +
-            (it.time ? '<span class="sch-time">'+esc(it.time)+'</span>' : '') +
+            (it.schedule_time ? '<span class="sch-time">'+esc(it.schedule_time.slice(0,5))+'</span>' : '') +
             '<span class="sch-title">'+esc(it.title||'(제목없음)')+'</span>' +
-            (it.type ? '<span class="sch-type">'+esc(it.type)+'</span>' : '') +
           '</div>' +
         '</div>';
       }).join('') +
     '</div>';
+    // 항목 클릭 → 캘린더 이동
+    box.querySelectorAll('.sch-row[data-date]').forEach(function(row){
+      row.addEventListener('click', function(){
+        window.location.href = LINKS.calendar + '?date=' + this.dataset.date;
+      });
+    });
+  }
+  function loadTodayFromSB() {
+    var box = document.getElementById('today-list'); if (!box) return;
+    box.innerHTML = '<div class="panel-empty" style="color:var(--text-m)">일정 불러오는 중...</div>';
+    var today = todayStr();
+    sbFetch(
+      '/rest/v1/schedules?select=*&schedule_date=eq.'+today+
+      '&order=schedule_time.asc.nullslast'
+    ).then(function(rows){
+      renderTodayItems(rows || []);
+    }).catch(function(){
+      // Supabase 실패 시 localStorage fallback
+      var items = safeJson(KEY_SCHEDULE, []);
+      var fallback = items.filter(function(it){ return it.date===today; }).map(function(it){
+        return { title:it.title, schedule_time:it.time, is_done:it.done };
+      });
+      renderTodayItems(fallback);
+    });
   }
 
   /* ── 10. 최근 작업 (최대 5개) ──────────────── */
@@ -858,11 +880,12 @@ button{font-family:inherit}
 
     /* 오늘 일정 버튼 */
     document.getElementById('btn-full-cal').addEventListener('click', function(){
-      window.location.href = LINKS.calendar;
+      window.location.href = LINKS.calendar + '?date=' + todayStr();
     });
     document.getElementById('btn-add-schedule').addEventListener('click', function(){
-      addRecentAction({type:'일정',text:'캘린더 이동',url:LINKS.calendar});
-      window.location.href = LINKS.calendar;
+      var url = LINKS.calendar + '?date=' + todayStr();
+      addRecentAction({type:'일정',text:'캘린더 이동',url:url});
+      window.location.href = url;
     });
 
     /* 최근 작업 이동 */
@@ -925,7 +948,7 @@ button{font-family:inherit}
     renderHeaderDate();
     renderBiz();
     renderContent();
-    renderToday();
+    loadTodayFromSB();
     renderRecent();
     bindEvents();
 
