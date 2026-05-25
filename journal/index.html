@@ -65,6 +65,7 @@ textarea{min-height:120px;resize:vertical}
   <h2 style="margin-top:0;color:#101d3d">업무일지</h2>
   <div class="form-grid">
     <div><label>날짜</label><input id="date" type="date"></div>
+    <div><label>작성자</label><select id="writer"><option>주현희</option><option>김정현</option></select></div>
     <div><label>업무구분</label><select id="kind"><option>상담</option><option>방문</option><option>계약</option><option>광고</option></select></div>
     <div><label>고객명</label><input id="name"></div>
     <div><label>매물명</label><input id="property"></div>
@@ -72,25 +73,96 @@ textarea{min-height:120px;resize:vertical}
   </div>
   <div class="actions"><button class="btn gold" onclick="save()">저장</button><button class="btn" onclick="clearAll()">전체삭제</button></div>
 </section>
-<section class="result"><h2 style="margin-top:0">최근 업무일지</h2><div id="list"></div></section>
+<section class="result">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+    <h2 style="margin:0">최근 업무일지</h2>
+    <div class="filter-buttons" style="display:flex;gap:8px;">
+      <button class="btn" id="btnFilterAll" onclick="setFilter('all')" style="padding:6px 12px;font-size:13px;">전체 업무일지</button>
+      <button class="btn" id="btnFilterJoo" onclick="setFilter('주현희')" style="padding:6px 12px;font-size:13px;">주현희 업무일지</button>
+      <button class="btn" id="btnFilterKim" onclick="setFilter('김정현')" style="padding:6px 12px;font-size:13px;">김정현 업무일지</button>
+    </div>
+  </div>
+  <div id="list"></div>
+</section>
 
 <div class="footer">하이탑부동산 · 031-949-8969 · 파주/운정 상가·토지·오피스텔 전문</div>
 </div>
 
 <script>
 const KEY='hitop_journal';
+let currentFilter = 'all';
+
 document.getElementById('date').valueAsDate=new Date();
+
 function save(){
- const item={date:v('date'),kind:v('kind'),name:v('name'),property:v('property'),memo:v('memo')};
- const arr=JSON.parse(localStorage.getItem(KEY)||'[]'); arr.unshift(item); localStorage.setItem(KEY,JSON.stringify(arr)); render();
-}
-function v(id){return document.getElementById(id).value}
-function render(){
+ const item={
+   date:v('date'),
+   writer:v('writer'),
+   kind:v('kind'),
+   name:v('name'),
+   property:v('property'),
+   memo:v('memo')
+ };
  const arr=JSON.parse(localStorage.getItem(KEY)||'[]');
- document.getElementById('list').innerHTML=arr.map(x=>`<div style="padding:12px;border-bottom:1px solid rgba(255,255,255,.15)"><b>${x.date} · ${x.kind}</b><br>${x.name} / ${x.property}<br><span style="color:#cbd7f3">${x.memo}</span></div>`).join('')||'저장된 일지가 없습니다.';
+ arr.unshift(item);
+ localStorage.setItem(KEY,JSON.stringify(arr));
+ 
+ // 저장 완료 후 입력 필드 리셋
+ document.getElementById('name').value = '';
+ document.getElementById('property').value = '';
+ document.getElementById('memo').value = '';
+ 
+ render();
 }
+
+function v(id){return document.getElementById(id).value}
+
+function setFilter(filter) {
+  currentFilter = filter;
+  
+  // 모든 필터 버튼의 클래스 및 스타일 초기화
+  document.querySelectorAll('.filter-buttons .btn').forEach(btn => {
+    btn.style.background = '#0b142c';
+    btn.style.color = 'var(--text)';
+    btn.style.borderColor = 'var(--line)';
+  });
+  
+  const activeBtnId = filter === 'all' ? 'btnFilterAll' : (filter === '주현희' ? 'btnFilterJoo' : 'btnFilterKim');
+  const activeBtn = document.getElementById(activeBtnId);
+  if (activeBtn) {
+    activeBtn.style.background = 'linear-gradient(135deg,var(--gold),var(--gold2))';
+    activeBtn.style.color = '#111827';
+    activeBtn.style.borderColor = 'transparent';
+  }
+  
+  render();
+}
+
+function render(){
+  let arr=JSON.parse(localStorage.getItem(KEY)||'[]');
+  
+  // 기존 레거시 데이터 무결성 보장: writer가 누락되었을 시 기본값 "주현희" 자동 바인딩
+  arr = arr.map(x => ({
+    ...x,
+    writer: x.writer || '주현희'
+  }));
+  
+  // 필터 상태에 따른 필터링 적용
+  const filtered = currentFilter === 'all' ? arr : arr.filter(x => x.writer === currentFilter);
+  
+  document.getElementById('list').innerHTML=filtered.map(x=>`
+    <div style="padding:12px;border-bottom:1px solid rgba(255,255,255,.15)">
+      <b>${x.date} · ${x.kind} · <span style="color:var(--gold2)">${x.writer}</span></b><br>
+      ${x.name || '고객명 없음'} / ${x.property || '매물명 없음'}<br>
+      <span style="color:#cbd7f3">${x.memo || '내용 없음'}</span>
+    </div>
+  `).join('')||'<div style="padding:12px;color:var(--muted)">저장된 일지가 없습니다.</div>';
+}
+
 function clearAll(){if(confirm('전체 삭제할까요?')){localStorage.removeItem(KEY);render();}}
-render();
+
+// 초기 필터 설정 및 최초 렌더링 구동
+setFilter('all');
 </script>
 
 </body>
