@@ -518,6 +518,27 @@ button{font-family:inherit}
       { id:'c4', icon:'☕', name:'하이탑카페',     url:LINKS.cafe,                                newTab:true }
     ];
   }
+  function seedUserCats() {
+    return {
+      cats: [
+        { id:'default-ai-tools', name:'AI도구', links:[
+          { id:'dai-1', icon:'🤖', name:'ChatGPT',   url:'https://chat.openai.com',   desc:'', newTab:true },
+          { id:'dai-2', icon:'✨', name:'Claude',     url:'https://claude.ai',         desc:'', newTab:true },
+          { id:'dai-3', icon:'🔍', name:'Perplexity', url:'https://www.perplexity.ai', desc:'', newTab:true },
+          { id:'dai-4', icon:'🎨', name:'Canva',      url:'https://www.canva.com',     desc:'', newTab:true },
+          { id:'dai-5', icon:'💡', name:'Gemini',     url:'https://gemini.google.com', desc:'', newTab:true }
+        ]},
+        { id:'default-gov-sites', name:'공공사이트', links:[
+          { id:'gov-1', icon:'🗺', name:'토지이음',   url:'https://www.eum.go.kr',    desc:'', newTab:true },
+          { id:'gov-2', icon:'🏛', name:'정부24',     url:'https://www.gov.kr',       desc:'', newTab:true },
+          { id:'gov-3', icon:'📋', name:'건축행정',   url:'https://www.eais.go.kr',   desc:'', newTab:true },
+          { id:'gov-4', icon:'🏠', name:'국토교통부', url:'https://www.molit.go.kr',  desc:'', newTab:true },
+          { id:'gov-5', icon:'💼', name:'국세청',     url:'https://www.nts.go.kr',    desc:'', newTab:true }
+        ]}
+      ],
+      catOrder: ['default-ai-tools','default-gov-sites']
+    };
+  }
 
   /* ── 3. 헬퍼 ─────────────────────────────────── */
   function esc(s) {
@@ -569,8 +590,25 @@ button{font-family:inherit}
   }
   function loadUserCats() {
     var s = safeJson(KEY_USER_CATS, null);
-    if (s && Array.isArray(s.cats)) return s;
-    return { cats: [], catOrder: [] };
+    var seed = seedUserCats();
+
+    /* 데이터 없음 → 기본 시드로 초기화 */
+    if (!s || !Array.isArray(s.cats)) {
+      setJson(KEY_USER_CATS, seed);
+      return seed;
+    }
+
+    /* 데이터 있음 → 누락된 기본 카테고리만 이름 기준으로 보충 (기존 데이터 삭제 안 함) */
+    var existingNames = s.cats.map(function(c){ return c.name; });
+    var missing = seed.cats.filter(function(c){
+      return existingNames.indexOf(c.name) === -1;
+    });
+    if (missing.length) {
+      s.cats     = missing.concat(s.cats);
+      s.catOrder = missing.map(function(c){ return c.id; }).concat(s.catOrder || []);
+      setJson(KEY_USER_CATS, s);
+    }
+    return s;
   }
   function saveUserCats() {
     setJson(KEY_USER_CATS, { cats: state.userCats, catOrder: state.userCatOrder });
