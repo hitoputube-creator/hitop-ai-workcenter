@@ -32,8 +32,7 @@ button{font-family:inherit}
   background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .35s ease}
 
 .wrap{width:min(1400px,calc(100% - 32px));margin:0 auto;padding:6px 0 8px;
-  flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;
-  justify-content:space-between}
+  flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;gap:8px}
 
 /* ── HEADER ── */
 .site-header{
@@ -106,22 +105,22 @@ button{font-family:inherit}
 .qs-edit-btn:hover{background:rgba(212,175,55,.1)}
 .qs-edit-btn.active{background:rgba(212,175,55,.18);border-color:rgba(212,175,55,.5);color:var(--gold2)}
 
-.qc-grid{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start}
+.qc-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
 
 /* Normal card */
 .qc-card{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  width:80px;height:80px;flex-shrink:0;
-  border-radius:10px;border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  width:110px;height:110px;flex-shrink:0;
+  border-radius:12px;border:1px solid var(--border);
   background:rgba(255,255,255,.03);
   cursor:pointer;transition:all .15s;text-align:center;user-select:none;overflow:hidden}
 .qc-card:hover{transform:translateY(-2px);border-color:rgba(212,175,55,.35);background:rgba(212,175,55,.07)}
 .qc-card.gold-border{border-color:rgba(212,175,55,.3)}
-.qc-icon{font-size:22px;line-height:1;flex-shrink:0}
-.qc-name{font-size:11px;font-weight:700;color:#FFFFFF;
+.qc-icon{font-size:32px;line-height:1;flex-shrink:0}
+.qc-name{font-size:13px;font-weight:700;color:#FFFFFF;
   white-space:normal;word-break:keep-all;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden;line-height:1.25;width:100%;padding:0 3px}
+  overflow:hidden;line-height:1.3;width:100%;padding:0 6px}
 
 /* Content card variant */
 .qc-card.content{background:rgba(212,175,55,.04);border-color:rgba(212,175,55,.14)}
@@ -205,23 +204,23 @@ button{font-family:inherit}
 .uqs-act-btn.danger:hover{background:rgba(255,122,122,.1)}
 
 /* 사용자 링크 그리드 */
-.uql-grid{display:flex;flex-wrap:wrap;gap:6px;min-height:10px;align-items:flex-start}
+.uql-grid{display:flex;flex-wrap:wrap;gap:8px;min-height:10px;align-items:flex-start}
 
 /* 사용자 링크 카드 */
 .uql-card{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  width:80px;height:80px;flex-shrink:0;
-  border-radius:10px;border:1px solid rgba(212,175,55,.2);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  width:110px;height:110px;flex-shrink:0;
+  border-radius:12px;border:1px solid rgba(212,175,55,.2);
   background:rgba(255,255,255,.03);
   cursor:pointer;transition:all .15s;position:relative;user-select:none;overflow:hidden;text-align:center}
 .uql-card:hover{transform:translateY(-2px);border-color:rgba(212,175,55,.45);background:rgba(212,175,55,.07)}
 .uql-card.dragging-link{opacity:.35;border-style:dashed;transform:none}
 .uql-card.drag-over-link{border-color:var(--gold2);box-shadow:0 0 0 2px rgba(212,175,55,.3)}
-.uql-icon{font-size:22px;line-height:1;flex-shrink:0}
-.uql-name{font-size:11px;font-weight:700;color:#fff;
+.uql-icon{font-size:32px;line-height:1;flex-shrink:0}
+.uql-name{font-size:13px;font-weight:700;color:#fff;
   white-space:normal;word-break:keep-all;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden;line-height:1.25;width:100%;padding:0 3px}
+  overflow:hidden;line-height:1.3;width:100%;padding:0 6px}
 .uql-desc{display:none}
 .uql-ctrl{position:absolute;top:6px;right:6px;display:flex;gap:3px;opacity:0;transition:.15s}
 .uql-card:hover .uql-ctrl{opacity:1}
@@ -232,15 +231,15 @@ button{font-family:inherit}
 
 /* 링크 추가 버튼 (카드 모양) */
 .uql-add-btn{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-  width:80px;height:80px;flex-shrink:0;
-  border-radius:10px;border:1px dashed rgba(212,175,55,.25);
-  background:transparent;color:var(--gold);font-size:11px;font-weight:700;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  width:110px;height:110px;flex-shrink:0;
+  border-radius:12px;border:1px dashed rgba(212,175,55,.25);
+  background:transparent;color:var(--gold);font-size:13px;font-weight:700;
   cursor:pointer;transition:.15s;text-align:center}
 .uql-add-btn:hover{border-color:rgba(212,175,55,.55);background:rgba(212,175,55,.05)}
 
 /* 카테고리 추가 버튼 */
-.add-cat-wrap{margin-top:0;flex-shrink:0}
+.add-cat-wrap{margin-top:auto;flex-shrink:0}
 .add-cat-btn{display:block;width:100%;
   border:1px dashed rgba(212,175,55,.3);border-radius:10px;
   background:transparent;color:var(--gold);padding:7px;font-size:12px;font-weight:800;
@@ -296,15 +295,21 @@ button{font-family:inherit}
   color:var(--text-m);font-size:11px;text-align:center;flex-shrink:0}
 
 /* ── RESPONSIVE ── */
-@media(max-width:900px){.qc-card,.uql-card{width:74px;height:74px}}
+@media(max-width:1200px){.qc-card,.uql-card,.uql-add-btn{width:96px;height:96px}}
+@media(max-width:900px){
+  .qc-card,.uql-card,.uql-add-btn{width:86px;height:86px}
+  .qc-icon,.uql-icon{font-size:26px}
+}
 @media(max-width:767px){
   .site-header{padding:6px 12px}
-  .qc-grid,.uql-grid{gap:5px}
+  .qc-grid,.uql-grid{gap:6px}
+  .qc-card,.uql-card,.uql-add-btn{width:80px;height:80px}
 }
 @media(max-width:480px){
   .wrap{width:calc(100% - 16px)}
   .header-title{font-size:16px}
-  .qc-card,.uql-card,.uql-add-btn{width:66px;height:66px}
+  .qc-card,.uql-card,.uql-add-btn{width:70px;height:70px}
+  .qc-icon,.uql-icon{font-size:22px}
   .qce-card,.qce-add-form{min-width:140px}
   .modal{padding:16px}
   .uqs-actions{opacity:1}
