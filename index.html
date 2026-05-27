@@ -592,22 +592,66 @@ button{font-family:inherit}
     var s = safeJson(KEY_USER_CATS, null);
     var seed = seedUserCats();
 
-    /* 데이터 없음 → 기본 시드로 초기화 */
+    /* 데이터 없음 → 기본 시드로 초기화 (신규 기기·모바일) */
     if (!s || !Array.isArray(s.cats)) {
       setJson(KEY_USER_CATS, seed);
       return seed;
     }
 
-    /* 데이터 있음 → 누락된 기본 카테고리만 이름 기준으로 보충 (기존 데이터 삭제 안 함) */
-    var existingNames = s.cats.map(function(c){ return c.name; });
-    var missing = seed.cats.filter(function(c){
-      return existingNames.indexOf(c.name) === -1;
+    var changed = false;
+
+    /* ── 1단계: 잘못 추가된 시드 카테고리 정리 ──────────────────────────
+       시드 ID(default-ai-tools / default-gov-sites)를 가진 카테고리가
+       동시에, 해당 이름을 포함하는 다른 카테고리(예: "빠른이동 - AI도구")와
+       함께 존재하면 → 링크를 기존 카테고리로 병합 후 시드 카테고리 삭제.
+       기존에 같은 이름 또는 같은 URL 링크가 있으면 중복 추가하지 않음.
+    ──────────────────────────────────────────────────────────────────── */
+    seed.cats.forEach(function(seedCat) {
+      var seedIdx = -1;
+      s.cats.forEach(function(c, i){ if (c.id === seedCat.id) seedIdx = i; });
+      if (seedIdx === -1) return; // 시드 카테고리 없음 → 스킵
+
+      // 시드 이름을 포함하는 다른 카테고리 탐색
+      // 예) "AI도구" ⊂ "빠른이동 - AI도구"
+      var targetIdx = -1;
+      s.cats.forEach(function(c, i) {
+        if (c.id !== seedCat.id && c.name.indexOf(seedCat.name) !== -1) targetIdx = i;
+      });
+      if (targetIdx === -1) return; // 대상 없음 → 시드가 유일한 카테고리이므로 유지
+
+      // 링크 병합 (이름 또는 URL 중복 제외)
+      var target = s.cats[targetIdx];
+      var seedLinks = (s.cats[seedIdx].links || []);
+      seedLinks.forEach(function(link) {
+        var dup = (target.links || []).some(function(tl) {
+          return tl.name === link.name ||
+                 (tl.url && link.url && tl.url === link.url);
+        });
+        if (!dup) target.links = (target.links || []).concat([link]);
+      });
+
+      // 시드 카테고리 제거
+      s.cats.splice(seedIdx, 1);
+      s.catOrder = (s.catOrder || []).filter(function(id){ return id !== seedCat.id; });
+      changed = true;
+    });
+
+    /* ── 2단계: 진짜 누락된 기본 카테고리만 보충 ────────────────────────
+       ID가 일치하거나, 이름을 포함하는 카테고리가 이미 있으면 추가하지 않음.
+       → "AI도구"가 시드 이름이고 "빠른이동 - AI도구"가 존재하면 건너뜀.
+    ──────────────────────────────────────────────────────────────────── */
+    var missing = seed.cats.filter(function(c) {
+      return !s.cats.some(function(ex) {
+        return ex.id === c.id || ex.name.indexOf(c.name) !== -1;
+      });
     });
     if (missing.length) {
       s.cats     = missing.concat(s.cats);
       s.catOrder = missing.map(function(c){ return c.id; }).concat(s.catOrder || []);
-      setJson(KEY_USER_CATS, s);
+      changed = true;
     }
+
+    if (changed) setJson(KEY_USER_CATS, s);
     return s;
   }
   function saveUserCats() {
