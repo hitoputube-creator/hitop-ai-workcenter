@@ -126,7 +126,16 @@ button{font-family:inherit}
 .qce-card{
   border:1px solid rgba(212,175,55,.22);border-radius:10px;
   background:rgba(212,175,55,.04);padding:8px;min-width:158px;
-  display:flex;flex-direction:column;gap:5px}
+  display:flex;flex-direction:column;gap:5px;
+  transition:opacity .15s,border-color .15s,box-shadow .15s}
+.qce-card[draggable="true"]{cursor:default}
+.qce-card.qce-dragging{opacity:.4;border-style:dashed;border-color:var(--gold);box-shadow:none}
+.qce-card.qce-drag-over{border-color:var(--gold2);box-shadow:0 0 0 2px rgba(212,175,55,.35)}
+/* 드래그 핸들 */
+.qce-handle{cursor:grab;color:var(--text-m);font-size:15px;flex-shrink:0;
+  padding:1px 3px;border-radius:4px;transition:.15s;user-select:none;line-height:1}
+.qce-handle:hover{color:var(--gold2);background:rgba(212,175,55,.12)}
+.qce-handle:active{cursor:grabbing}
 .qce-top{display:flex;align-items:center;gap:5px}
 .qce-del{width:22px;height:22px;border-radius:50%;
   border:1px solid rgba(255,122,122,.4);background:transparent;color:var(--danger);
@@ -510,6 +519,9 @@ button{font-family:inherit}
     userCats   : []   // [{id,name,catOrder,links:[{id,icon,name,url,desc,newTab}]}]
   };
 
+  /* 편집 모드 드래그 추적 변수 */
+  var _editDragSrc = null; // { id, category }
+
   /* ── 5. 로컬스토리지 로드 ─────────────────────── */
   function loadBiz() {
     var s = safeJson(KEY_BIZ, null);
@@ -593,8 +605,10 @@ button{font-family:inherit}
     '</div>';
   }
   function buildEditCard(sc, isContent) {
-    return '<div class="qce-card" data-id="'+esc(sc.id)+'">'+
+    var cat = isContent ? 'content' : 'biz';
+    return '<div class="qce-card" draggable="true" data-id="'+esc(sc.id)+'" data-category="'+cat+'">'+
       '<div class="qce-top">'+
+        '<span class="qce-handle" title="드래그로 순서 변경">⠿</span>'+
         '<button type="button" class="qce-del" title="삭제">✕</button>'+
         '<input class="qce-icon-inp" value="'+esc(sc.icon)+'" maxlength="4" placeholder="📌">'+
         '<input class="qce-name-inp" value="'+esc(sc.name)+'" placeholder="이름">'+
@@ -679,6 +693,95 @@ button{font-family:inherit}
     form.querySelector('.qce-url-inp').value='';
     if(ntEl) ntEl.checked=false;
     form.querySelector('.qce-name-inp').focus();
+  }
+
+  /* ════════════════════════════════════════════
+     편집 모드 드래그 앤 드롭 (중개업무 / 콘텐츠채널)
+  ════════════════════════════════════════════ */
+  function setupEditDragDrop() {
+    ['biz-grid','content-grid'].forEach(function(gridId) {
+      var grid = document.getElementById(gridId);
+      if (!grid) return;
+      var category = gridId === 'biz-grid' ? 'biz' : 'content';
+
+      /* dragstart — 편집 카드에서만 동작 */
+      grid.addEventListener('dragstart', function(e) {
+        var card = e.target.closest('.qce-card');
+        if (!card) { e.preventDefault(); return; }
+        /* input·button에서 시작하면 드래그 차단 (텍스트 선택 허용) */
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' ||
+            e.target.tagName === 'LABEL' || e.target.tagName === 'TEXTAREA') {
+          e.preventDefault(); return;
+        }
+        _editDragSrc = { id: card.dataset.id, category: category };
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', 'edit:'+category+':'+card.dataset.id);
+        /* 드래그 이미지가 먼저 캡처된 뒤 opacity 적용 */
+        setTimeout(function(){ card.classList.add('qce-dragging'); }, 0);
+      });
+
+      /* dragend */
+      grid.addEventListener('dragend', function() {
+        grid.querySelectorAll('.qce-card').forEach(function(c) {
+          c.classList.remove('qce-dragging','qce-drag-over');
+        });
+        _editDragSrc = null;
+      });
+
+      /* dragover */
+      grid.addEventListener('dragover', function(e) {
+        if (!_editDragSrc || _editDragSrc.category !== category) return;
+        var card = e.target.closest('.qce-card');
+        if (!card || card.dataset.id === _editDragSrc.id) return;
+        e.preventDefault(); /* ← 필수: 없으면 drop 이벤트가 발생하지 않음 */
+        e.dataTransfer.dropEffect = 'move';
+        grid.querySelectorAll('.qce-card').forEach(function(c){ c.classList.remove('qce-drag-over'); });
+        card.classList.add('qce-drag-over');
+      });
+
+      /* dragleave */
+      grid.addEventListener('dragleave', function(e) {
+        /* 그리드 자체를 벗어날 때만 하이라이트 제거 */
+        if (!grid.contains(e.relatedTarget)) {
+          grid.querySelectorAll('.qce-card').forEach(function(c){ c.classList.remove('qce-drag-over'); });
+        }
+      });
+
+      /* drop */
+      grid.addEventListener('drop', function(e) {
+        if (!_editDragSrc || _editDragSrc.category !== category) return;
+        var card = e.target.closest('.qce-card');
+        if (!card) return;
+        e.preventDefault();
+
+        var fromId = _editDragSrc.id;
+        var toId   = card.dataset.id;
+        if (fromId === toId) return;
+
+        /* 배열에서 순서 재정렬 */
+        var list = category === 'biz' ? state.biz : state.content;
+        var fromIdx = -1, toIdx = -1;
+        for (var i = 0; i < list.length; i++) {
+          if (list[i].id === fromId) fromIdx = i;
+          if (list[i].id === toId)   toIdx   = i;
+        }
+        if (fromIdx === -1 || toIdx === -1) return;
+
+        var moved = list.splice(fromIdx, 1)[0];
+        list.splice(toIdx, 0, moved);
+
+        /* 즉시 localStorage 저장 */
+        if (category === 'biz') {
+          setJson(KEY_BIZ, state.biz);
+          /* state.bizEdit = true 유지한 채 렌더 */
+          renderBiz();
+        } else {
+          setJson(KEY_CONTENT, state.content);
+          renderContent();
+        }
+        _editDragSrc = null;
+      });
+    });
   }
 
   /* ════════════════════════════════════════════
@@ -1162,6 +1265,9 @@ button{font-family:inherit}
         if(sc) openShortcut(sc,'콘텐츠채널');
       }
     });
+
+    /* 편집 모드 드래그 앤 드롭 (중개업무 / 콘텐츠채널) — 그리드 요소에 1회만 등록 */
+    setupEditDragDrop();
 
     /* 카테고리 추가 버튼 */
     document.getElementById('btn-add-cat').addEventListener('click',function(){
