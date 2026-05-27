@@ -105,6 +105,23 @@ button{font-family:inherit}
 .qs-edit-btn:hover{background:rgba(212,175,55,.1)}
 .qs-edit-btn.active{background:rgba(212,175,55,.18);border-color:rgba(212,175,55,.5);color:var(--gold2)}
 
+/* ── 섹션 헤더 버튼 공통 ── */
+.qs-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0}
+/* 링크 추가 버튼 — 골드 강조 */
+.qs-add-btn{
+  border:1px solid rgba(212,175,55,.45);border-radius:999px;
+  background:rgba(212,175,55,.14);color:var(--gold2);
+  font-size:12px;font-weight:700;padding:5px 12px;
+  cursor:pointer;transition:.15s;white-space:nowrap}
+.qs-add-btn:hover{background:rgba(212,175,55,.3);border-color:var(--gold2)}
+
+/* 사용자 섹션 — 항상 보이는 버튼 래퍼 */
+.uqs-btns{display:flex;align-items:center;gap:6px;flex-wrap:wrap;flex-shrink:0}
+
+/* 사용자 섹션 편집 모드 — 링크 컨트롤 항상 표시 */
+.uqs-section.editing .uql-ctrl{opacity:1 !important}
+.uqs-section.editing .uqs-actions{opacity:1}
+
 .qc-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
 
 /* Normal card */
@@ -352,7 +369,10 @@ button{font-family:inherit}
   <div class="quick-section">
     <div class="qs-header">
       <span class="qs-label">⚡ 빠른 이동 — 중개 업무</span>
-      <button type="button" class="qs-edit-btn" id="biz-edit-btn">✏ 편집</button>
+      <div class="qs-actions">
+        <button type="button" class="qs-add-btn" id="biz-add-btn">＋ 링크 추가</button>
+        <button type="button" class="qs-edit-btn" id="biz-edit-btn">✏ 편집</button>
+      </div>
     </div>
     <div class="qc-grid" id="biz-grid"></div>
   </div>
@@ -361,7 +381,10 @@ button{font-family:inherit}
   <div class="quick-section">
     <div class="qs-header">
       <span class="qs-label">📡 빠른 이동 — 콘텐츠 채널</span>
-      <button type="button" class="qs-edit-btn" id="content-edit-btn">✏ 편집</button>
+      <div class="qs-actions">
+        <button type="button" class="qs-add-btn" id="content-add-btn">＋ 링크 추가</button>
+        <button type="button" class="qs-edit-btn" id="content-edit-btn">✏ 편집</button>
+      </div>
     </div>
     <div class="qc-grid" id="content-grid"></div>
   </div>
@@ -832,6 +855,12 @@ button{font-family:inherit}
       '<div class="uqs-header">'+
         '<span class="uqs-drag-handle" title="드래그로 순서 변경">⠿</span>'+
         '<span class="uqs-label">'+esc(cat.name)+'</span>'+
+        /* 항상 보이는 주요 버튼 */
+        '<div class="uqs-btns">'+
+          '<button class="qs-add-btn" data-action="add-link" data-cat="'+esc(cat.id)+'">＋ 링크 추가</button>'+
+          '<button class="qs-edit-btn" data-action="toggle-edit" data-cat="'+esc(cat.id)+'">✏ 편집</button>'+
+        '</div>'+
+        /* hover 시 표시 — 섹션 관리 (이름 수정, 삭제) */
         '<div class="uqs-actions">'+
           '<button class="uqs-act-btn" data-action="rename" data-cat="'+esc(cat.id)+'">✏ 이름 수정</button>'+
           '<button class="uqs-act-btn danger" data-action="delete-cat" data-cat="'+esc(cat.id)+'">🗑 삭제</button>'+
@@ -839,7 +868,6 @@ button{font-family:inherit}
       '</div>'+
       '<div class="uql-grid" data-cat-id="'+esc(cat.id)+'">'+
         linksHtml+
-        '<button class="uql-add-btn" data-action="add-link" data-cat="'+esc(cat.id)+'">＋<br>링크 추가</button>'+
       '</div>';
     return section;
   }
@@ -885,6 +913,7 @@ button{font-family:inherit}
       if(action==='add-link')    openLinkModal('add', catId, null);
       if(action==='edit-link')   openLinkModal('edit', catId, linkId);
       if(action==='delete-link') deleteUserLink(catId, linkId);
+      if(action==='toggle-edit') toggleUserSectionEdit(btn);
     });
   }
 
@@ -930,6 +959,16 @@ button{font-family:inherit}
     var cat=findCat(catId); if(!cat) return;
     cat.links=(cat.links||[]).filter(function(l){ return l.id!==linkId; });
     saveUserCats(); renderUserCats();
+  }
+
+  /* 사용자 섹션 편집 모드 토글 — ctrl 버튼 항상 표시 */
+  function toggleUserSectionEdit(btn) {
+    var section = btn.closest('.uqs-section');
+    if (!section) return;
+    var isEditing = section.classList.contains('editing');
+    section.classList.toggle('editing');
+    btn.textContent = isEditing ? '✏ 편집' : '✔ 완료';
+    btn.classList.toggle('active', !isEditing);
   }
 
   /* ══════════════════════════════════════════
@@ -1237,6 +1276,17 @@ button{font-family:inherit}
       }
     });
 
+    /* 중개업무 링크 추가 — 편집 모드 진입 후 입력 폼에 포커스 */
+    document.getElementById('biz-add-btn').addEventListener('click',function(){
+      if(!state.bizEdit){
+        state.bizEdit=true; renderBiz();
+        var eb=document.getElementById('biz-edit-btn');
+        eb.textContent='✔ 완료'; eb.classList.add('active');
+      }
+      var inp=document.querySelector('#biz-grid .qce-add-form .qce-name-inp');
+      if(inp){ inp.scrollIntoView({behavior:'smooth',block:'nearest'}); inp.focus(); }
+    });
+
     /* 중개업무 편집 */
     document.getElementById('biz-edit-btn').addEventListener('click',function(){
       if(!state.bizEdit){
@@ -1255,6 +1305,17 @@ button{font-family:inherit}
         for(var i=0;i<state.biz.length;i++) if(state.biz[i].id===card.dataset.id){sc=state.biz[i];break;}
         if(sc) openShortcut(sc,'중개업무');
       }
+    });
+
+    /* 콘텐츠채널 링크 추가 — 편집 모드 진입 후 입력 폼에 포커스 */
+    document.getElementById('content-add-btn').addEventListener('click',function(){
+      if(!state.contentEdit){
+        state.contentEdit=true; renderContent();
+        var eb=document.getElementById('content-edit-btn');
+        eb.textContent='✔ 완료'; eb.classList.add('active');
+      }
+      var inp=document.querySelector('#content-grid .qce-add-form .qce-name-inp');
+      if(inp){ inp.scrollIntoView({behavior:'smooth',block:'nearest'}); inp.focus(); }
     });
 
     /* 콘텐츠 편집 */
