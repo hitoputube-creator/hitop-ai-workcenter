@@ -31,8 +31,9 @@ button{font-family:inherit}
 #loading-bar{position:fixed;top:0;left:0;height:2px;width:0;z-index:999;
   background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .35s ease}
 
-.wrap{width:min(1400px,calc(100% - 32px));margin:0 auto;padding:6px 0 0;
-  flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.wrap{width:min(1400px,calc(100% - 32px));margin:0 auto;padding:6px 0 8px;
+  flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;
+  justify-content:space-between}
 
 /* ── HEADER ── */
 .site-header{
@@ -68,7 +69,7 @@ button{font-family:inherit}
 .btn.gold:hover{filter:brightness(1.07);color:#111827}
 
 /* ── SEARCH ── */
-.search-section{margin-top:6px;position:relative;flex-shrink:0}
+.search-section{margin-top:0;position:relative;flex-shrink:0}
 .search-input{
   width:100%;background:rgba(255,255,255,.04);
   border:1px solid rgba(255,255,255,.1);border-radius:10px;
@@ -94,7 +95,7 @@ button{font-family:inherit}
 .sr-empty{padding:14px;color:var(--text-m);font-size:12.5px;text-align:center}
 
 /* ── 기존 QUICK SECTIONS (중개업무·콘텐츠채널) ── */
-.quick-section{margin-top:6px;background:var(--card);
+.quick-section{margin-top:0;background:var(--card);
   border:1px solid var(--border);border-radius:10px;padding:7px 12px;flex-shrink:0}
 .qs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:6px;flex-wrap:wrap}
 .qs-label{font-size:13px;font-weight:700;color:#C9A84C;letter-spacing:.01em;flex:1}
@@ -178,9 +179,11 @@ button{font-family:inherit}
 .qce-add-btn:hover{background:rgba(212,175,55,.2)}
 
 /* ── 사용자 정의 QUICK SECTIONS ── */
-#user-quick-sections{margin-top:4px;flex:1;overflow-y:auto;min-height:0;padding-bottom:4px}
+/* display:contents 로 하위 섹션을 .wrap 의 직접 flex 자식처럼 처리
+   → .wrap justify-content:space-between 이 모든 섹션에 균등 적용됨 */
+#user-quick-sections{display:contents}
 
-.uqs-section{margin-top:6px;background:var(--card);
+.uqs-section{margin-top:0;background:var(--card);
   border:1px solid var(--border);border-radius:10px;padding:7px 12px;
   position:relative;transition:border-color .15s,box-shadow .15s}
 .uqs-section.drag-over-cat{border-color:var(--gold2);box-shadow:0 0 0 2px rgba(212,175,55,.25)}
@@ -237,7 +240,7 @@ button{font-family:inherit}
 .uql-add-btn:hover{border-color:rgba(212,175,55,.55);background:rgba(212,175,55,.05)}
 
 /* 카테고리 추가 버튼 */
-.add-cat-wrap{margin-top:6px;flex-shrink:0}
+.add-cat-wrap{margin-top:0;flex-shrink:0}
 .add-cat-btn{display:block;width:100%;
   border:1px dashed rgba(212,175,55,.3);border-radius:10px;
   background:transparent;color:var(--gold);padding:7px;font-size:12px;font-weight:800;
