@@ -318,18 +318,30 @@ button{font-family:inherit}
   .qc-icon,.uql-icon{font-size:26px}
 }
 @media(max-width:767px){
+  /* 모바일 세로 스크롤 허용 — PC의 overflow:hidden 해제 */
+  html,body{height:auto;min-height:100vh;overflow-x:hidden;overflow-y:auto}
+  .wrap{overflow:visible;flex:none;padding-bottom:24px}
+  /* 헤더 */
   .site-header{padding:6px 12px}
+  .header-right{gap:8px}
+  /* 카드 그리드 */
   .qc-grid,.uql-grid{gap:6px}
   .qc-card,.uql-card,.uql-add-btn{width:80px;height:80px}
+  /* 사용자 섹션 — 터치에서 hover 없으므로 actions 항상 표시 */
+  .uqs-actions{opacity:1}
 }
 @media(max-width:480px){
   .wrap{width:calc(100% - 16px)}
-  .header-title{font-size:16px}
+  .header-title{font-size:15px}
+  .header-sub{display:none}
+  .btn{padding:4px 10px;font-size:11px}
+  .date-badge{min-width:70px;padding:3px 8px}
+  .date-badge-d,.date-badge-w{font-size:11px}
   .qc-card,.uql-card,.uql-add-btn{width:70px;height:70px}
   .qc-icon,.uql-icon{font-size:22px}
+  .qc-name,.uql-name{font-size:11px}
   .qce-card,.qce-add-form{min-width:140px}
   .modal{padding:16px}
-  .uqs-actions{opacity:1}
 }
 </style>
 </head>
