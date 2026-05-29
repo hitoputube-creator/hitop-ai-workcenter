@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>비공개 개인업무 노트 🔒</title>
+<style>
+:root{
+  --bg:#071024; --panel:#101b34; --panel2:#16264d;
+  --gold:#d6ad35; --gold2:#ffd75a; --text:#f8fafc; --muted:#aab7d4;
+  --line:rgba(214,173,53,.42); --white:#fff; --ink:#172033;
+  --red:#ef4444; --green:#22c55e; --purple:#a855f7;
+  --amber:#f59e0b; --blue:#3b82f6; --gray:#6b7280;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;
+  background:linear-gradient(180deg,#101b34,#071024 45%,#050914);
+  color:var(--text);min-height:100vh}
+a{text-decoration:none;color:inherit}
+.wrap{width:min(1200px,calc(100% - 32px));margin:0 auto;padding:30px 0 60px}
+
+/* HEADER */
+.header{display:flex;justify-content:space-between;gap:14px;align-items:center;
+  border-bottom:1px solid var(--line);padding-bottom:16px;margin-bottom:24px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-mark{width:48px;height:48px;border:1px solid var(--line);border-radius:14px;
+  display:grid;place-items:center;color:var(--gold2);font-weight:900;
+  background:rgba(214,173,53,.12);font-size:14px}
+.logo h1{font-size:26px;letter-spacing:-1px;margin:0}
+.logo-sub{color:var(--muted);font-size:13px;margin-top:3px}
+.lock-badge{display:inline-flex;align-items:center;gap:5px;
+  background:rgba(168,85,247,.18);border:1px solid rgba(168,85,247,.4);
+  border-radius:999px;padding:3px 10px;font-size:12px;color:#c084fc;font-weight:700;margin-left:8px}
+.header-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);border-radius:999px;background:#0b142c;
+  color:var(--text);padding:8px 14px;font-weight:700;cursor:pointer;font-size:14px;transition:.15s}
+.btn:hover{border-color:var(--gold2)}
+.btn.gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111827;border:0}
+.btn.gold:hover{opacity:.92}
+.btn.danger{border-color:#ef4444;color:#ef4444}
+.btn.danger:hover{background:rgba(239,68,68,.12)}
+.btn.sm{padding:5px 11px;font-size:12px}
+.btn.purple{background:rgba(168,85,247,.18);border-color:rgba(168,85,247,.5);color:#c084fc}
+
+/* LOGIN PANEL */
+#loginSection{display:flex;justify-content:center;padding:40px 0}
+.login-box{background:#fff;color:var(--ink);border-radius:24px;padding:32px 36px;
+  width:min(420px,100%);box-shadow:0 24px 70px rgba(0,0,0,.3);border:1px solid #dce5f5}
+.login-box h2{font-size:22px;margin-bottom:6px;color:#101d3d}
+.login-box p{font-size:13px;color:#64748b;margin-bottom:24px}
+.field{margin-bottom:16px}
+.field label{font-size:13px;font-weight:700;color:#41506c;display:block;margin-bottom:7px}
+.field input{width:100%;border:1px solid #ccd7ec;border-radius:12px;
+  padding:12px 14px;font-size:15px;outline:none;background:#f7f9fd;color:#172033}
+.field input:focus{border-color:#6366f1;background:#fff}
+#loginErr{color:#ef4444;font-size:13px;margin-top:-8px;margin-bottom:8px;display:none}
+.login-btn{width:100%;padding:14px;border:0;border-radius:14px;
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;
+  font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;transition:.15s}
+.login-btn:hover{opacity:.9}
+.login-note{margin-top:16px;font-size:12px;color:#94a3b8;text-align:center;line-height:1.7}
+
+/* USER BAR */
+#userBar{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);
+  border-radius:14px;padding:10px 16px;display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+#userBar span{font-size:13px;color:#c084fc}
+#userBar strong{color:#e9d5ff}
+
+/* SUMMARY BOXES */
+.summary-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.sbox{background:linear-gradient(145deg,#16264d,#0b1630);border:1px solid rgba(214,173,53,.25);
+  border-radius:18px;padding:16px;text-align:center}
+.sbox .sval{font-size:28px;font-weight:900;color:var(--gold2);margin-bottom:4px}
+.sbox .slabel{font-size:12px;color:var(--muted)}
+
+/* MAIN GRID */
+.main-grid{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
+
+/* FORM PANEL */
+.form-panel{background:#fff;color:var(--ink);border-radius:22px;padding:22px;
+  box-shadow:0 12px 40px rgba(0,0,0,.2);border:1px solid #dce5f5}
+.form-panel h3{font-size:16px;font-weight:800;color:#101d3d;margin-bottom:16px}
+.fg{margin-bottom:13px}
+.fg label{font-size:12px;font-weight:700;color:#41506c;display:block;margin-bottom:6px}
+.fg input,.fg select,.fg textarea{width:100%;border:1px solid #ccd7ec;border-radius:10px;
+  padding:10px 12px;font-size:14px;outline:none;background:#f7f9fd;color:#172033}
+.fg textarea{min-height:72px;resize:vertical}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#6366f1;background:#fff}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-actions{display:flex;gap:8px;margin-top:16px}
+#editId{display:none}
+.cancel-edit{display:none}
+
+/* RIGHT PANEL */
+.right-panel{display:flex;flex-direction:column;gap:18px}
+
+/* FILTER + SEARCH BAR */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:4px}
+.filter-bar .btn{padding:5px 12px;font-size:12px}
+.filter-bar .btn.active{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111827;border:0}
+.search-wrap{position:relative;flex:1;min-width:160px}
+.search-wrap input{width:100%;border:1px solid rgba(214,173,53,.3);border-radius:999px;
+  padding:7px 14px 7px 34px;font-size:13px;background:#0b142c;color:var(--text);outline:none}
+.search-wrap input:focus{border-color:var(--gold2)}
+.search-wrap::before{content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:13px}
+
+/* CARDS */
+#notesList{}
+.note-card{background:linear-gradient(145deg,#16264d,#0b1630);border:1px solid rgba(214,173,53,.18);
+  border-left:4px solid var(--cat-color,#6b7280);border-radius:16px;padding:16px;
+  margin-bottom:12px;transition:.15s}
+.note-card:hover{border-color:var(--gold2);box-shadow:0 8px 30px rgba(0,0,0,.2)}
+.note-card.done{opacity:.55}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+.card-title{font-size:15px;font-weight:700;flex:1;line-height:1.4}
+.card-badges{display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0}
+.badge{font-size:11px;font-weight:700;border-radius:999px;padding:2px 8px;border:1px solid}
+.badge.cat{background:rgba(255,255,255,.07)}
+.badge.status-예정{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.4);color:#93c5fd}
+.badge.status-진행중{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.4);color:#86efac}
+.badge.status-보류{background:rgba(245,158,11,.15);border-color:rgba(245,158,11,.4);color:#fcd34d}
+.badge.status-완료{background:rgba(107,114,128,.15);border-color:rgba(107,114,128,.4);color:#9ca3af}
+.badge.pri-높음{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#fca5a5}
+.badge.pri-보통{background:rgba(214,173,53,.12);border-color:rgba(214,173,53,.3);color:var(--gold2)}
+.badge.pri-낮음{background:rgba(107,114,128,.1);border-color:rgba(107,114,128,.25);color:#9ca3af}
+.card-meta{font-size:12px;color:var(--muted);margin-bottom:7px;display:flex;gap:12px;flex-wrap:wrap}
+.card-memo{font-size:13px;color:#cbd7f3;line-height:1.6;margin-bottom:8px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-next{font-size:12px;background:rgba(255,255,255,.06);border-radius:8px;
+  padding:6px 10px;color:#e2e8f0;border-left:3px solid var(--gold)}
+.card-next::before{content:"▶ 다음: ";color:var(--gold2);font-weight:700}
+.card-actions{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.empty-msg{padding:32px;text-align:center;color:var(--muted);font-size:14px}
+
+/* CALENDAR */
+.cal-panel{background:linear-gradient(145deg,#101b34,#16264d);border:1px solid rgba(214,173,53,.25);
+  border-radius:22px;padding:20px}
+.cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cal-header h3{font-size:16px;font-weight:700;color:var(--gold2)}
+.cal-nav{display:flex;gap:8px}
+.cal-nav button{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
+  border-radius:8px;color:var(--text);padding:4px 10px;cursor:pointer;font-size:13px}
+.cal-nav button:hover{background:rgba(214,173,53,.15);border-color:var(--gold2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-day-name{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding:4px 0}
+.cal-day{min-height:52px;border-radius:8px;padding:4px;background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.05);position:relative}
+.cal-day.today{border-color:var(--gold2);background:rgba(214,173,53,.1)}
+.cal-day.other-month{opacity:.35}
+.cal-day .day-num{font-size:11px;color:var(--muted);font-weight:700;text-align:right;line-height:1}
+.cal-day .day-num.sun{color:#fca5a5}
+.cal-day .day-num.sat{color:#93c5fd}
+.cal-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin:1px 1px 0;cursor:pointer}
+.cal-dots{margin-top:3px;line-height:1}
+.cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.08)}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr}
+  .summary-row{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .wrap{padding-top:18px}
+  .logo h1{font-size:20px}
+  .summary-row{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- HEADER -->
+  <header class="header">
+    <a class="logo" href="../index.html">
+      <div class="logo-mark">HT</div>
+      <div>
+        <h1>비공개 개인업무 노트 <span class="lock-badge">🔒 비공개</span></h1>
+        <div class="logo-sub">하이탑 AI 업무센터 · 개인 전용</div>
+      </div>
+    </a>
+    <div class="header-btns">
+      <a class="btn" href="index.html">📋 업무일지</a>
+      <a class="btn" href="../index.html">대시보드</a>
+    </div>
+  </header>
+
+  <!-- LOGIN SECTION -->
+  <div id="loginSection">
+    <div class="login-box">
+      <h2>🔒 개인 노트 로그인</h2>
+      <p>이 공간은 본인만 볼 수 있는 비공개 개인 업무 노트입니다.<br>Supabase 계정으로 로그인해 주세요.</p>
+      <div class="field">
+        <label>이메일</label>
+        <input id="loginEmail" type="email" placeholder="이메일 입력">
+      </div>
+      <div class="field">
+        <label>비밀번호</label>
+        <input id="loginPw" type="password" placeholder="비밀번호 입력" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <div id="loginErr">로그인 실패: 이메일 또는 비밀번호를 확인해주세요.</div>
+      <button class="login-btn" onclick="doLogin()">로그인</button>
+      <div class="login-note">이 페이지는 Supabase RLS로 보호됩니다.<br>본인의 노트만 조회·수정·삭제할 수 있습니다.</div>
+    </div>
+  </div>
+
+  <!-- MAIN SECTION (로그인 후) -->
+  <div id="mainSection" style="display:none">
+    <!-- USER BAR -->
+    <div id="userBar">
+      <span>🔒 로그인 중: <strong id="userEmail">-</strong></span>
+      <button class="btn sm danger" onclick="doLogout()">로그아웃</button>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-row">
+      <div class="sbox"><div class="sval" id="sumToday">0</div><div class="slabel">오늘 마감</div></div>
+      <div class="sbox"><div class="sval" id="sumWeek">0</div><div class="slabel">이번 주 마감</div></div>
+      <div class="sbox"><div class="sval" id="sumActive">0</div><div class="slabel">진행중</div></div>
+      <div class="sbox"><div class="sval" id="sumDone">0</div><div class="slabel">완료</div></div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="main-grid">
+      <!-- FORM PANEL -->
+      <div>
+        <div class="form-panel">
+          <h3 id="formTitle">✏️ 새 노트 추가</h3>
+          <input type="hidden" id="editId">
+          <div class="fg"><label>제목 *</label><input id="fTitle" placeholder="업무 제목"></div>
+          <div class="fg-row">
+            <div class="fg">
+              <label>카테고리 *</label>
+              <select id="fCategory">
+                <option>유튜브</option><option>블로그</option><option>AI공부</option>
+                <option>수익화</option><option>개인일정</option><option>아이디어</option><option>기타</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>상태</label>
+              <select id="fStatus">
+                <option>예정</option><option>진행중</option><option>보류</option><option>완료</option>
+              </select>
+            </div>
+          </div>
+          <div class="fg-row">
+            <div class="fg">
+              <label>우선순위</label>
+              <select id="fPriority">
+                <option>보통</option><option>높음</option><option>낮음</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>마감일</label>
+              <input id="fDueDate" type="date">
+            </div>
+          </div>
+          <div class="fg"><label>메모</label><textarea id="fMemo" placeholder="업무 내용, 아이디어 등"></textarea></div>
+          <div class="fg"><label>다음 할 일</label><input id="fNextAction" placeholder="다음에 해야 할 구체적인 액션"></div>
+          <div class="form-actions">
+            <button class="btn gold" onclick="saveNote()">💾 저장</button>
+            <button class="btn cancel-edit" id="cancelEditBtn" onclick="cancelEdit()">취소</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL -->
+      <div class="right-panel">
+        <!-- FILTER + SEARCH -->
+        <div>
+          <div class="filter-bar" id="filterBar">
+            <button class="btn active" data-filter="all" onclick="setFilter('all')">전체</button>
+            <button class="btn" data-filter="today" onclick="setFilter('today')">📅 오늘할일</button>
+            <button class="btn" data-filter="week" onclick="setFilter('week')">📆 이번주</button>
+            <button class="btn" data-filter="done" onclick="setFilter('done')">✅ 완료</button>
+            <div class="search-wrap">
+              <input id="searchInput" placeholder="검색 (제목/메모/다음할일)" oninput="renderCards()">
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap" id="catFilterBar">
+            <span style="font-size:12px;color:var(--muted);align-self:center">카테고리:</span>
+          </div>
+        </div>
+
+        <!-- CARDS -->
+        <div id="notesList"><div class="empty-msg">노트를 불러오는 중...</div></div>
+
+        <!-- CALENDAR -->
+        <div class="cal-panel">
+          <div class="cal-header">
+            <h3 id="calTitle">2024년 1월</h3>
+            <div class="cal-nav">
+              <button onclick="calMove(-1)">◀</button>
+              <button onclick="calMove(1)">▶</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-legend" id="calLegend"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /mainSection -->
+</div><!-- /wrap -->
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ====== SUPABASE 초기화 ======
+const SUPABASE_URL = "https://xaxbkdnrzsghsabkdvzj.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_gqNFRMHb6yYKvqFnQurPKQ_7gGhURVd";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ====== 카테고리 색상 ======
+const CAT_COLORS = {
+  '유튜브': '#ef4444',
+  '블로그': '#22c55e',
+  'AI공부': '#a855f7',
+  '수익화': '#f59e0b',
+  '개인일정': '#3b82f6',
+  '아이디어': '#6b7280',
+  '기타': '#9ca3af'
+};
+
+// ====== 상태 ======
+let allNotes = [];
+let currentFilter = 'all';
+let currentCatFilter = '';
+let calYear, calMonth;
+
+// ====== 날짜 헬퍼 ======
+function toDateStr(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+function todayStr() { return toDateStr(new Date()); }
+function thisWeekRange() {
+  const now = new Date();
+  const day = now.getDay(); // 0=일
+  const mon = new Date(now); mon.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  return { start: toDateStr(mon), end: toDateStr(sun) };
+}
+
+// ====== 로그인 ======
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.style.display = 'none';
+  if (!email || !pw) { errEl.textContent = '이메일과 비밀번호를 입력해주세요.'; errEl.style.display = 'block'; return; }
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) throw error;
+    showMain(data.user);
+  } catch(e) {
+    errEl.textContent = '로그인 실패: ' + (e.message || '이메일 또는 비밀번호를 확인해주세요.');
+    errEl.style.display = 'block';
+  }
+}
+
+// ====== 로그아웃 ======
+async function doLogout() {
+  await sb.auth.signOut();
+  allNotes = [];
+  document.getElementById('loginSection').style.display = 'flex';
+  document.getElementById('mainSection').style.display = 'none';
+  document.getElementById('loginPw').value = '';
+}
+
+// ====== 메인 화면 전환 ======
+function showMain(user) {
+  document.getElementById('loginSection').style.display = 'none';
+  document.getElementById('mainSection').style.display = 'block';
+  document.getElementById('userEmail').textContent = user.email;
+  buildCatFilterBar();
+  initCal();
+  loadNotes();
+}
+
+// ====== 노트 불러오기 ======
+async function loadNotes() {
+  try {
+    const { data, error } = await sb.from('private_notes').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    allNotes = data || [];
+    updateSummary();
+    renderCards();
+    renderCal();
+  } catch(e) {
+    document.getElementById('notesList').innerHTML = `<div class="empty-msg" style="color:#ef4444">불러오기 실패: ${e.message}</div>`;
+  }
+}
+
+// ====== 요약 업데이트 ======
+function updateSummary() {
+  const today = todayStr();
+  const { start, end } = thisWeekRange();
+  document.getElementById('sumToday').textContent = allNotes.filter(n => n.due_date === today && n.status !== '완료').length;
+  document.getElementById('sumWeek').textContent = allNotes.filter(n => n.due_date && n.due_date >= start && n.due_date <= end && n.status !== '완료').length;
+  document.getElementById('sumActive').textContent = allNotes.filter(n => n.status === '진행중').length;
+  document.getElementById('sumDone').textContent = allNotes.filter(n => n.status === '완료').length;
+}
+
+// ====== 카테고리 필터 바 ======
+function buildCatFilterBar() {
+  const bar = document.getElementById('catFilterBar');
+  const cats = ['유튜브','블로그','AI공부','수익화','개인일정','아이디어','기타'];
+  bar.innerHTML = '<span style="font-size:12px;color:var(--muted);align-self:center">카테고리:</span>';
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'btn sm';
+    btn.textContent = cat;
+    btn.style.borderColor = CAT_COLORS[cat] + '80';
+    btn.dataset.cat = cat;
+    btn.onclick = () => { currentCatFilter = currentCatFilter === cat ? '' : cat; buildCatFilterBar(); renderCards(); };
+    if (currentCatFilter === cat) {
+      btn.style.background = CAT_COLORS[cat] + '30';
+      btn.style.color = CAT_COLORS[cat];
+    }
+    bar.appendChild(btn);
+  });
+}
+
+// ====== 필터 설정 ======
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('#filterBar .btn[data-filter]').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  renderCards();
+}
+
+// ====== 카드 렌더링 ======
+function renderCards() {
+  const today = todayStr();
+  const { start, end } = thisWeekRange();
+  const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+
+  let notes = [...allNotes];
+
+  // 필터
+  if (currentFilter === 'today') notes = notes.filter(n => n.due_date === today && n.status !== '완료');
+  else if (currentFilter === 'week') notes = notes.filter(n => n.due_date && n.due_date >= start && n.due_date <= end && n.status !== '완료');
+  else if (currentFilter === 'done') notes = notes.filter(n => n.status === '완료');
+  else notes = notes.filter(n => n.status !== '완료'); // 기본: 완료 제외
+
+  // 카테고리 필터
+  if (currentCatFilter) notes = notes.filter(n => n.category === currentCatFilter);
+
+  // 검색
+  if (q) notes = notes.filter(n =>
+    (n.title||'').toLowerCase().includes(q) ||
+    (n.memo||'').toLowerCase().includes(q) ||
+    (n.next_action||'').toLowerCase().includes(q)
+  );
+
+  if (!notes.length) {
+    document.getElementById('notesList').innerHTML = '<div class="empty-msg">해당하는 노트가 없습니다.</div>';
+    return;
+  }
+
+  document.getElementById('notesList').innerHTML = notes.map(n => {
+    const color = CAT_COLORS[n.category] || '#6b7280';
+    const isDone = n.status === '완료';
+    const isOverdue = n.due_date && n.due_date < today && !isDone;
+    return `
+<div class="note-card${isDone ? ' done' : ''}" style="--cat-color:${color}">
+  <div class="card-top">
+    <div class="card-title">${esc(n.title)}</div>
+    <div class="card-badges">
+      <span class="badge cat" style="border-color:${color}60;color:${color}">${esc(n.category)}</span>
+      <span class="badge status-${n.status}">${n.status}</span>
+      <span class="badge pri-${n.priority}">${n.priority}</span>
+    </div>
+  </div>
+  <div class="card-meta">
+    ${n.due_date ? `<span style="${isOverdue?'color:#fca5a5;font-weight:700':''}">📅 ${n.due_date}${isOverdue?' ⚠️ 마감초과':''}</span>` : ''}
+    ${n.writer_name ? `<span>👤 ${esc(n.writer_name)}</span>` : ''}
+    <span style="color:#475569;font-size:11px">${fmtDate(n.created_at)}</span>
+  </div>
+  ${n.memo ? `<div class="card-memo">${esc(n.memo)}</div>` : ''}
+  ${n.next_action ? `<div class="card-next">${esc(n.next_action)}</div>` : ''}
+  <div class="card-actions">
+    <button class="btn sm" onclick="startEdit(${JSON.stringify(n.id)})">✏️ 수정</button>
+    ${!isDone ? `<button class="btn sm" style="border-color:#22c55e60;color:#86efac" onclick="markDone(${JSON.stringify(n.id)})">✅ 완료</button>` : ''}
+    <button class="btn sm danger" onclick="deleteNote(${JSON.stringify(n.id)})">🗑 삭제</button>
+  </div>
+</div>`;
+  }).join('');
+}
+
+// ====== 저장 (추가/수정) ======
+async function saveNote() {
+  const id = document.getElementById('editId').value;
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { alert('제목을 입력해주세요.'); return; }
+
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.'); doLogout(); return; }
+
+  const payload = {
+    title,
+    category: document.getElementById('fCategory').value,
+    status: document.getElementById('fStatus').value,
+    priority: document.getElementById('fPriority').value,
+    due_date: document.getElementById('fDueDate').value || null,
+    memo: document.getElementById('fMemo').value.trim() || null,
+    next_action: document.getElementById('fNextAction').value.trim() || null,
+    writer_name: user.email,
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    if (id) {
+      // 수정
+      const { error } = await sb.from('private_notes').update(payload).eq('id', id);
+      if (error) throw error;
+    } else {
+      // 추가
+      payload.user_id = user.id;
+      const { error } = await sb.from('private_notes').insert(payload);
+      if (error) throw error;
+    }
+    resetForm();
+    await loadNotes();
+  } catch(e) {
+    alert('저장 실패: ' + e.message);
+  }
+}
+
+// ====== 완료 처리 ======
+async function markDone(id) {
+  try {
+    const { error } = await sb.from('private_notes').update({ status: '완료', updated_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw error;
+    await loadNotes();
+  } catch(e) { alert('완료 처리 실패: ' + e.message); }
+}
+
+// ====== 수정 시작 ======
+function startEdit(id) {
+  const n = allNotes.find(x => x.id === id);
+  if (!n) return;
+  document.getElementById('editId').value = id;
+  document.getElementById('fTitle').value = n.title || '';
+  document.getElementById('fCategory').value = n.category || '기타';
+  document.getElementById('fStatus').value = n.status || '예정';
+  document.getElementById('fPriority').value = n.priority || '보통';
+  document.getElementById('fDueDate').value = n.due_date || '';
+  document.getElementById('fMemo').value = n.memo || '';
+  document.getElementById('fNextAction').value = n.next_action || '';
+  document.getElementById('formTitle').textContent = '✏️ 노트 수정';
+  document.getElementById('cancelEditBtn').style.display = 'inline-block';
+  document.querySelector('.cancel-edit').style.display = 'inline-block';
+  document.getElementById('fTitle').focus();
+  document.querySelector('.form-panel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ====== 수정 취소 ======
+function cancelEdit() {
+  resetForm();
+}
+
+function resetForm() {
+  document.getElementById('editId').value = '';
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fCategory').value = '유튜브';
+  document.getElementById('fStatus').value = '예정';
+  document.getElementById('fPriority').value = '보통';
+  document.getElementById('fDueDate').value = '';
+  document.getElementById('fMemo').value = '';
+  document.getElementById('fNextAction').value = '';
+  document.getElementById('formTitle').textContent = '✏️ 새 노트 추가';
+  document.getElementById('cancelEditBtn').style.display = 'none';
+  document.querySelector('.cancel-edit').style.display = 'none';
+}
+
+// ====== 삭제 ======
+async function deleteNote(id) {
+  if (!confirm('이 노트를 삭제할까요?')) return;
+  try {
+    const { error } = await sb.from('private_notes').delete().eq('id', id);
+    if (error) throw error;
+    await loadNotes();
+  } catch(e) { alert('삭제 실패: ' + e.message); }
+}
+
+// ====== 캘린더 ======
+function initCal() {
+  const now = new Date();
+  calYear = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCal();
+}
+
+function calMove(delta) {
+  calMonth += delta;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCal();
+}
+
+function renderCal() {
+  const dayNames = ['일','월','화','수','목','금','토'];
+  const today = todayStr();
+  document.getElementById('calTitle').textContent = `${calYear}년 ${calMonth+1}월`;
+
+  // 이번 달 due_date 가진 노트 맵
+  const duteMap = {};
+  allNotes.forEach(n => {
+    if (!n.due_date) return;
+    const d = n.due_date.substring(0,7); // yyyy-mm
+    if (d !== `${calYear}-${String(calMonth+1).padStart(2,'0')}`) return;
+    const day = parseInt(n.due_date.substring(8,10));
+    if (!duteMap[day]) duteMap[day] = [];
+    duteMap[day].push(n);
+  });
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const prevDays = new Date(calYear, calMonth, 0).getDate();
+
+  let html = dayNames.map((d,i) => `<div class="cal-day-name" style="${i===0?'color:#fca5a5':i===6?'color:#93c5fd':''}">${d}</div>`).join('');
+
+  // 이전 달
+  for (let i = firstDay - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month"><div class="cal-day-num">${prevDays-i}</div></div>`;
+  }
+
+  // 이번 달
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = dateStr === today;
+    const dow = new Date(calYear, calMonth, d).getDay();
+    const notes = duteMap[d] || [];
+    const dots = notes.map(n => {
+      const c = CAT_COLORS[n.category] || '#6b7280';
+      return `<span class="cal-dot" style="background:${c}" title="${n.title}"></span>`;
+    }).join('');
+    html += `<div class="cal-day${isToday?' today':''}">
+      <div class="day-num${dow===0?' sun':dow===6?' sat':''}">${d}</div>
+      ${dots ? `<div class="cal-dots">${dots}</div>` : ''}
+    </div>`;
+  }
+
+  // 다음 달
+  const total = firstDay + daysInMonth;
+  const remain = (7 - (total % 7)) % 7;
+  for (let d = 1; d <= remain; d++) {
+    html += `<div class="cal-day other-month"><div class="day-num">${d}</div></div>`;
+  }
+
+  document.getElementById('calGrid').innerHTML = html;
+
+  // 범례
+  const usedCats = [...new Set(allNotes.filter(n => n.due_date).map(n => n.category))];
+  document.getElementById('calLegend').innerHTML = usedCats.map(cat => `
+    <div class="leg-item">
+      <span class="leg-dot" style="background:${CAT_COLORS[cat]||'#6b7280'}"></span>${cat}
+    </div>`).join('');
+}
+
+// ====== 유틸 ======
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ====== 세션 자동 복원 ======
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user) {
+    showMain(session.user);
+  }
+})();
+</script>
+</body>
+</html>
