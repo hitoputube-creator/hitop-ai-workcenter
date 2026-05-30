@@ -483,6 +483,7 @@ button{font-family:inherit}
 
   /* ── 0. 링크 중앙 관리 ───────────────────────── */
   var LINKS = {
+    homepage       : 'https://hitoputube-creator.github.io/hitop-homepage/',
     propertyManage : 'https://hitoputube-creator.github.io/haitop-realty-system/',
     workDiary      : './journal/',
     calendar       : './calendar/',
@@ -495,45 +496,64 @@ button{font-family:inherit}
   };
 
   /* ── 1. 스토리지 키 ───────────────────────────── */
-  var KEY_BIZ      = 'hitop_biz_sc';
-  var KEY_CONTENT  = 'hitop_content_sc';
-  var KEY_USER_CATS= 'hitop_user_cats_v1'; // 사용자 정의 카테고리
+  var KEY_BIZ       = 'hitop_biz_sc';
+  var KEY_CONTENT   = 'hitop_content_sc';
+  var KEY_USER_CATS = 'hitop_user_cats_v1';
+  /* 이 값을 바꾸면 모든 기기에서 카드 데이터가 기본값으로 초기화됨 */
+  var DATA_VERSION  = '2026-05-30-company-standard';
+  var KEY_DATA_VER  = 'hitop_data_ver';
 
-  /* ── 2. 시드 데이터 ───────────────────────────── */
+  /* ── 2. 시드 데이터 (회사 PC 기준 확정 카드 목록) ── */
   function seedBiz() {
     return [
-      { id:'b1', icon:'🏠', name:'매물관리',   url:LINKS.propertyManage,  newTab:true  },
-      { id:'b2', icon:'📅', name:'캘린더',     url:LINKS.calendar,        newTab:false },
-      { id:'b3', icon:'📓', name:'업무일지',   url:LINKS.workDiary,        newTab:false },
-      { id:'b4', icon:'💬', name:'계약문자',   url:LINKS.contractMessage,  newTab:false },
-      { id:'b5', icon:'💰', name:'중개보수',   url:LINKS.brokerageFee,     newTab:false },
-      { id:'b6', icon:'📊', name:'수익률견적', url:LINKS.estimate,         newTab:false }
+      { id:'b0', icon:'🌐', name:'홈페이지',        url:LINKS.homepage,         newTab:true  },
+      { id:'b1', icon:'🏠', name:'매물관리·관리용',  url:LINKS.propertyManage,  newTab:true  },
+      { id:'b2', icon:'📅', name:'캘린더',           url:LINKS.calendar,        newTab:false },
+      { id:'b3', icon:'📓', name:'업무일지',         url:LINKS.workDiary,        newTab:false },
+      { id:'b4', icon:'💬', name:'계약문자',         url:LINKS.contractMessage,  newTab:false },
+      { id:'b5', icon:'💰', name:'중개보수',         url:LINKS.brokerageFee,     newTab:false },
+      { id:'b6', icon:'📊', name:'수익률견적',       url:LINKS.estimate,         newTab:false },
+      { id:'b7', icon:'📣', name:'매물광고·홈페이지', url:'https://www.naver.com', newTab:true },
+      { id:'b8', icon:'🏢', name:'부동산포스·매물광고', url:'https://www.naver.com', newTab:true }
     ];
   }
   function seedContent() {
     return [
-      { id:'c1', icon:'📺', name:'하이탑부동산TV', url:'https://www.youtube.com/@하이탑부동산TV', newTab:true },
-      { id:'c2', icon:'🤖', name:'나도한다AI',     url:'',                                        newTab:true },
-      { id:'c3', icon:'📝', name:'하이탑블로그',   url:LINKS.blog,                                newTab:true },
-      { id:'c4', icon:'☕', name:'하이탑카페',     url:LINKS.cafe,                                newTab:true }
+      { id:'c1', icon:'📺', name:'하이탑부동산TV 유튜브', url:'https://www.youtube.com/@하이탑부동산TV', newTab:true },
+      { id:'c2', icon:'💑', name:'부부공미일기 유튜브',   url:'https://www.youtube.com/@부부공미일기',   newTab:true },
+      { id:'c3', icon:'📝', name:'하이탑블로그',          url:LINKS.blog,                                newTab:true },
+      { id:'c4', icon:'☕', name:'하이탑카페',             url:LINKS.cafe,                                newTab:true },
+      { id:'c5', icon:'🧵', name:'하이탑 스레드 threads', url:'https://www.threads.net/@haitop_realty',  newTab:true }
     ];
   }
   function seedUserCats() {
     return {
       cats: [
         { id:'default-ai-tools', name:'AI도구', links:[
-          { id:'dai-1', icon:'🤖', name:'ChatGPT',   url:'https://chat.openai.com',   desc:'', newTab:true },
-          { id:'dai-2', icon:'✨', name:'Claude',     url:'https://claude.ai',         desc:'', newTab:true },
-          { id:'dai-3', icon:'🔍', name:'Perplexity', url:'https://www.perplexity.ai', desc:'', newTab:true },
-          { id:'dai-4', icon:'🎨', name:'Canva',      url:'https://www.canva.com',     desc:'', newTab:true },
-          { id:'dai-5', icon:'💡', name:'Gemini',     url:'https://gemini.google.com', desc:'', newTab:true }
+          { id:'dai-0', icon:'📋', name:'하이탑notion',      url:'https://www.notion.so',             desc:'', newTab:true },
+          { id:'dai-1', icon:'🖼', name:'이미지 프롬프트 툴', url:'https://www.midjourney.com',        desc:'', newTab:true },
+          { id:'dai-2', icon:'😀', name:'이모지 모음 사이트', url:'https://emojipedia.org',            desc:'', newTab:true },
+          { id:'dai-3', icon:'🎨', name:'이미지프롬프트3',    url:'https://ideogram.ai',               desc:'', newTab:true },
+          { id:'dai-4', icon:'🤖', name:'ChatGPT',            url:'https://chat.openai.com',           desc:'', newTab:true },
+          { id:'dai-5', icon:'✨', name:'Claude',              url:'https://claude.ai',                 desc:'', newTab:true },
+          { id:'dai-6', icon:'🔍', name:'Perplexity',          url:'https://www.perplexity.ai',         desc:'', newTab:true },
+          { id:'dai-7', icon:'🎨', name:'Canva',               url:'https://www.canva.com',             desc:'', newTab:true },
+          { id:'dai-8', icon:'💡', name:'Gemini',              url:'https://gemini.google.com',         desc:'', newTab:true },
+          { id:'dai-9', icon:'🧠', name:'구글AI스튜디오',      url:'https://aistudio.google.com',       desc:'', newTab:true },
+          { id:'dai-10',icon:'📓', name:'NotebookLM',          url:'https://notebooklm.google.com',     desc:'', newTab:true }
         ]},
         { id:'default-gov-sites', name:'공공사이트', links:[
-          { id:'gov-1', icon:'🗺', name:'토지이음',   url:'https://www.eum.go.kr',    desc:'', newTab:true },
-          { id:'gov-2', icon:'🏛', name:'정부24',     url:'https://www.gov.kr',       desc:'', newTab:true },
-          { id:'gov-3', icon:'📋', name:'건축행정',   url:'https://www.eais.go.kr',   desc:'', newTab:true },
-          { id:'gov-4', icon:'🏠', name:'국토교통부', url:'https://www.molit.go.kr',  desc:'', newTab:true },
-          { id:'gov-5', icon:'💼', name:'국세청',     url:'https://www.nts.go.kr',    desc:'', newTab:true }
+          { id:'gov-1',  icon:'🗺',  name:'토지이음',          url:'https://www.eum.go.kr',               desc:'', newTab:true },
+          { id:'gov-2',  icon:'🏞',  name:'경기토지정보',       url:'https://bud.gg.go.kr',                desc:'', newTab:true },
+          { id:'gov-3',  icon:'⚖',  name:'대법원인터넷등기',   url:'https://www.iros.go.kr',              desc:'', newTab:true },
+          { id:'gov-4',  icon:'🏗',  name:'정부24_건축물대장',  url:'https://www.gov.kr/mw/EgovMobileMain.do', desc:'', newTab:true },
+          { id:'gov-5',  icon:'📜',  name:'정부24_토지대장',    url:'https://www.gov.kr/mw/EgovMobileMain.do', desc:'', newTab:true },
+          { id:'gov-6',  icon:'🏠',  name:'네이버부동산',       url:'https://land.naver.com',              desc:'', newTab:true },
+          { id:'gov-7',  icon:'🔎',  name:'부동산디스코',       url:'https://www.disco.re',                desc:'', newTab:true },
+          { id:'gov-8',  icon:'🔨',  name:'스피드옥션',         url:'https://www.speedauction.co.kr',      desc:'', newTab:true },
+          { id:'gov-9',  icon:'🏛',  name:'정부24',             url:'https://www.gov.kr',                  desc:'', newTab:true },
+          { id:'gov-10', icon:'📋',  name:'건축행정·세움터',    url:'https://www.eais.go.kr',              desc:'', newTab:true },
+          { id:'gov-11', icon:'🏠',  name:'국토교통부',         url:'https://www.molit.go.kr',             desc:'', newTab:true }
         ]}
       ],
       catOrder: ['default-ai-tools','default-gov-sites']
@@ -577,7 +597,22 @@ button{font-family:inherit}
   /* 편집 모드 드래그 추적 변수 */
   var _editDragSrc = null; // { id, category }
 
-  /* ── 5. 로컬스토리지 로드 ─────────────────────── */
+  /* ── 5. 데이터 버전 마이그레이션 ────────────────
+     DATA_VERSION이 다르면 카드 데이터를 전부 시드로 초기화.
+     → 코드에서 시드를 바꾼 후 DATA_VERSION을 갱신하면
+       회사·집·모바일 등 모든 기기에서 동일한 카드 목록이 적용됨.
+  ─────────────────────────────────────────────── */
+  function migrateIfNeeded() {
+    var stored = localStorage.getItem(KEY_DATA_VER);
+    if (stored === DATA_VERSION) return; // 최신 버전 → 마이그레이션 불필요
+    // 구버전 또는 미설정 → 카드 관련 키를 모두 지우고 버전 기록
+    localStorage.removeItem(KEY_BIZ);
+    localStorage.removeItem(KEY_CONTENT);
+    localStorage.removeItem(KEY_USER_CATS);
+    localStorage.setItem(KEY_DATA_VER, DATA_VERSION);
+  }
+
+  /* ── 6(구5). 로컬스토리지 로드 ─────────────────── */
   function loadBiz() {
     var s = safeJson(KEY_BIZ, null);
     if (Array.isArray(s) && s.length) return s;
@@ -591,67 +626,10 @@ button{font-family:inherit}
   function loadUserCats() {
     var s = safeJson(KEY_USER_CATS, null);
     var seed = seedUserCats();
-
-    /* 데이터 없음 → 기본 시드로 초기화 (신규 기기·모바일) */
     if (!s || !Array.isArray(s.cats)) {
       setJson(KEY_USER_CATS, seed);
       return seed;
     }
-
-    var changed = false;
-
-    /* ── 1단계: 잘못 추가된 시드 카테고리 정리 ──────────────────────────
-       시드 ID(default-ai-tools / default-gov-sites)를 가진 카테고리가
-       동시에, 해당 이름을 포함하는 다른 카테고리(예: "빠른이동 - AI도구")와
-       함께 존재하면 → 링크를 기존 카테고리로 병합 후 시드 카테고리 삭제.
-       기존에 같은 이름 또는 같은 URL 링크가 있으면 중복 추가하지 않음.
-    ──────────────────────────────────────────────────────────────────── */
-    seed.cats.forEach(function(seedCat) {
-      var seedIdx = -1;
-      s.cats.forEach(function(c, i){ if (c.id === seedCat.id) seedIdx = i; });
-      if (seedIdx === -1) return; // 시드 카테고리 없음 → 스킵
-
-      // 시드 이름을 포함하는 다른 카테고리 탐색
-      // 예) "AI도구" ⊂ "빠른이동 - AI도구"
-      var targetIdx = -1;
-      s.cats.forEach(function(c, i) {
-        if (c.id !== seedCat.id && c.name.indexOf(seedCat.name) !== -1) targetIdx = i;
-      });
-      if (targetIdx === -1) return; // 대상 없음 → 시드가 유일한 카테고리이므로 유지
-
-      // 링크 병합 (이름 또는 URL 중복 제외)
-      var target = s.cats[targetIdx];
-      var seedLinks = (s.cats[seedIdx].links || []);
-      seedLinks.forEach(function(link) {
-        var dup = (target.links || []).some(function(tl) {
-          return tl.name === link.name ||
-                 (tl.url && link.url && tl.url === link.url);
-        });
-        if (!dup) target.links = (target.links || []).concat([link]);
-      });
-
-      // 시드 카테고리 제거
-      s.cats.splice(seedIdx, 1);
-      s.catOrder = (s.catOrder || []).filter(function(id){ return id !== seedCat.id; });
-      changed = true;
-    });
-
-    /* ── 2단계: 진짜 누락된 기본 카테고리만 보충 ────────────────────────
-       ID가 일치하거나, 이름을 포함하는 카테고리가 이미 있으면 추가하지 않음.
-       → "AI도구"가 시드 이름이고 "빠른이동 - AI도구"가 존재하면 건너뜀.
-    ──────────────────────────────────────────────────────────────────── */
-    var missing = seed.cats.filter(function(c) {
-      return !s.cats.some(function(ex) {
-        return ex.id === c.id || ex.name.indexOf(c.name) !== -1;
-      });
-    });
-    if (missing.length) {
-      s.cats     = missing.concat(s.cats);
-      s.catOrder = missing.map(function(c){ return c.id; }).concat(s.catOrder || []);
-      changed = true;
-    }
-
-    if (changed) setJson(KEY_USER_CATS, s);
     return s;
   }
   function saveUserCats() {
@@ -1498,6 +1476,7 @@ button{font-family:inherit}
 
   /* ── 15. INIT ───────────────────────────────── */
   function init() {
+    migrateIfNeeded(); // 버전 불일치 시 카드 데이터 초기화 (항상 최초 실행)
     state.biz     = loadBiz();
     state.content = loadContent();
     var uc        = loadUserCats();
