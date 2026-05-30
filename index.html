@@ -25,6 +25,9 @@
 html,body{height:100%;overflow:hidden}
 body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;
   background:var(--bg);color:var(--text-p);display:flex;flex-direction:column}
+@media(max-width:767px){
+  html,body{height:auto;overflow:auto}
+}
 a{text-decoration:none;color:inherit}
 button{font-family:inherit}
 
@@ -33,6 +36,9 @@ button{font-family:inherit}
 
 .wrap{width:min(1400px,calc(100% - 32px));margin:0 auto;padding:6px 0 8px;
   flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;gap:8px}
+@media(max-width:767px){
+  .wrap{overflow:visible;min-height:auto;padding-bottom:24px}
+}
 
 /* ── HEADER ── */
 .site-header{
@@ -399,7 +405,7 @@ button{font-family:inherit}
 
 </div>
 
-<footer class="footer">하이탑부동산 · 031-949-8969</footer>
+<footer class="footer">하이탑부동산 · 031-949-8969 &nbsp;|&nbsp; <span id="footer-ver" style="opacity:.5;font-size:10px"></span></footer>
 
 <!-- ⚙ 설정 모달 -->
 <div class="modal-backdrop" id="settings-backdrop" aria-hidden="true">
@@ -597,19 +603,49 @@ button{font-family:inherit}
   /* 편집 모드 드래그 추적 변수 */
   var _editDragSrc = null; // { id, category }
 
-  /* ── 5. 데이터 버전 마이그레이션 ────────────────
-     DATA_VERSION이 다르면 카드 데이터를 전부 시드로 초기화.
-     → 코드에서 시드를 바꾼 후 DATA_VERSION을 갱신하면
-       회사·집·모바일 등 모든 기기에서 동일한 카드 목록이 적용됨.
-  ─────────────────────────────────────────────── */
+  /* ── 5. 데이터 버전 마이그레이션 + ?resetLinks=1 강제 초기화 ─────
+     · DATA_VERSION이 다르면 카드 데이터를 전부 시드로 초기화.
+     · URL에 ?resetLinks=1 을 붙이면 버전 무관 강제 초기화.
+       예) https://hitoputube-creator.github.io/hitop-ai-workcenter/?resetLinks=1
+  ─────────────────────────────────────────────────────────────────── */
   function migrateIfNeeded() {
-    var stored = localStorage.getItem(KEY_DATA_VER);
-    if (stored === DATA_VERSION) return; // 최신 버전 → 마이그레이션 불필요
-    // 구버전 또는 미설정 → 카드 관련 키를 모두 지우고 버전 기록
+    var stored  = localStorage.getItem(KEY_DATA_VER);
+    var forceReset = new URLSearchParams(window.location.search).get('resetLinks') === '1';
+
+    console.group('[hitop] 데이터 버전 체크');
+    console.log('코드 DATA_VERSION :', DATA_VERSION);
+    console.log('저장된 버전       :', stored || '(없음)');
+    console.log('?resetLinks=1     :', forceReset);
+
+    if (!forceReset && stored === DATA_VERSION) {
+      console.log('▶ 최신 버전 일치 — 마이그레이션 생략');
+      console.groupEnd();
+      return;
+    }
+
+    // 강제 초기화 또는 구버전 → 카드 관련 키 전부 삭제 후 버전 갱신
     localStorage.removeItem(KEY_BIZ);
     localStorage.removeItem(KEY_CONTENT);
     localStorage.removeItem(KEY_USER_CATS);
     localStorage.setItem(KEY_DATA_VER, DATA_VERSION);
+
+    var bizCount  = seedBiz().length;
+    var conCount  = seedContent().length;
+    var catCount  = seedUserCats().cats.length;
+    var linkCount = seedUserCats().cats.reduce(function(s,c){ return s+(c.links||[]).length; }, 0);
+
+    console.log(forceReset ? '▶ ?resetLinks=1 강제 초기화 실행' : '▶ 구버전 감지 — 자동 마이그레이션 실행');
+    console.log('새 DATA_VERSION  :', DATA_VERSION);
+    console.log('중개업무 카드 수  :', bizCount);
+    console.log('콘텐츠 카드 수   :', conCount);
+    console.log('사용자 카테고리  :', catCount, '개 /  링크:', linkCount, '개');
+    console.groupEnd();
+
+    // ?resetLinks=1 로 진입했다면 URL 파라미터 제거 (새로고침 없이)
+    if (forceReset && window.history && window.history.replaceState) {
+      var clean = window.location.pathname + window.location.hash;
+      window.history.replaceState(null, '', clean);
+    }
   }
 
   /* ── 6(구5). 로컬스토리지 로드 ─────────────────── */
@@ -1476,12 +1512,16 @@ button{font-family:inherit}
 
   /* ── 15. INIT ───────────────────────────────── */
   function init() {
-    migrateIfNeeded(); // 버전 불일치 시 카드 데이터 초기화 (항상 최초 실행)
+    migrateIfNeeded(); // 버전 불일치 or ?resetLinks=1 시 카드 데이터 초기화
     state.biz     = loadBiz();
     state.content = loadContent();
     var uc        = loadUserCats();
     state.userCats    = uc.cats||[];
     state.userCatOrder= uc.catOrder||[];
+
+    // 푸터에 현재 데이터 버전 표시
+    var fv = document.getElementById('footer-ver');
+    if (fv) fv.textContent = 'data ' + DATA_VERSION;
 
     renderHeaderDate();
     renderBiz();
