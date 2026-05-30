@@ -500,30 +500,30 @@ button{font-family:inherit}
   var KEY_CONTENT   = 'hitop_content_sc';
   var KEY_USER_CATS = 'hitop_user_cats_v1';
   /* 이 값을 바꾸면 모든 기기에서 카드 데이터가 기본값으로 초기화됨 */
-  var DATA_VERSION  = '2026-05-30-company-standard';
+  var DATA_VERSION  = '2026-05-30-v2';
   var KEY_DATA_VER  = 'hitop_data_ver';
 
-  /* ── 2. 시드 데이터 (회사 PC 기준 확정 카드 목록) ── */
+  /* ── 2. 시드 데이터 (회사 PC 기준 확정 카드 목록 — 2026-05-30) ── */
   function seedBiz() {
     return [
-      { id:'b0', icon:'🌐', name:'홈페이지',        url:LINKS.homepage,         newTab:true  },
-      { id:'b1', icon:'🏠', name:'매물관리·관리용',  url:LINKS.propertyManage,  newTab:true  },
-      { id:'b2', icon:'📅', name:'캘린더',           url:LINKS.calendar,        newTab:false },
-      { id:'b3', icon:'📓', name:'업무일지',         url:LINKS.workDiary,        newTab:false },
-      { id:'b4', icon:'💬', name:'계약문자',         url:LINKS.contractMessage,  newTab:false },
-      { id:'b5', icon:'💰', name:'중개보수',         url:LINKS.brokerageFee,     newTab:false },
-      { id:'b6', icon:'📊', name:'수익률견적',       url:LINKS.estimate,         newTab:false },
-      { id:'b7', icon:'📣', name:'매물광고·홈페이지', url:'https://www.naver.com', newTab:true },
-      { id:'b8', icon:'🏢', name:'부동산포스·매물광고', url:'https://www.naver.com', newTab:true }
+      { id:'b0', icon:'📌', name:'홈페이지',          url:'https://hitoputube-creator.github.io/hitop-property-platform/', newTab:false },
+      { id:'b1', icon:'🏠', name:'매물관리-관리용',    url:'https://hitoputube-creator.github.io/haitop-realty-system/',   newTab:true  },
+      { id:'b2', icon:'📅', name:'캘린더',             url:'https://calendar.google.com/calendar/u/0/r',                   newTab:false },
+      { id:'b3', icon:'📓', name:'업무일지',           url:'https://hitoputube-creator.github.io/haitop-realestate-diary/', newTab:false },
+      { id:'b4', icon:'💬', name:'계약문자',           url:'https://hitoputube-creator.github.io/Contract-Message/index.html', newTab:false },
+      { id:'b5', icon:'💰', name:'중개보수',           url:'https://xn--989a00af8jnslv3dba.com/',                           newTab:false },
+      { id:'b6', icon:'📊', name:'수익률견적',         url:'https://hitoputube-creator.github.io/Commercial-Property-Quote/', newTab:false },
+      { id:'b7', icon:'🖥️', name:'매물광고-홈페이지', url:'https://hitoputube-creator.github.io/hitop-property-platform/listings.html', newTab:false },
+      { id:'b8', icon:'📌', name:'부동산포스_매물광고', url:'https://www.rfine.kr/manage/',                                   newTab:false }
     ];
   }
   function seedContent() {
     return [
-      { id:'c1', icon:'📺', name:'하이탑부동산TV 유튜브', url:'https://www.youtube.com/@하이탑부동산TV', newTab:true },
-      { id:'c2', icon:'💑', name:'부부공미일기 유튜브',   url:'https://www.youtube.com/@부부공미일기',   newTab:true },
-      { id:'c3', icon:'📝', name:'하이탑블로그',          url:LINKS.blog,                                newTab:true },
-      { id:'c4', icon:'☕', name:'하이탑카페',             url:LINKS.cafe,                                newTab:true },
-      { id:'c5', icon:'🧵', name:'하이탑 스레드 threads', url:'https://www.threads.net/@haitop_realty',  newTab:true }
+      { id:'c1', icon:'📺', name:'하이탑부동산TV 유튜브', url:'https://www.youtube.com/@hitop_ai',              newTab:true },
+      { id:'c2', icon:'🤖', name:'부부경매일기 유튜브',   url:'https://www.youtube.com/@auction_couple-h4r',   newTab:true },
+      { id:'c3', icon:'📝', name:'하이탑블로그',          url:'https://blog.naver.com/newpajucity',             newTab:true },
+      { id:'c4', icon:'☕', name:'하이탑카페',             url:'https://cafe.naver.com/pajujjang',               newTab:true },
+      { id:'c5', icon:'📌', name:'하이탑 스레드 threads', url:'https://www.threads.com/?hl=ko',                 newTab:true }
     ];
   }
   function seedUserCats() {
