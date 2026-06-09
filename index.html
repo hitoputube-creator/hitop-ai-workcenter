@@ -662,6 +662,58 @@ button{font-family:inherit}
     if (Array.isArray(s) && s.length) return s;
     var seed = seedContent(); setJson(KEY_CONTENT, seed); return seed;
   }
+  /* ── 필수 공공사이트 링크 정의 (id 기준으로 복구 여부 판단) ── */
+  var MANDATORY_GOV_LINKS = [
+    { id:'gov-1',  icon:'🗺',  name:'토지이음',          url:'https://www.eum.go.kr',               desc:'', newTab:true },
+    { id:'gov-2',  icon:'🏞',  name:'경기토지정보',       url:'https://bud.gg.go.kr',                desc:'', newTab:true },
+    { id:'gov-3',  icon:'⚖',  name:'대법원인터넷등기',   url:'https://www.iros.go.kr',              desc:'', newTab:true },
+    { id:'gov-4',  icon:'🏗',  name:'정부24_건축물대장',  url:'https://www.gov.kr/mw/EgovMobileMain.do', desc:'', newTab:true },
+    { id:'gov-5',  icon:'📜',  name:'정부24_토지대장',    url:'https://www.gov.kr/mw/EgovMobileMain.do', desc:'', newTab:true },
+    { id:'gov-6',  icon:'🏠',  name:'네이버부동산',       url:'https://land.naver.com',              desc:'', newTab:true },
+    { id:'gov-7',  icon:'🔎',  name:'부동산디스코',       url:'https://www.disco.re',                desc:'', newTab:true },
+    { id:'gov-8',  icon:'🔨',  name:'스피드옥션',         url:'https://www.speedauction.co.kr',      desc:'', newTab:true },
+    { id:'gov-9',  icon:'🏛',  name:'정부24',             url:'https://www.gov.kr',                  desc:'', newTab:true },
+    { id:'gov-10', icon:'📋',  name:'건축행정·세움터',    url:'https://www.eais.go.kr',              desc:'', newTab:true },
+    { id:'gov-11', icon:'🏠',  name:'국토교통부',         url:'https://www.molit.go.kr',             desc:'', newTab:true }
+  ];
+
+  /* 필수 링크 복구 + 정렬: 필수 링크를 정의 순서대로 앞에, 사용자 링크는 뒤에 */
+  function restoreMandatoryLinks(data) {
+    var govCat = (data.cats || []).find(function(c){ return c.id === 'default-gov-sites'; });
+    // 카테고리 자체가 없으면 맨 앞에 추가
+    if (!govCat) {
+      govCat = { id:'default-gov-sites', name:'공공사이트', links:[] };
+      data.cats = [govCat].concat(data.cats || []);
+      if (!data.catOrder) data.catOrder = [];
+      if (data.catOrder.indexOf('default-gov-sites') === -1) {
+        data.catOrder.unshift('default-gov-sites');
+      }
+    }
+    if (!govCat.links) govCat.links = [];
+
+    var mandatoryIds = MANDATORY_GOV_LINKS.map(function(ml){ return ml.id; });
+    // 기존 링크 중 사용자가 추가한 링크(필수 id가 아닌 것)만 추출
+    var userLinks = govCat.links.filter(function(l){
+      return mandatoryIds.indexOf(l.id) === -1;
+    });
+    // 기존 링크 중 필수 링크는 id→객체 맵으로 보관 (사용자가 수정한 name/icon 유지 목적)
+    var existingMandatory = {};
+    govCat.links.forEach(function(l){
+      if (mandatoryIds.indexOf(l.id) !== -1) existingMandatory[l.id] = l;
+    });
+
+    // 필수 링크를 정의 순서대로 재구성 (없으면 시드 값, 있으면 기존 값 유지)
+    var orderedMandatory = MANDATORY_GOV_LINKS.map(function(ml){
+      return existingMandatory[ml.id] || ml;
+    });
+
+    var newLinks = orderedMandatory.concat(userLinks);
+    var changed = JSON.stringify(newLinks) !== JSON.stringify(govCat.links);
+    govCat.links = newLinks;
+    if (changed) setJson(KEY_USER_CATS, data);
+    return data;
+  }
+
   function loadUserCats() {
     var s = safeJson(KEY_USER_CATS, null);
     var seed = seedUserCats();
@@ -669,7 +721,7 @@ button{font-family:inherit}
       setJson(KEY_USER_CATS, seed);
       return seed;
     }
-    return s;
+    return restoreMandatoryLinks(s);
   }
   function saveUserCats() {
     setJson(KEY_USER_CATS, { cats: state.userCats, catOrder: state.userCatOrder });
