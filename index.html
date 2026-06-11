@@ -22,20 +22,18 @@
   --danger:#ff7a7a;
 }
 *{box-sizing:border-box}
-html,body{height:100%;overflow:hidden}
+html{height:100%}
 body{margin:0;font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;
-  background:var(--bg);color:var(--text-p);display:flex;flex-direction:column}
-@media(max-width:767px){
-  html,body{height:auto;overflow:auto}
-}
+  background:var(--bg);color:var(--text-p);display:flex;flex-direction:column;
+  min-height:100vh;overflow-x:hidden;overflow-y:auto}
 a{text-decoration:none;color:inherit}
 button{font-family:inherit}
 
 #loading-bar{position:fixed;top:0;left:0;height:2px;width:0;z-index:999;
   background:linear-gradient(90deg,var(--gold),var(--gold2));transition:width .35s ease}
 
-.wrap{width:min(1400px,calc(100% - 32px));margin:0 auto;padding:6px 0 8px;
-  flex:1;display:flex;flex-direction:column;overflow:hidden;min-height:0;gap:8px}
+.wrap{width:min(1400px,calc(100% - 32px));margin:0 auto;padding:6px 0 48px;
+  flex:1;display:flex;flex-direction:column;gap:8px}
 @media(max-width:767px){
   .wrap{overflow:visible;min-height:auto;padding-bottom:24px}
 }
