@@ -430,9 +430,10 @@ button{font-family:inherit}
     <div class="modal-section" style="margin-bottom:0">
       <h4>Supabase 동기화 안내</h4>
       <p style="font-size:12px;color:var(--text-m);margin:0;line-height:1.6">
-        바로가기는 localStorage에 즉시 저장되며,<br>
-        Supabase <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px">dashboard_shortcuts</code>
-        테이블이 있으면 자동으로 동기화됩니다.
+        모든 바로가기와 카테고리/링크는 localStorage에 즉시 저장되며,<br>
+        Supabase <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px">dashboard_shortcuts</code> /
+        <code style="background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px">user_categories</code>
+        테이블로 자동 동기화되어 PC 간 공유됩니다.
       </p>
     </div>
     <div class="modal-footer">
@@ -723,6 +724,7 @@ button{font-family:inherit}
   }
   function saveUserCats() {
     setJson(KEY_USER_CATS, { cats: state.userCats, catOrder: state.userCatOrder });
+    syncUserCatsSB();
   }
 
   /* ── 6. Supabase 연동 ────────────────────────── */
@@ -769,6 +771,50 @@ button{font-family:inherit}
     }).catch(function(){
       console.warn('[hitop] Supabase shortcuts load failed — using localStorage');
     });
+  }
+
+  /* ── 사용자 카테고리 Supabase 동기화 ──────────── */
+  var SB_USER_KEY = 'hitop';
+
+  function syncUserCatsSB() {
+    var ordered = getOrderedUserCats();
+    sbFetch('/rest/v1/user_categories?user_key=eq.' + SB_USER_KEY, 'DELETE')
+      .then(function() {
+        if (!ordered.length) return null;
+        return sbFetch('/rest/v1/user_categories', 'POST',
+          ordered.map(function(cat, i) {
+            return { id: cat.id, user_key: SB_USER_KEY, name: cat.name,
+                     links: cat.links || [], sort_order: i };
+          }), { 'Prefer': 'return=minimal' });
+      })
+      .catch(function(e) { console.warn('[hitop] Supabase user_categories sync failed:', e); });
+  }
+
+  function tryLoadUserCatsFromSB() {
+    sbFetch('/rest/v1/user_categories?select=*&user_key=eq.' + SB_USER_KEY + '&order=sort_order.asc')
+      .then(function(rows) {
+        if (Array.isArray(rows) && rows.length) {
+          /* Supabase에 데이터 있음 → 우선 사용, localStorage 덮어쓰기 */
+          var cats = rows.map(function(row) {
+            return { id: row.id, name: row.name, links: Array.isArray(row.links) ? row.links : [] };
+          });
+          var catOrder = rows.map(function(row) { return row.id; });
+          state.userCats = cats;
+          state.userCatOrder = catOrder;
+          setJson(KEY_USER_CATS, { cats: cats, catOrder: catOrder });
+          renderUserCats();
+        } else {
+          /* Supabase 비어있음 → localStorage 데이터를 Supabase에 업로드 (첫 마이그레이션) */
+          var local = safeJson(KEY_USER_CATS, null);
+          if (local && Array.isArray(local.cats) && local.cats.length) {
+            console.log('[hitop] Supabase user_categories 비어있음 — localStorage 데이터 업로드 시작');
+            syncUserCatsSB();
+          }
+        }
+      })
+      .catch(function() {
+        console.warn('[hitop] Supabase user_categories load failed — using localStorage');
+      });
   }
 
   /* ── 7. 공통 — 카드 클릭 ────────────────────── */
@@ -1584,6 +1630,7 @@ button{font-family:inherit}
 
     setLoad(true);
     tryLoadFromSB();
+    tryLoadUserCatsFromSB();
     setTimeout(function(){ setLoad(false); }, 1200);
   }
 
