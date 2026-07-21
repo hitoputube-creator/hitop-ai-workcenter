@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 포털 - 하이탑 AI 업무센터</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<style>
+:root{--bg:#071625;--panel:#101f32;--card:#172b42;--card2:#1b324c;--line:#294057;--line2:#35516c;--txt:#f5f8fb;--sub:#b4c2d2;--muted:#8193a8;--gold:#d8b84a;--gold2:rgba(216,184,74,.13);--blue:#5f9fd8;--blue2:rgba(95,159,216,.14);--danger:#ff8585}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#0a1f35 0%,var(--bg) 48%,#06131f 100%);color:var(--txt);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+.shell{width:min(1200px,calc(100% - 48px));margin:auto;padding:14px 0 32px;display:flex;flex-direction:column;gap:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 0 14px;border-bottom:1px solid rgba(201,168,76,.2)}
+.brand{display:flex;gap:12px;align-items:center;min-width:0}
+h1{margin:0;font-size:20px}
+.sub{font-size:12.5px;color:var(--sub);margin-top:3px}
+.top-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.btn,.mini{border:1px solid var(--line2);border-radius:10px;background:rgba(255,255,255,.025);color:var(--sub);font-weight:700;cursor:pointer;transition:border-color .15s,background .15s,color .15s}
+.btn{min-height:34px;padding:0 12px;font-size:12.5px}
+.mini{min-height:28px;padding:0 9px;font-size:11.5px}
+.btn:hover,.mini:hover{border-color:var(--blue);color:var(--txt);background:var(--blue2)}
+.primary{background:var(--gold2);border-color:rgba(216,184,74,.5);color:var(--gold)}
+.primary.active{background:var(--gold);border-color:var(--gold);color:#071423}
+.danger{border-color:rgba(255,133,133,.4);color:var(--danger)}
+.danger:hover{color:var(--danger);border-color:rgba(255,133,133,.6);background:rgba(255,133,133,.1)}
+.mini[disabled]{opacity:.4;cursor:not-allowed}
+.search input{width:100%;height:48px;border:1px solid var(--line2);border-radius:12px;background:linear-gradient(180deg,#102338,#0c1d30);color:var(--txt);padding:0 16px;outline:none;font-size:14px}
+.search input:focus{border-color:var(--blue);background:#12273d}
+.edit-toolbar{display:none;gap:8px;flex-wrap:wrap}
+.shell.edit-mode .edit-toolbar{display:flex}
+.cat-section{background:linear-gradient(180deg,rgba(16,31,50,.96),#0f1d2f);border:1px solid rgba(53,81,108,.86);border-radius:12px;padding:14px}
+.cat-section.featured{border-color:rgba(216,184,74,.55);background:rgba(216,184,74,.04)}
+.cat-header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.cat-toggle{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;padding:4px 0;text-align:left;cursor:pointer}
+.cat-title{font-size:15px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cat-count{font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.05);padding:2px 8px;border-radius:10px;flex-shrink:0}
+.chev{width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:.18s;flex-shrink:0}
+.cat-section.open .chev{transform:rotate(225deg)}
+.cat-desc{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.cat-body{display:none}
+.cat-section.open .cat-body{display:block}
+.cat-edit-controls{gap:5px;flex-wrap:wrap;align-items:center}
+.link-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:10px}
+.link-item{display:flex;flex-direction:column;gap:5px;min-width:0}
+.link-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;min-height:56px}
+.link-card:hover{border-color:var(--blue);background:var(--card2)}
+.link-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
+.link-info{min-width:0;flex:1}
+.link-name{font-size:13.5px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;min-width:0}
+.name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.link-desc{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link-arrow{font-size:14px;color:var(--muted);flex-shrink:0}
+.link-card:hover .link-arrow{color:var(--blue)}
+.link-invalid{font-size:12px;color:var(--danger);padding:12px 14px;border:1px dashed var(--danger);border-radius:12px}
+.badge{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:700;flex-shrink:0}
+.badge-free{background:rgba(34,197,94,.15);color:#4ade80}
+.badge-paid{background:rgba(239,68,68,.15);color:#f87171}
+.badge-freemium{background:rgba(234,179,8,.15);color:#facc15}
+.badge-etc{background:rgba(148,163,184,.15);color:#cbd5e1}
+.link-edit-controls{display:flex;gap:5px;flex-wrap:wrap}
+.link-edit-controls .mini{flex:1;min-width:44px}
+.no-result{display:none;text-align:center;color:var(--muted);padding:40px;font-size:14px}
+.footer{text-align:center;color:var(--muted);font-size:12px;padding-top:4px}
+.modal-bg{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px}
+.modal-bg.show{display:flex}
+.modal{width:min(460px,100%);max-height:90vh;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:20px}
+.modal h3{margin:0 0 16px;font-size:17px}
+.lab{display:block;margin:12px 0 5px;color:var(--sub);font-size:12px;font-weight:800}
+.inp{width:100%;min-height:40px;border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.18);color:var(--txt);padding:0 11px;outline:none}
+textarea.inp{min-height:60px;padding:10px 11px;resize:vertical}
+.inp:focus{border-color:var(--blue)}
+.row{display:flex;align-items:center;gap:8px;margin-top:12px;color:var(--sub);font-size:13px}
+.note{font-size:12px;color:var(--muted);margin:4px 0}
+.foot{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.toast{position:fixed;right:18px;bottom:18px;z-index:80;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;font-size:13px;opacity:0;transform:translateY(8px);transition:.18s;max-width:calc(100% - 36px)}
+.toast.show{opacity:1;transform:translateY(0)}
+@media(max-width:640px){
+.top{flex-direction:column;align-items:flex-start}
+.top-actions{width:100%}
+.top-actions .btn{flex:1;min-width:0}
+.link-grid{grid-template-columns:1fr}
+.cat-header{flex-direction:column;align-items:flex-start}
+.cat-edit-controls{width:100%}
+.cat-edit-controls .mini{flex:1;min-width:60px}
+}
+</style>
+</head>
+<body>
+<div class="shell" id="app">
+  <header class="top">
+    <div class="brand">
+      <a class="btn" href="./index.html">← 업무센터</a>
+      <div>
+        <h1>AI 포털</h1>
+        <div class="sub">업무 도구부터 AI·이미지·영상까지 한 곳에서 관리</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn primary" id="editModeBtn">편집 모드</button>
+    </div>
+  </header>
+
+  <div class="edit-toolbar">
+    <button class="btn" id="catAddBtn">카테고리 추가</button>
+    <button class="btn" id="exportBtn">설정 내보내기</button>
+    <button class="btn" id="importBtn">설정 가져오기</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <button class="btn danger" id="resetBtn">기본값 복원</button>
+  </div>
+
+  <section class="search">
+    <input id="q" placeholder="도구 이름, 키워드 검색" autocomplete="off">
+  </section>
+
+  <main id="catList"></main>
+
+  <div class="no-result" id="noResult">검색 결과가 없습니다.</div>
+
+  <footer class="footer">하이탑 AI 업무센터 · AI 포털</footer>
+</div>
+
+<div class="modal-bg" id="linkModal">
+  <div class="modal">
+    <h3 id="linkModalTitle">링크 추가</h3>
+    <label class="lab" for="lnName">이름</label>
+    <input class="inp" id="lnName" maxlength="60">
+    <label class="lab" for="lnUrl">URL</label>
+    <input class="inp" id="lnUrl" placeholder="https://">
+    <label class="lab" for="lnCat">카테고리</label>
+    <select class="inp" id="lnCat"></select>
+    <label class="lab" for="lnDesc">설명</label>
+    <input class="inp" id="lnDesc" maxlength="80">
+    <label class="lab" for="lnKeywords">검색 키워드</label>
+    <input class="inp" id="lnKeywords" placeholder="공백으로 구분">
+    <label class="lab" for="lnBadge">요금 구분</label>
+    <select class="inp" id="lnBadge">
+      <option value="free">Free</option>
+      <option value="freemium">Freemium</option>
+      <option value="paid">Paid</option>
+      <option value="etc">기타</option>
+    </select>
+    <label class="lab" for="lnIcon">아이콘 문자 (2~4자)</label>
+    <input class="inp" id="lnIcon" maxlength="4">
+    <label class="row"><input type="checkbox" id="lnNewTab"> 새 탭에서 열기</label>
+    <div class="foot">
+      <button class="btn" data-close="linkModal">취소</button>
+      <button class="btn primary" id="linkSaveBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="catModal">
+  <div class="modal">
+    <h3 id="catModalTitle">카테고리 추가</h3>
+    <label class="lab" for="ctName">이름</label>
+    <input class="inp" id="ctName" maxlength="30">
+    <label class="lab" for="ctDesc">설명</label>
+    <input class="inp" id="ctDesc" maxlength="80">
+    <div class="foot">
+      <button class="btn" data-close="catModal">취소</button>
+      <button class="btn primary" id="catSaveBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="catDelModal">
+  <div class="modal">
+    <h3>카테고리 삭제</h3>
+    <p class="note" id="catDelInfo"></p>
+    <label class="row"><input type="radio" name="catDelChoice" value="delete" checked> 안의 링크도 함께 삭제</label>
+    <label class="row"><input type="radio" name="catDelChoice" value="move"> 다른 카테고리로 이동</label>
+    <select class="inp" id="catDelTarget" style="margin-top:8px"></select>
+    <div id="catDelConfirmWrap" style="display:none">
+      <label class="lab" for="catDelConfirmName">기본 카테고리입니다. 삭제하려면 카테고리 이름을 정확히 입력하세요.</label>
+      <input class="inp" id="catDelConfirmName">
+    </div>
+    <div class="foot">
+      <button class="btn" data-close="catDelModal">취소</button>
+      <button class="btn danger" id="catDelBtn">삭제</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">확인</h3>
+    <p class="note" id="confirmMsg"></p>
+    <div class="foot">
+      <button class="btn" data-close="confirmModal">취소</button>
+      <button class="btn danger" id="confirmOkBtn">확인</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+var KEY='hitop_ai_portal_v1';
+var st={data:null,editMode:false,query:''};
+var linkCtx=null,catCtx=null,catDelId=null,dragCat=null,dragLink=null;
+var PALETTE=[['#3a7bd5','#fff'],['#8b5cf6','#fff'],['#f59e0b','#fff'],['#10b981','#fff'],['#ef4444','#fff'],['#06b6d4','#fff'],['#ec4899','#fff'],['#6366f1','#fff']];
+
+function id(){return 'u-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)}
+function isValidUrl(u){return /^https?:\/\/\S+$/i.test(String(u||'').trim())}
+function normUrl(u){return String(u||'').trim().toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'')}
+function colorFor(seed){var s=String(seed||'');var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return PALETTE[h%PALETTE.length]}
+function badgeLabel(b){return {free:'Free',freemium:'Freemium',paid:'Paid',etc:'기타'}[b]||'기타'}
+
+function L(id_,name,url,desc,keywords,badge,icon,color,textColor){
+  return {id:id_,name:name,url:url,desc:desc||'',keywords:keywords||'',badge:badge||'freemium',icon:icon||name.slice(0,2),color:color||'#3a7bd5',textColor:textColor||'#fff',newTab:true};
+}
+function C(id_,name,desc,isDefault,links){
+  return {id:id_,name:name,desc:desc||'',isDefault:!!isDefault,collapsed:false,links:links};
+}
+
+function defaultData(){
+  var cats={};
+  var order=['my-tools','chatbot','image-video','dev','writing','free-media','research','custom'];
+  cats['my-tools']=C('my-tools','내 업무 도구','자주 쓰는 업무 도구 모음',true,[
+    L('mt-1','하이탑 Notion','https://www.notion.so','업무 노트 & 문서','notion 노션','freemium','N','#000','#fff'),
+    L('mt-2','Claude','https://claude.ai','Anthropic의 안전한 AI','claude 클로드 anthropic','freemium','Cl','#cc785c','#fff'),
+    L('mt-3','ChatGPT','https://chat.openai.com','OpenAI의 대표 AI','chatgpt gpt openai 챗지피티','freemium','C','#10a37f','#fff'),
+    L('mt-4','Gemini','https://gemini.google.com','Google의 AI 어시스턴트','gemini 제미나이 구글','freemium','G','#4285f4','#fff'),
+    L('mt-5','구글 AI 스튜디오','https://aistudio.google.com','Gemini API 개발','google aistudio 구글에이아이스튜디오','free','Gs','#4285f4','#fff'),
+    L('mt-6','Perplexity','https://www.perplexity.ai','AI 검색 엔진','perplexity 퍼플렉시티 검색','freemium','P','#1db954','#fff'),
+    L('mt-7','이미지 프롬프트 툴','https://www.midjourney.com','예술적 이미지 생성','midjourney 미드저니 이미지프롬프트','paid','Mj','#1a1a1a','#fff'),
+    L('mt-8','이모지 모음 사이트','https://emojipedia.org','이모지 검색 및 모음','이모지 이미지 모음 emoji','free','E','#f59e0b','#fff'),
+    L('mt-9','이미지프롬프트3','https://ideogram.ai','텍스트 특화 이미지 생성','ideogram 이미지프롬프트3','freemium','I','#8b5cf6','#fff'),
+    L('mt-10','Canva','https://www.canva.com','디자인 & 편집 도구','canva 캔바 디자인','freemium','C','#00c4cc','#fff'),
+    L('mt-11','NotebookLM','https://notebooklm.google.com','Google AI 노트','notebooklm 노트북lm 구글','free','NL','#4285f4','#fff'),
+    L('mt-12','Pexels','https://www.pexels.com','무료 이미지 소스','pexels 픽셀스 무료이미지','free','Px','#05a081','#fff'),
+    L('mt-13','Unsplash','https://unsplash.com','무료 고퀄 이미지','unsplash 무료이미지','free','U','#000','#fff'),
+    L('mt-14','Pixabay','https://pixabay.com','무료 이미지/영상','pixabay 픽사베이 무료이미지','free','Pb','#2ec66d','#fff'),
+    L('mt-15','Mixkit','https://mixkit.co','무료 동영상 소스','mixkit 믹스킷 무료동영상','free','M','#ff6b6b','#fff'),
+    L('mt-16','Coverr','https://coverr.co','무료 동영상 배경','coverr 커버 무료동영상','free','Cv','#1a1a2e','#00d4aa'),
+    L('mt-17','Freepik','https://www.freepik.com','AI 이미지/디자인 소스','freepik 프리픽 이미지','freemium','Fp','#1273eb','#fff')
+  ]);
+  cats['chatbot']=C('chatbot','대표 AI 챗봇','일반 대화형 AI 챗봇 모음',true,[
+    L('cb-1','Grok','https://grok.com','xAI의 반항적인 AI','grok 그록 xai','paid','G','#1a1a1a','#fff'),
+    L('cb-2','Meta AI','https://www.meta.ai','Meta의 무료 AI','metaai 메타ai 메타 llama','free','M','#0081fb','#fff'),
+    L('cb-3','Kimi','https://kimi.moonshot.cn','Moonshot의 긴 문맥 AI','kimi 키미 moonshot','freemium','K','#1a1a2e','#00d4aa'),
+    L('cb-4','DeepSeek','https://chat.deepseek.com','중국의 강력한 AI','deepseek 딥시크 중국','free','D','#4f6ef7','#fff'),
+    L('cb-5','Copilot','https://copilot.microsoft.com','Microsoft의 AI','copilot 코파일럿 마이크로소프트 bing','freemium','Co','#0078d4','#fff'),
+    L('cb-6','Poe','https://poe.com','다양한 AI 모음','poe 포에 quora','freemium','P','#d1a8e0','#4a154b'),
+    L('cb-7','Clova','https://clova.ai','네이버의 AI','clova 클로바 네이버','free','C','#03c75a','#fff'),
+    L('cb-8','네이버 AI Studio','https://www.aistudio.kr','네이버 AI 개발 플랫폼','aistudio 네이버 naver','free','N','#03c75a','#fff'),
+    L('cb-9','A. (에이닷)','https://www.skt.ai','SKT의 AI 어시스턴트','skt 에이닷 adot','free','A','#ff5a00','#fff'),
+    L('cb-10','뤼튼 (Wrtn)','https://wrtn.ai','한국 AI 플랫폼','wrtn 뤼튼','freemium','W','#111','#fff'),
+    L('cb-11','Upstage','https://upstage.ai','Solar LLM 개발사','upstage 업스테이지 solar','paid','U','#6366f1','#fff'),
+    L('cb-12','42dot','https://www.42dot.ai','현대차그룹 AI','42dot 42닷 현대','paid','42','#1a1a1a','#00ff88')
+  ]);
+  cats['image-video']=C('image-video','이미지·영상 제작','이미지 및 영상 생성 AI',true,[
+    L('iv-1','DALL·E 3','https://openai.com/dall-e-3','OpenAI 이미지 생성','dalle 달리 dalle3','freemium','D','#10a37f','#fff'),
+    L('iv-2','Adobe Firefly','https://www.adobe.com/products/firefly.html','어도비 AI 이미지','firefly 파이어플라이 어도비','freemium','F','#ff0000','#fff'),
+    L('iv-3','Leonardo.AI','https://leonardo.ai','게임/캐릭터 이미지','leonardo 레오나르도 이미지','freemium','L','#2d2d2d','#ff6b6b'),
+    L('iv-4','Runway','https://runwayml.com','AI 비디오 생성','runway 런웨이 비디오','paid','R','#000','#fff'),
+    L('iv-5','Pika','https://pika.art','AI 비디오 제작','pika 피카 비디오','freemium','P','#ff6b9d','#fff'),
+    L('iv-6','Kling AI','https://klingai.com','고품질 AI 비디오','kling 클링 비디오 중국','freemium','K','#1a1a2e','#ff4757'),
+    L('iv-7','Freepik AI','https://www.freepik.com/ai','AI 이미지/디자인','freepik ai 프리픽','freemium','Fp','#1273eb','#fff')
+  ]);
+  cats['dev']=C('dev','개발·코딩','AI 코딩 어시스턴트',true,[
+    L('dv-1','GitHub Copilot','https://github.com/features/copilot','AI 코딩 어시스턴트','github copilot 깃허브 코파일럿','paid','GH','#2d333b','#fff'),
+    L('dv-2','Cursor','https://www.cursor.com','AI 기반 코드 에디터','cursor 커서 에디터','freemium','Cu','#000','#fff'),
+    L('dv-3','v0 by Vercel','https://v0.dev','AI UI 생성','v0 vercel ui','freemium','v0','#000','#fff'),
+    L('dv-4','Replit','https://replit.com','AI 코딩 플랫폼','replit 레플릿 코딩','freemium','R','#f26207','#fff'),
+    L('dv-5','Codeium','https://codeium.com','무료 AI 코드 완성','codeium 코드이움','free','Cd','#09b6a2','#fff'),
+    L('dv-6','Claude Code','https://www.anthropic.com/engineering/claude-code','터미널 AI 코딩','claude code 클로드코드 코딩','paid','Cc','#cc785c','#fff')
+  ]);
+  cats['writing']=C('writing','글쓰기·업무','문서 작성 및 프레젠테이션 AI',true,[
+    L('wr-1','Notion AI','https://www.notion.so/product/ai','AI 노트 & 문서','notion ai 노션','paid','N','#000','#fff'),
+    L('wr-2','Jasper','https://www.jasper.ai','AI 마케팅 글쓰기','jasper 재스퍼 마케팅','paid','J','#6366f1','#fff'),
+    L('wr-3','Copy.ai','https://www.copy.ai','AI 카피라이팅','copyai 카피에이아이 마케팅','freemium','Ca','#3b82f6','#fff'),
+    L('wr-4','Gamma','https://gamma.app','AI 프레젠테이션','gamma 감마 프레젠테이션','freemium','G','#111','#00ff88'),
+    L('wr-5','Tome','https://tome.app','AI 스토리텔링','tome 톰 프레젠테이션','freemium','T','#000','#fff'),
+    L('wr-6','Canva AI','https://www.canva.com/magic','AI 디자인 도구','canva ai 캔바 디자인','freemium','C','#00c4cc','#fff')
+  ]);
+  cats['free-media']=C('free-media','무료 이미지·영상 자료','무료 소스 & 아이콘',true,[
+    L('fm-1','Flaticon','https://www.flaticon.com','무료 아이콘 소스','flaticon 플랫아이콘 아이콘','free','Fi','#4ad295','#fff')
+  ]);
+  cats['research']=C('research','연구·특수 목적','AI 연구 및 개발자 플랫폼',true,[
+    L('rs-1','Hugging Face','https://huggingface.co/chat','오픈소스 AI 허브','huggingface 허깅페이스 오픈소스','free','Hf','#ffbd4a','#000'),
+    L('rs-2','Chatbot Arena','https://lmarena.ai','AI 모델 순위 비교','lmarena 챗봇아레나 비교','free','La','#1a1a2e','#ffd700'),
+    L('rs-3','OpenAI Platform','https://platform.openai.com','API & 개발자 도구','openai platform 오픈에이아이 플랫폼 api','paid','Op','#10a37f','#fff')
+  ]);
+  cats['custom']=C('custom','내가 추가한 도구','직접 등록한 도구',true,[]);
+  return {version:1,catOrder:order,cats:cats};
+}
+
+function cleanLink(l){
+  l=l||{};
+  var badge=['free','freemium','paid','etc'].indexOf(l.badge)>-1?l.badge:'etc';
+  var nm=String(l.name||'').trim().slice(0,60)||'이름 없음';
+  return {
+    id:String(l.id||id()),
+    name:nm,
+    url:isValidUrl(l.url)?String(l.url).trim():'',
+    desc:String(l.desc||'').trim().slice(0,120),
+    keywords:String(l.keywords||'').trim().slice(0,120),
+    badge:badge,
+    icon:(String(l.icon||'').trim().slice(0,4))||nm.slice(0,2),
+    color:typeof l.color==='string'&&l.color?l.color:'#3a7bd5',
+    textColor:typeof l.textColor==='string'&&l.textColor?l.textColor:'#fff',
+    newTab:l.newTab!==false
+  };
+}
+function cleanCat(c){
+  c=c||{};
+  return {
+    id:String(c.id||id()),
+    name:String(c.name||'').trim().slice(0,30)||'카테고리',
+    desc:String(c.desc||'').trim().slice(0,80),
+    isDefault:!!c.isDefault,
+    collapsed:!!c.collapsed,
+    links:Array.isArray(c.links)?c.links.map(cleanLink):[]
+  };
+}
+function isValidShape(d){
+  return !!(d && typeof d==='object' && Array.isArray(d.catOrder) && d.cats && typeof d.cats==='object');
+}
+function load(){
+  var raw=null;
+  try{raw=localStorage.getItem(KEY)}catch(e){}
+  var d=null;
+  if(raw){
+    try{ var parsed=JSON.parse(raw); if(isValidShape(parsed)) d=parsed; }catch(e){}
+  }
+  if(!d) d=defaultData();
+  var cats={};
+  var order=Array.isArray(d.catOrder)?d.catOrder.slice():[];
+  Object.keys(d.cats||{}).forEach(function(k){ cats[k]=cleanCat(d.cats[k]); });
+  order=order.filter(function(cid){return cats[cid]});
+  Object.keys(cats).forEach(function(cid){ if(order.indexOf(cid)<0) order.push(cid); });
+  st.data={version:1,catOrder:order,cats:cats};
+  save();
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st.data)); }catch(e){} }
+function findCat(cid){return st.data.cats[cid]}
+function findLink(cid,lid){var c=findCat(cid); return c&&c.links.find(function(l){return l.id===lid})}
+function allLinksFlat(){
+  var out=[];
+  st.data.catOrder.forEach(function(cid){var c=findCat(cid); if(c) c.links.forEach(function(l){out.push({cat:c,link:l})})});
+  return out;
+}
+function moveArr(arr,idx,dir){
+  var j=idx+dir; if(idx<0||j<0||j>=arr.length) return false;
+  var x=arr.splice(idx,1)[0]; arr.splice(j,0,x); return true;
+}
+function matchLink(l,q){
+  if(!q) return true;
+  var hay=(l.name+' '+l.desc+' '+l.keywords).toLowerCase();
+  return hay.indexOf(q)>-1;
+}
+
+function buildLinkItem(cat,link){
+  var wrap=document.createElement('div');
+  wrap.className='link-item';
+  wrap.dataset.linkId=link.id;
+  if(st.editMode) wrap.draggable=true;
+
+  if(isValidUrl(link.url)){
+    var a=document.createElement('a');
+    a.className='link-card';
+    a.href=link.url;
+    if(link.newTab){ a.target='_blank'; a.rel='noopener noreferrer'; }
+    var icon=document.createElement('span');
+    icon.className='link-icon';
+    icon.style.background=link.color; icon.style.color=link.textColor;
+    icon.textContent=link.icon;
+    var info=document.createElement('span'); info.className='link-info';
+    var nameEl=document.createElement('span'); nameEl.className='link-name';
+    var nameText=document.createElement('span'); nameText.className='name-text'; nameText.textContent=link.name;
+    var badge=document.createElement('span'); badge.className='badge badge-'+link.badge; badge.textContent=badgeLabel(link.badge);
+    nameEl.appendChild(nameText); nameEl.appendChild(badge);
+    var descEl=document.createElement('span'); descEl.className='link-desc'; descEl.textContent=link.desc;
+    info.appendChild(nameEl); info.appendChild(descEl);
+    var arrow=document.createElement('span'); arrow.className='link-arrow'; arrow.textContent='↗';
+    a.appendChild(icon); a.appendChild(info); a.appendChild(arrow);
+    wrap.appendChild(a);
+  } else {
+    var invalid=document.createElement('div');
+    invalid.className='link-invalid';
+    invalid.textContent=(link.name||'이름 없음')+' — URL 미설정';
+    wrap.appendChild(invalid);
+  }
+
+  if(st.editMode){
+    var ctrl=document.createElement('div');
+    ctrl.className='link-edit-controls';
+    [['위','link-up'],['아래','link-down'],['수정','link-edit'],['삭제','link-del']].forEach(function(pair){
+      var b=document.createElement('button');
+      b.type='button'; b.className='mini'+(pair[1]==='link-del'?' danger':'');
+      b.textContent=pair[0];
+      b.dataset.act=pair[1]; b.dataset.catId=cat.id; b.dataset.linkId=link.id;
+      ctrl.appendChild(b);
+    });
+    wrap.appendChild(ctrl);
+  }
+  return wrap;
+}
+
+function buildCatSection(cat, idx, total){
+  var q=st.query.trim().toLowerCase();
+  var visibleLinks=cat.links.filter(function(l){return matchLink(l,q)});
+  if(q && visibleLinks.length===0) return null;
+
+  var sec=document.createElement('section');
+  sec.className='cat-section'+(cat.id==='my-tools'?' featured':'');
+  var isOpen = q ? true : !cat.collapsed;
+  if(isOpen) sec.classList.add('open');
+  sec.dataset.catId=cat.id;
+  if(st.editMode) sec.draggable=true;
+
+  var header=document.createElement('div'); header.className='cat-header';
+  var toggle=document.createElement('button'); toggle.type='button'; toggle.className='cat-toggle'; toggle.dataset.act='cat-toggle'; toggle.dataset.catId=cat.id;
+  var chev=document.createElement('span'); chev.className='chev';
+  var title=document.createElement('span'); title.className='cat-title'; title.textContent=cat.name;
+  var count=document.createElement('span'); count.className='cat-count'; count.textContent=(q?visibleLinks.length:cat.links.length)+'개';
+  toggle.appendChild(chev); toggle.appendChild(title); toggle.appendChild(count);
+  header.appendChild(toggle);
+
+  if(st.editMode){
+    var ctrl=document.createElement('div'); ctrl.className='cat-edit-controls'; ctrl.style.display='flex';
+    function mkBtn(label,act,extraClass){var b=document.createElement('button');b.type='button';b.className='mini'+(extraClass?' '+extraClass:'');b.textContent=label;b.dataset.act=act;b.dataset.catId=cat.id;return b}
+    ctrl.appendChild(mkBtn('링크 추가','cat-link-add'));
+    var up=mkBtn('위','cat-up'); if(idx===0) up.disabled=true; ctrl.appendChild(up);
+    var down=mkBtn('아래','cat-down'); if(idx===total-1) down.disabled=true; ctrl.appendChild(down);
+    ctrl.appendChild(mkBtn('수정','cat-edit'));
+    ctrl.appendChild(mkBtn('삭제','cat-del','danger'));
+    header.appendChild(ctrl);
+  }
+  sec.appendChild(header);
+
+  if(cat.desc){
+    var descEl=document.createElement('div'); descEl.className='cat-desc'; descEl.textContent=cat.desc;
+    sec.appendChild(descEl);
+  }
+
+  var body=document.createElement('div'); body.className='cat-body';
+  var grid=document.createElement('div'); grid.className='link-grid';
+  (q?visibleLinks:cat.links).forEach(function(l){ grid.appendChild(buildLinkItem(cat,l)); });
+  body.appendChild(grid);
+  sec.appendChild(body);
+  return sec;
+}
+
+function render(){
+  var shell=document.getElementById('app');
+  shell.classList.toggle('edit-mode', st.editMode);
+  var editModeBtn=document.getElementById('editModeBtn');
+  editModeBtn.textContent = st.editMode ? '편집 완료' : '편집 모드';
+  editModeBtn.classList.toggle('active', st.editMode);
+
+  var list=document.getElementById('catList');
+  list.innerHTML='';
+  var order=st.data.catOrder;
+  var totalVisible=0;
+  order.forEach(function(cid,idx){
+    var cat=findCat(cid); if(!cat) return;
+    var sec=buildCatSection(cat, idx, order.length);
+    if(sec){ list.appendChild(sec); totalVisible++; }
+  });
+  document.getElementById('noResult').style.display = (st.query.trim() && totalVisible===0) ? 'block':'none';
+}
+
+function toast(s){
+  var t=document.getElementById('toast');
+  t.textContent=s; t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t=setTimeout(function(){t.classList.remove('show')},1600);
+}
+function showModal(mid){ document.getElementById(mid).classList.add('show'); }
+function hideModal(mid){ document.getElementById(mid).classList.remove('show'); }
+var confirmCb=null;
+function askConfirm(msg, cb){
+  confirmCb=cb;
+  document.getElementById('confirmMsg').textContent=msg;
+  showModal('confirmModal');
+}
+document.getElementById('confirmOkBtn').onclick=function(){
+  hideModal('confirmModal');
+  var cb=confirmCb; confirmCb=null;
+  if(cb) cb();
+};
+
+function populateCatSelect(sel, selectedId){
+  sel.innerHTML='';
+  st.data.catOrder.forEach(function(cid){
+    var c=findCat(cid); if(!c) return;
+    var opt=document.createElement('option'); opt.value=c.id; opt.textContent=c.name;
+    if(c.id===selectedId) opt.selected=true;
+    sel.appendChild(opt);
+  });
+}
+function openLinkModal(ctx){
+  linkCtx=ctx;
+  var l = ctx.mode==='edit' ? findLink(ctx.catId, ctx.linkId) : null;
+  document.getElementById('linkModalTitle').textContent = ctx.mode==='add'?'링크 추가':'링크 수정';
+  document.getElementById('lnName').value = l?l.name:'';
+  document.getElementById('lnUrl').value = l?l.url:'';
+  document.getElementById('lnDesc').value = l?l.desc:'';
+  document.getElementById('lnKeywords').value = l?l.keywords:'';
+  document.getElementById('lnBadge').value = l?l.badge:'freemium';
+  document.getElementById('lnIcon').value = l?l.icon:'';
+  document.getElementById('lnNewTab').checked = l ? !!l.newTab : true;
+  populateCatSelect(document.getElementById('lnCat'), ctx.catId);
+  showModal('linkModal');
+  setTimeout(function(){document.getElementById('lnName').focus()},50);
+}
+function saveLinkModal(){
+  var lnName=document.getElementById('lnName'), lnUrl=document.getElementById('lnUrl'), lnCat=document.getElementById('lnCat');
+  var name=lnName.value.trim();
+  var urlv=lnUrl.value.trim();
+  var targetCatId=lnCat.value;
+  if(!name){ alert('이름을 입력해주세요.'); return; }
+  if(!isValidUrl(urlv)){ alert('URL은 http:// 또는 https:// 로 시작해야 합니다.'); return; }
+  var targetCat=findCat(targetCatId);
+  if(!targetCat){ alert('카테고리를 선택해주세요.'); return; }
+
+  var norm=normUrl(urlv);
+  var dupe=allLinksFlat().find(function(x){ return normUrl(x.link.url)===norm && !(linkCtx.mode==='edit' && x.link.id===linkCtx.linkId); });
+  if(dupe){
+    askConfirm('이미 등록된 URL입니다 ('+dupe.cat.name+' · '+dupe.link.name+'). 그래도 저장하시겠습니까?', function(){ finishSaveLink(name,urlv,targetCat); });
+    return;
+  }
+  finishSaveLink(name,urlv,targetCat);
+}
+function finishSaveLink(name,urlv,targetCat){
+  var existing = linkCtx.mode==='edit' ? findLink(linkCtx.catId, linkCtx.linkId) : null;
+  var cp = existing ? [existing.color, existing.textColor] : colorFor(name+urlv);
+
+  var data=cleanLink({
+    id: linkCtx.mode==='edit' ? linkCtx.linkId : id(),
+    name:name, url:urlv,
+    desc:document.getElementById('lnDesc').value.trim(),
+    keywords:document.getElementById('lnKeywords').value.trim(),
+    badge:document.getElementById('lnBadge').value,
+    icon:document.getElementById('lnIcon').value.trim(),
+    color:cp[0], textColor:cp[1],
+    newTab:document.getElementById('lnNewTab').checked
+  });
+
+  if(linkCtx.mode==='add'){
+    targetCat.links.push(data);
+  } else {
+    var srcCat=findCat(linkCtx.catId);
+    var idx=srcCat.links.findIndex(function(l){return l.id===linkCtx.linkId});
+    if(srcCat.id===targetCat.id){ srcCat.links[idx]=data; }
+    else { srcCat.links.splice(idx,1); targetCat.links.push(data); }
+  }
+  save(); hideModal('linkModal'); render(); toast('저장되었습니다');
+}
+
+function openCatModal(ctx){
+  catCtx=ctx;
+  var c = ctx.mode==='edit' ? findCat(ctx.catId) : null;
+  document.getElementById('catModalTitle').textContent = ctx.mode==='add'?'카테고리 추가':'카테고리 수정';
+  document.getElementById('ctName').value = c?c.name:'';
+  document.getElementById('ctDesc').value = c?c.desc:'';
+  showModal('catModal');
+  setTimeout(function(){document.getElementById('ctName').focus()},50);
+}
+function saveCatModal(){
+  var name=document.getElementById('ctName').value.trim();
+  if(!name){ alert('카테고리 이름을 입력해주세요.'); return; }
+  var desc=document.getElementById('ctDesc').value.trim();
+  if(catCtx.mode==='add'){
+    var newId=id();
+    st.data.cats[newId]=cleanCat({id:newId,name:name,desc:desc,isDefault:false,collapsed:false,links:[]});
+    st.data.catOrder.push(newId);
+  } else {
+    var c=findCat(catCtx.catId);
+    c.name=name.slice(0,30); c.desc=desc.slice(0,80);
+  }
+  save(); hideModal('catModal'); render(); toast('저장되었습니다');
+}
+
+function openCatDelModal(cid){
+  catDelId=cid;
+  var cat=findCat(cid); if(!cat) return;
+  document.getElementById('catDelInfo').textContent = '"'+cat.name+'" 카테고리를 삭제합니다. (링크 '+cat.links.length+'개)';
+  document.querySelector('input[name="catDelChoice"][value="delete"]').checked=true;
+  var sel=document.getElementById('catDelTarget');
+  sel.innerHTML='';
+  st.data.catOrder.filter(function(x){return x!==cid}).forEach(function(oid){
+    var oc=findCat(oid); if(!oc) return;
+    var opt=document.createElement('option'); opt.value=oc.id; opt.textContent=oc.name; sel.appendChild(opt);
+  });
+  var moveRadio=document.querySelector('input[name="catDelChoice"][value="move"]');
+  moveRadio.disabled = sel.options.length===0;
+  if(sel.options.length===0){ document.querySelector('input[name="catDelChoice"][value="delete"]').checked=true; }
+  var confirmWrap=document.getElementById('catDelConfirmWrap');
+  document.getElementById('catDelConfirmName').value='';
+  confirmWrap.style.display = cat.isDefault ? 'block' : 'none';
+  showModal('catDelModal');
+}
+function performCatDelete(){
+  var cat=findCat(catDelId); if(!cat) return;
+  if(cat.isDefault){
+    var typed=document.getElementById('catDelConfirmName').value.trim();
+    if(typed!==cat.name){ alert('카테고리 이름이 일치하지 않습니다.'); return; }
+  }
+  var choice=document.querySelector('input[name="catDelChoice"]:checked').value;
+  if(choice==='move'){
+    var targetId=document.getElementById('catDelTarget').value;
+    var target=findCat(targetId);
+    if(!target){ alert('이동할 카테고리가 없습니다.'); return; }
+    target.links = target.links.concat(cat.links);
+  }
+  delete st.data.cats[catDelId];
+  st.data.catOrder = st.data.catOrder.filter(function(x){return x!==catDelId});
+  save(); hideModal('catDelModal'); render(); toast('삭제되었습니다');
+}
+
+function deleteLink(cid,lid){
+  askConfirm('이 링크를 삭제하시겠습니까?', function(){
+    var cat=findCat(cid); if(!cat) return;
+    var idx=cat.links.findIndex(function(l){return l.id===lid});
+    if(idx>-1){ cat.links.splice(idx,1); save(); render(); toast('삭제되었습니다'); }
+  });
+}
+function moveCat(cid,dir){
+  var idx=st.data.catOrder.indexOf(cid);
+  if(moveArr(st.data.catOrder, idx, dir)){ save(); render(); }
+}
+function moveLink(cid,lid,dir){
+  var cat=findCat(cid); if(!cat) return;
+  var idx=cat.links.findIndex(function(l){return l.id===lid});
+  if(moveArr(cat.links, idx, dir)){ save(); render(); }
+}
+
+document.getElementById('catList').addEventListener('click', function(e){
+  var toggleBtn=e.target.closest('[data-act="cat-toggle"]');
+  if(toggleBtn){
+    var cat=findCat(toggleBtn.dataset.catId);
+    if(cat){ cat.collapsed=!cat.collapsed; save(); render(); }
+    return;
+  }
+  var actBtn=e.target.closest('[data-act]');
+  if(!actBtn) return;
+  var act=actBtn.dataset.act, catId=actBtn.dataset.catId, linkId=actBtn.dataset.linkId;
+  if(act==='cat-link-add'){ openLinkModal({mode:'add',catId:catId}); return; }
+  if(act==='cat-edit'){ openCatModal({mode:'edit',catId:catId}); return; }
+  if(act==='cat-up'||act==='cat-down'){ moveCat(catId, act==='cat-up'?-1:1); return; }
+  if(act==='cat-del'){ openCatDelModal(catId); return; }
+  if(act==='link-edit'){ openLinkModal({mode:'edit',catId:catId,linkId:linkId}); return; }
+  if(act==='link-del'){ deleteLink(catId,linkId); return; }
+  if(act==='link-up'||act==='link-down'){ moveLink(catId,linkId,act==='link-up'?-1:1); return; }
+});
+
+document.getElementById('catList').addEventListener('dragstart', function(e){
+  if(!st.editMode) return;
+  var item=e.target.closest('.link-item');
+  if(item){ dragLink={catId:item.closest('.cat-section').dataset.catId, linkId:item.dataset.linkId}; dragCat=null; e.dataTransfer.effectAllowed='move'; return; }
+  var sec=e.target.closest('.cat-section');
+  if(sec && e.target.closest('.cat-header') && !e.target.closest('button')){ dragCat=sec.dataset.catId; dragLink=null; e.dataTransfer.effectAllowed='move'; }
+});
+document.getElementById('catList').addEventListener('dragover', function(e){ if(dragLink||dragCat) e.preventDefault(); });
+document.getElementById('catList').addEventListener('drop', function(e){
+  e.preventDefault();
+  if(dragLink){
+    var targetItem=e.target.closest('.link-item');
+    if(targetItem){
+      var cat=findCat(dragLink.catId);
+      var targetCatId=targetItem.closest('.cat-section').dataset.catId;
+      if(cat && targetCatId===cat.id){
+        var fromIdx=cat.links.findIndex(function(l){return l.id===dragLink.linkId});
+        var toIdx=cat.links.findIndex(function(l){return l.id===targetItem.dataset.linkId});
+        if(fromIdx>-1 && toIdx>-1 && fromIdx!==toIdx){
+          var moved=cat.links.splice(fromIdx,1)[0];
+          cat.links.splice(toIdx,0,moved);
+          save(); render();
+        }
+      }
+    }
+    dragLink=null; return;
+  }
+  if(dragCat){
+    var targetSec=e.target.closest('.cat-section');
+    if(targetSec){
+      var order=st.data.catOrder;
+      var fromIdx=order.indexOf(dragCat);
+      var toIdx=order.indexOf(targetSec.dataset.catId);
+      if(fromIdx>-1 && toIdx>-1 && fromIdx!==toIdx){
+        var moved=order.splice(fromIdx,1)[0];
+        order.splice(toIdx,0,moved);
+        save(); render();
+      }
+    }
+    dragCat=null; return;
+  }
+});
+
+document.addEventListener('click', function(e){
+  var c=e.target.closest('[data-close]'); if(c){ hideModal(c.dataset.close); }
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){ ['linkModal','catModal','catDelModal','confirmModal'].forEach(hideModal); }
+});
+
+document.getElementById('editModeBtn').onclick=function(){ st.editMode=!st.editMode; render(); };
+document.getElementById('catAddBtn').onclick=function(){ openCatModal({mode:'add'}); };
+document.getElementById('linkSaveBtn').onclick=saveLinkModal;
+document.getElementById('catSaveBtn').onclick=saveCatModal;
+document.getElementById('catDelBtn').onclick=performCatDelete;
+document.getElementById('q').oninput=function(){ st.query=this.value; render(); };
+
+document.getElementById('exportBtn').onclick=function(){
+  var blob=new Blob([JSON.stringify(st.data,null,2)],{type:'application/json'});
+  var u=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=u; a.download='ai-portal-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(u);
+};
+document.getElementById('importBtn').onclick=function(){ document.getElementById('importFile').click(); };
+document.getElementById('importFile').onchange=function(e){
+  var f=e.target.files&&e.target.files[0]; if(!f) return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var parsed=JSON.parse(reader.result);
+      if(!isValidShape(parsed)) throw new Error('invalid shape');
+      var cats={}; var order=parsed.catOrder.slice();
+      Object.keys(parsed.cats).forEach(function(k){ cats[k]=cleanCat(parsed.cats[k]); });
+      order=order.filter(function(cid){return cats[cid]});
+      Object.keys(cats).forEach(function(cid){ if(order.indexOf(cid)<0) order.push(cid); });
+      var totalLinks=0; Object.keys(cats).forEach(function(k){totalLinks+=cats[k].links.length});
+      askConfirm('카테고리 '+order.length+'개, 링크 '+totalLinks+'개를 가져옵니다. 현재 데이터를 덮어씁니다. 계속할까요?', function(){
+        st.data={version:1,catOrder:order,cats:cats};
+        save(); render(); toast('가져오기 완료');
+      });
+    }catch(err){ alert('올바른 백업 파일이 아닙니다.'); }
+  };
+  reader.readAsText(f);
+  e.target.value='';
+};
+document.getElementById('resetBtn').onclick=function(){
+  askConfirm('모든 카테고리와 링크를 기본값으로 되돌립니다. 계속할까요?', function(){
+    st.data=defaultData(); save(); render(); toast('기본값으로 복원되었습니다');
+  });
+};
+
+load();
+render();
+})();
+</script>
+</body>
+</html>
