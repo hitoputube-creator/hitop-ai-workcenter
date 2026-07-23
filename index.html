@@ -286,7 +286,8 @@ function bizSeed(){return[
   ['b5','중개보수','https://xn--989a00af8jnslv3dba.com/',false],
   ['b6','상가견적서','https://hitoputube-creator.github.io/Commercial-Property-Quote/',false],
   ['b7','매물광고','https://hitoputube-creator.github.io/hitop-property-platform/listings.html',false],
-  ['b8','부동산포스','https://www.rfine.kr/manage/',false]
+  ['b8','부동산포스','https://www.rfine.kr/manage/',false],
+  ['b9','저장공간 관리','./storage-admin.html',false]
 ].map(row)}
 function conSeed(){return[
   ['c1','하이탑부동산TV','https://www.youtube.com/@hitop_ai',true],
@@ -320,6 +321,11 @@ function restoreCats(raw){
 function initData(){
   localStorage.setItem(KV,VER);
   st.biz=(js(KB,null)||bizSeed()).map(clean);
+  // 이미 localStorage에 핵심 업무 목록이 저장된 기존 사용자에게도 새로 추가된
+  // 저장공간 관리 링크가 보이도록 1회성 마이그레이션(seed는 신규 사용자에게만 적용됨).
+  if(!st.biz.some(function(l){return l.name==='저장공간 관리'})){
+    st.biz.push(clean({id:'b9',name:'저장공간 관리',url:'./storage-admin.html',newTab:false}));
+  }
   st.content=(js(KC,null)||conSeed()).map(clean);
   var d=restoreCats(js(KU,null));
   st.cats=d.cats;
