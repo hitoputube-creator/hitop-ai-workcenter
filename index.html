@@ -31,11 +31,15 @@ h1{margin:0;font-size:20px;line-height:1.15;white-space:nowrap;overflow:hidden;t
 .primary{background:var(--gold2);border-color:rgba(216,184,74,.5);color:var(--gold)}
 .primary.active{background:var(--gold);border-color:var(--gold);color:#071423}
 .danger:hover{color:var(--danger);border-color:rgba(255,133,133,.6)}
-.search{position:relative}
+.search-row{display:flex;align-items:stretch;gap:10px}
+.search{position:relative;flex:1;min-width:0}
 .search:before{content:"";position:absolute;left:17px;top:16px;width:13px;height:13px;border:2px solid var(--blue);border-radius:50%;opacity:.95}
 .search:after{content:"";position:absolute;left:30px;top:30px;width:8px;height:2px;background:var(--blue);transform:rotate(45deg);transform-origin:left center}
 .search input{width:100%;height:50px;border:1px solid var(--line2);border-radius:12px;background:linear-gradient(180deg,#102338,#0c1d30);color:var(--txt);padding:0 18px 0 48px;outline:none;font-size:14px}
 .search input:focus{border-color:var(--blue);background:#12273d}
+.storage-btn{flex:none;display:flex;align-items:center;gap:7px;height:50px;padding:0 15px;border:1px solid rgba(201,168,76,.42);border-radius:12px;background:linear-gradient(180deg,#152a41,#101f32);color:var(--gold);font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;transition:border-color .15s,background .15s,transform .15s}
+.storage-btn:hover{border-color:var(--gold);background:#182d45;transform:translateY(-1px)}
+.storage-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .results{display:none;position:absolute;z-index:20;left:0;right:0;top:56px;max-height:310px;overflow:auto;background:var(--panel);border:1px solid var(--line2);border-radius:12px;padding:7px;box-shadow:0 18px 36px rgba(0,0,0,.28)}
 .results.show{display:block}
 .sr{width:100%;border:0;background:transparent;border-radius:8px;color:var(--txt);display:flex;justify-content:space-between;text-align:left;padding:10px;cursor:pointer}
@@ -125,6 +129,7 @@ h2{margin:0;font-size:16px}
 @media(max-width:1180px){.layout{grid-template-columns:1fr}.side{position:static;max-height:none}.side-card{max-height:none}}
 @media(max-width:980px){.side{grid-template-columns:1fr}.pub-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.core{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.shell{width:calc(100% - 24px);padding-top:10px}.top{flex-direction:column;align-items:flex-start}.brand{align-items:flex-start}h1{font-size:18px;white-space:normal}.top-actions{justify-content:flex-start}.today{align-items:flex-start}.date{text-align:left}.core,.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.work-item.secondary{grid-column:1/-1}.pub-list{grid-template-columns:1fr}.head{flex-direction:column}.tile{min-height:50px}.tile.major{min-height:108px}.btn{min-height:38px}.name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.acc-top{grid-template-columns:1fr}.acc-cat-actions{padding:0 12px 10px}.edit-controls{width:100%}.edit-controls .mini{flex:1;min-width:48px}.pub .name{display:block}.today-summary{white-space:normal}}
+@media(max-width:480px){.storage-btn{padding:0 12px;gap:0}.storage-btn .label{display:none}}
 </style>
 </head>
 <body>
@@ -146,9 +151,15 @@ h2{margin:0;font-size:16px}
     </div>
   </header>
 
-  <section class="search">
-    <input id="q" placeholder="업무 도구, 사이트 또는 메뉴 검색" autocomplete="off">
-    <div class="results" id="results"></div>
+  <section class="search-row">
+    <div class="search">
+      <input id="q" placeholder="업무 도구, 사이트 또는 메뉴 검색" autocomplete="off">
+      <div class="results" id="results"></div>
+    </div>
+    <button class="storage-btn" id="storageBtn" title="저장공간 관리" aria-label="저장공간 관리">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6c0-1.1 3.6-2 8-2s8 .9 8 2-3.6 2-8 2-8-.9-8-2Z"/><path d="M4 6v6c0 1.1 3.6 2 8 2s8-.9 8-2V6"/><path d="M4 12v6c0 1.1 3.6 2 8 2s8-.9 8-2v-6"/></svg>
+      <span class="label">저장공간</span>
+    </button>
   </section>
 
   <main class="layout">
@@ -304,8 +315,7 @@ function bizSeed(){return[
   ['b5','중개보수','https://xn--989a00af8jnslv3dba.com/',false],
   ['b6','상가견적서','https://hitoputube-creator.github.io/Commercial-Property-Quote/',false],
   ['b7','매물광고','https://hitoputube-creator.github.io/hitop-property-platform/listings.html',false],
-  ['b8','부동산포스','https://www.rfine.kr/manage/',false],
-  ['b9','저장공간 관리','./storage-admin.html',false]
+  ['b8','부동산포스','https://www.rfine.kr/manage/',false]
 ].map(row)}
 function conSeed(){return[
   ['c1','하이탑부동산TV','https://www.youtube.com/@hitop_ai',true],
@@ -471,6 +481,8 @@ function restoreCats(raw){
 function initData(){
   localStorage.setItem(KV,VER);
   st.biz=(js(KB,null)||bizSeed()).map(clean);
+  // 저장공간 관리는 검색창 옆 전용 버튼으로 이동했으므로 핵심 업무 목록에서 제외.
+  st.biz=st.biz.filter(function(l){return l.name!=='저장공간 관리'});
   // seed에 새 항목이 추가되면 기존 저장 목록에도 자동 반영(단일 소스: bizSeed()).
   var bizNames={};
   st.biz.forEach(function(l){bizNames[l.name]=true});
@@ -726,6 +738,7 @@ catSave.onclick=function(){var n=catName.value.trim();if(!n)return alert('카테
 linkSave.onclick=saveLinkModal;
 setBtn.onclick=function(){show('settings')};
 dateBtn.onclick=function(){window.open('https://calendar.google.com','_blank','noopener')};
+storageBtn.onclick=function(){location.href='./storage-admin.html'};
 q.oninput=function(){search(q.value)};
 q.onfocus=function(){if(q.value)search(q.value)};
 results.onclick=function(e){var r=e.target.closest('.sr');if(!r)return;if(r.dataset.new==='1'||ext(r.dataset.url))window.open(r.dataset.url,'_blank','noopener');else location.href=r.dataset.url;q.value='';results.classList.remove('show')};
