@@ -471,11 +471,12 @@ function restoreCats(raw){
 function initData(){
   localStorage.setItem(KV,VER);
   st.biz=(js(KB,null)||bizSeed()).map(clean);
-  // 이미 localStorage에 핵심 업무 목록이 저장된 기존 사용자에게도 새로 추가된
-  // 저장공간 관리 링크가 보이도록 1회성 마이그레이션(seed는 신규 사용자에게만 적용됨).
-  if(!st.biz.some(function(l){return l.name==='저장공간 관리'})){
-    st.biz.push(clean({id:'b9',name:'저장공간 관리',url:'./storage-admin.html',newTab:false}));
-  }
+  // seed에 새 항목이 추가되면 기존 저장 목록에도 자동 반영(단일 소스: bizSeed()).
+  var bizNames={};
+  st.biz.forEach(function(l){bizNames[l.name]=true});
+  bizSeed().forEach(function(seedItem){
+    if(!bizNames[seedItem.name])st.biz.push(clean(seedItem));
+  });
   st.content=(js(KC,null)||conSeed()).map(clean);
   st.other=(js(KO,null)||[]).map(clean);
   var d=restoreCats(js(KU,null));
@@ -552,6 +553,11 @@ function renderContent(){
   }).join('');
 }
 function renderPublic(){
+  if(!st.sharedReady&&!st.sharedError){
+    pubCount.textContent='';
+    pub.innerHTML='<div class="empty">불러오는 중...</div>';
+    return;
+  }
   var gc=govCat(),pl=gc?gc.links:[];
   pubCount.textContent=pl.length+'개';
   var shown=st.publicOpen?pl:pl.slice(0,7);
@@ -560,6 +566,11 @@ function renderPublic(){
   }).join('')+(pl.length>7?'<button class="mini pub-toggle" data-act="toggle-public">'+(st.publicOpen?'접기':'전체 보기')+'</button>':'');
 }
 function renderOther(){
+  if(!st.sharedReady&&!st.sharedError){
+    otherCount.textContent='';
+    other.innerHTML='<div class="empty">불러오는 중...</div>';
+    return;
+  }
   otherCount.textContent=st.other.length+'개';
   var shown=st.otherOpen?st.other:st.other.slice(0,7);
   other.innerHTML=shown.map(function(l){
