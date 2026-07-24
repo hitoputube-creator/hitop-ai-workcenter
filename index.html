@@ -278,8 +278,9 @@ h2{margin:0;font-size:16px}
 <script>
 (function(){
 'use strict';
-var KB='hitop_biz_sc',KC='hitop_content_sc',KU='hitop_user_cats_v1',KO='hitop_other_sites_v1',KV='hitop_data_ver',VER='2026-07-20-dashboard-edit-v3';
-var st={biz:[],content:[],cats:[],order:[],other:[],edit:{biz:false,content:false,public:false,other:false},open:{content:true},publicOpen:false,otherOpen:false,cm:'add',cid:null,linkCtx:null};
+var KB='hitop_biz_sc',KC='hitop_content_sc',KU='hitop_user_cats_v1',KO='hitop_other_sites_v1',KV='hitop_data_ver',MIG_OTHER='hitop_other_sites_migrated_at',MIG_CATS='hitop_user_cats_migrated_at',VER='2026-07-20-dashboard-edit-v3';
+var SB_URL='https://xaxbkdnrzsghsabkdvzj.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhheGJrZG5yenNnaHNhYmtkdnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjc5NTIsImV4cCI6MjA4OTY0Mzk1Mn0.l27ZYQHLt48p7EQrZ8gbAOmJHvCfIur84CtgoWlA8Wg',SL='user_links';
+var st={biz:[],content:[],cats:[],order:[],other:[],edit:{biz:false,content:false,public:false,other:false},open:{content:true},publicOpen:false,otherOpen:false,sharedReady:false,sharedError:null,cm:'add',cid:null,linkCtx:null};
 var gov=[
   ['gov-1','토지이음','https://www.eum.go.kr'],
   ['gov-2','경기토지정보','https://bud.gg.go.kr'],
@@ -318,10 +319,142 @@ function id(){return'u-'+Date.now()+'-'+Math.random().toString(36).slice(2,6)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function js(k,f){try{var raw=localStorage.getItem(k);if(raw==null)return f;var v=JSON.parse(raw);return v==null?f:v}catch(e){return f}}
 function sv(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function sbFetch(path,method,body,extra){
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+  if(extra)Object.assign(h,extra);
+  var opt={method:method||'GET',headers:h};
+  if(body!=null)opt.body=JSON.stringify(body);
+  return fetch(SB_URL+path,opt).then(function(r){
+    if(!r.ok)return r.text().then(function(t){throw new Error(t||r.statusText)});
+    if(r.status===204)return null;
+    return r.json();
+  });
+}
 function url(u){u=String(u||'').trim();if(!u)return'';return/^(https?:|\.\/|\.\.\/|\/)/i.test(u)?u:'https://'+u}
 function ext(u){return/^https?:/i.test(u||'')}
 function clean(l){l=l||{};return{id:String(l.id||id()),name:String(l.name||'이름 없음').replace('매물관리-관리용','매물관리').replace('매물광고-홈페이지','매물광고').replace(/_/g,' ').trim(),url:url(l.url),desc:l.desc||'',newTab:l.newTab!==false,icon:l.icon||''}}
 function isGov(c){return c&&(c.id==='default-gov-sites'||/공공|정부|등기|토지|세움터|국토/i.test(c.name||''))}
+function govIds(){return gov.map(function(l){return l.id})}
+function sourceId(l){return String(l.sourceId||l.source_id||l.id||id())}
+function sbRow(l,cat,idx,active){
+  l=clean(l);
+  return{category:cat,name:l.name,url:l.url,desc:l.desc||'',new_tab:l.newTab!==false,icon:l.icon||'',sort_order:idx||0,source_id:sourceId(l),is_active:active!==false};
+}
+function linkFromRow(r){
+  var l=clean({id:r.source_id||r.id,name:r.name,url:r.url,desc:r.desc,newTab:r.new_tab,icon:r.icon});
+  l.sourceId=r.source_id||l.id;
+  l.sbId=r.id;
+  l.sortOrder=Number(r.sort_order||0);
+  l.isActive=r.is_active!==false;
+  return l;
+}
+function linkSort(a,b){
+  var sa=Number(a.sortOrder==null?9999:a.sortOrder),sb=Number(b.sortOrder==null?9999:b.sortOrder);
+  if(sa!==sb)return sa-sb;
+  return String(a.name||'').localeCompare(String(b.name||''));
+}
+function ensureGovCat(){
+  var g=govCat();
+  if(!g){g={id:'default-gov-sites',name:'공공사이트',links:[]};st.cats.push(g);st.order.push(g.id)}
+  return g;
+}
+function applySharedLinks(rows){
+  rows=Array.isArray(rows)?rows:[];
+  var activeOther=rows.filter(function(r){return r.category==='other'&&r.is_active!==false}).map(linkFromRow).sort(linkSort);
+  var govRows=rows.filter(function(r){return r.category==='gov'});
+  var bySource={};
+  govRows.forEach(function(r){if(r.source_id)bySource[r.source_id]=r});
+  var ids=govIds(),links=[];
+  gov.forEach(function(base,idx){
+    var r=bySource[base.id],l;
+    if(r&&r.is_active===false)return;
+    l=r?linkFromRow(r):clean(base);
+    l.sourceId=base.id;
+    if(!r)l.sortOrder=idx;
+    links.push(l);
+  });
+  govRows.forEach(function(r){
+    if(ids.indexOf(r.source_id)<0&&r.is_active!==false)links.push(linkFromRow(r));
+  });
+  links.sort(linkSort);
+  st.other=activeOther;
+  ensureGovCat().links=links;
+}
+function upsertLinkRows(rows){
+  rows=Array.isArray(rows)?rows:[rows];
+  console.log('[user_links] upsertLinkRows called',{count:rows.length,rows:rows});
+  if(!rows.length){console.log('[user_links] upsert skipped: no rows');return Promise.resolve([])}
+  return sbFetch('/rest/v1/'+SL+'?on_conflict=category,source_id','POST',rows,{'Prefer':'resolution=merge-duplicates,return=representation'}).then(function(res){
+    console.log('[user_links] upsert success',{count:Array.isArray(res)?res.length:0,response:res});
+    return res;
+  }).catch(function(e){
+    console.error('[user_links] upsert failed',{message:e.message||String(e),rows:rows});
+    throw e;
+  });
+}
+function loadSharedLinks(){
+  console.log('[user_links] loadSharedLinks called');
+  return sbFetch('/rest/v1/'+SL+'?select=*&category=in.(other,gov)&order=category.asc,sort_order.asc,created_at.asc').then(function(rows){
+    console.log('[user_links] load success',{count:Array.isArray(rows)?rows.length:0,rows:rows});
+    applySharedLinks(rows||[]);
+    st.sharedReady=true;st.sharedError=null;
+    render();
+  }).catch(function(e){
+    st.sharedError=e.message||String(e);
+    console.warn('[user_links] load failed',e);
+    render();
+  });
+}
+function migrateLocalLinks(){
+  var tasks=[],now=new Date().toISOString(),other=js(KO,null),rawCats=js(KU,null);
+  console.log('[user_links] migrateLocalLinks called',{
+    otherExists:Array.isArray(other),
+    otherCount:Array.isArray(other)?other.length:0,
+    catsExists:!!rawCats,
+    catsMigratedAt:localStorage.getItem(MIG_CATS),
+    otherMigratedAt:localStorage.getItem(MIG_OTHER),
+    rawCats:rawCats
+  });
+  if(!localStorage.getItem(MIG_OTHER)&&Array.isArray(other)){
+    console.log('[user_links] migrating other links',{count:other.length,links:other});
+    tasks.push(upsertLinkRows(other.map(function(l,i){return sbRow(l,'other',i,true)})).then(function(){localStorage.setItem(MIG_OTHER,now)}));
+  }else{
+    console.log('[user_links] skipping other migration',{reason:localStorage.getItem(MIG_OTHER)?'already migrated':'no local array'});
+  }
+  if(!localStorage.getItem(MIG_CATS)&&rawCats){
+    var d=restoreCats(rawCats),g=d.cats.find(isGov),links=g&&Array.isArray(g.links)?g.links:[];
+    console.log('[user_links] migrating gov links',{count:links.length,links:links});
+    tasks.push(upsertLinkRows(links.map(function(l,i){return sbRow(l,'gov',i,true)})).then(function(){localStorage.setItem(MIG_CATS,now)}));
+  }else{
+    console.log('[user_links] skipping gov migration',{reason:localStorage.getItem(MIG_CATS)?'already migrated':'no local cats'});
+  }
+  console.log('[user_links] migration task count',tasks.length);
+  return Promise.all(tasks).then(function(res){console.log('[user_links] migration complete',res);return res});
+}
+function syncSharedLinks(){
+  console.log('[user_links] syncSharedLinks called');
+  return migrateLocalLinks().then(loadSharedLinks).catch(function(e){
+    st.sharedError=e.message||String(e);
+    console.warn('[user_links] sync failed',e);
+    render();
+  });
+}
+function restoreSharedBackup(d){
+  var tasks=[];
+  if(Array.isArray(d.other))tasks.push(upsertLinkRows(d.other.map(function(l,i){return sbRow(l,'other',i,true)})));
+  if(Array.isArray(d.userCats)){
+    var x=restoreCats({cats:d.userCats,catOrder:d.userCatOrder||[]}),g=x.cats.find(isGov);
+    st.cats=x.cats;st.order=x.catOrder;saveCats();
+    if(g&&Array.isArray(g.links))tasks.push(upsertLinkRows(g.links.map(function(l,i){return sbRow(l,'gov',i,true)})));
+  }
+  return Promise.all(tasks).then(loadSharedLinks);
+}
+function saveSharedLink(cat,l,idx,active){
+  return upsertLinkRows(sbRow(l,cat,idx,active)).then(loadSharedLinks);
+}
+function saveSharedOrder(cat,links){
+  return upsertLinkRows(links.map(function(l,i){return sbRow(l,cat,i,l.isActive!==false)})).then(loadSharedLinks);
+}
 function restoreCats(raw){
   var d=raw&&Array.isArray(raw.cats)?raw:catsSeed();
   d.catOrder=Array.isArray(d.catOrder)?d.catOrder:[];
@@ -348,7 +481,7 @@ function initData(){
   var d=restoreCats(js(KU,null));
   st.cats=d.cats;
   st.order=d.catOrder;
-  sv(KB,st.biz);sv(KC,st.content);sv(KO,st.other);sv(KU,{cats:st.cats,catOrder:st.order});
+  sv(KB,st.biz);sv(KC,st.content);
 }
 function findCat(cid){return st.cats.find(function(c){return c.id===cid})}
 function ordered(){var m={},a=[];st.cats.forEach(function(c){m[c.id]=c});(st.order||[]).forEach(function(i){if(m[i])a.push(m[i])});st.cats.forEach(function(c){if((st.order||[]).indexOf(c.id)<0)a.push(c)});return a}
@@ -488,12 +621,12 @@ function saveLinkModal(){
     if(ctx.mode==='add')st.content.push(data);else st.content[st.content.findIndex(function(x){return x.id===ctx.id})]=data;
     sv(KC,st.content);
   }else if(ctx.store==='other'){
-    if(ctx.mode==='add')st.other.push(data);else st.other[st.other.findIndex(function(x){return x.id===ctx.id})]=data;
-    sv(KO,st.other);
+    var oi=ctx.mode==='add'?st.other.length:st.other.findIndex(function(x){return x.id===ctx.id});
+    return saveSharedLink('other',data,oi<0?st.other.length:oi,true).then(function(){hide('linkModal');toast('저장되었습니다')}).catch(function(e){alert('Supabase 저장 실패: '+(e.message||e))});
   }else if(ctx.store==='public'){
     var g=govCat();g.links=g.links||[];
-    if(ctx.mode==='add')g.links.push(data);else g.links[g.links.findIndex(function(x){return x.id===ctx.id})]=data;
-    saveCats();
+    var pi=ctx.mode==='add'?g.links.length:g.links.findIndex(function(x){return x.id===ctx.id});
+    return saveSharedLink('gov',data,pi<0?g.links.length:pi,true).then(function(){hide('linkModal');toast('저장되었습니다')}).catch(function(e){alert('Supabase 저장 실패: '+(e.message||e))});
   }else if(ctx.store==='cat'){
     var from=findCat(ctx.cid),target=findCat(lc.value);
     if(ctx.mode==='add')target.links.push(data);
@@ -562,9 +695,9 @@ document.addEventListener('click',function(e){
       if(act==='cat-up'||act==='cat-down'){moveCategory(cid,act==='cat-up'?-1:1);return}
       if(act.indexOf('biz-')===0){var bi=st.biz.findIndex(function(x){return x.id===idv});if(act==='biz-edit')openLinkModal({store:'biz',mode:'edit',id:idv});if(act==='biz-del'&&confirm('이 링크를 삭제하시겠습니까?'))removeLink(st.biz,idv,function(){sv(KB,st.biz)});if((act==='biz-up'||act==='biz-down')&&move(st.biz,bi,act==='biz-up'?-1:1)){sv(KB,st.biz);render()}return}
       if(act.indexOf('content-')===0){var ci=st.content.findIndex(function(x){return x.id===idv});if(act==='content-edit')openLinkModal({store:'content',mode:'edit',id:idv});if(act==='content-del'&&confirm('이 링크를 삭제하시겠습니까?'))removeLink(st.content,idv,function(){sv(KC,st.content)});if((act==='content-up'||act==='content-down')&&move(st.content,ci,act==='content-up'?-1:1)){sv(KC,st.content);render()}return}
-      if(act.indexOf('other-')===0){var oi=st.other.findIndex(function(x){return x.id===idv});if(act==='other-edit')openLinkModal({store:'other',mode:'edit',id:idv});if(act==='other-del'&&confirm('이 사이트를 삭제하시겠습니까?'))removeLink(st.other,idv,function(){sv(KO,st.other)});if((act==='other-up'||act==='other-down')&&move(st.other,oi,act==='other-up'?-1:1)){sv(KO,st.other);render()}return}
+      if(act.indexOf('other-')===0){var oi=st.other.findIndex(function(x){return x.id===idv});if(act==='other-edit')openLinkModal({store:'other',mode:'edit',id:idv});if(act==='other-del'&&confirm('이 사이트를 삭제하시겠습니까?')){var od=st.other[oi]||{id:idv};saveSharedLink('other',od,oi<0?0:oi,false).then(function(){toast('삭제되었습니다')}).catch(function(e){alert('Supabase 삭제 실패: '+(e.message||e))})}if((act==='other-up'||act==='other-down')&&move(st.other,oi,act==='other-up'?-1:1)){render();saveSharedOrder('other',st.other).catch(function(e){alert('Supabase 순서 저장 실패: '+(e.message||e))})}return}
       if(act.indexOf('link-')===0){var cat=findCat(cid),li=(cat.links||[]).findIndex(function(x){return x.id===idv});if(act==='link-edit')openLinkModal({store:'cat',mode:'edit',cid:cid,id:idv});if(act==='link-del'&&confirm('이 링크를 삭제하시겠습니까?'))removeLink(cat.links,idv,saveCats);if((act==='link-up'||act==='link-down')&&move(cat.links,li,act==='link-up'?-1:1)){saveCats();render()}return}
-      if(act.indexOf('pub-')===0){var g=govCat(),pi=(g.links||[]).findIndex(function(x){return x.id===idv});if(act==='pub-edit')openLinkModal({store:'public',mode:'edit',id:idv});if(act==='pub-del'&&confirm('이 사이트를 삭제하시겠습니까?'))removeLink(g.links,idv,saveCats);if((act==='pub-up'||act==='pub-down')&&move(g.links,pi,act==='pub-up'?-1:1)){saveCats();render()}return}
+      if(act.indexOf('pub-')===0){var g=govCat(),pi=(g.links||[]).findIndex(function(x){return x.id===idv});if(act==='pub-edit')openLinkModal({store:'public',mode:'edit',id:idv});if(act==='pub-del'&&confirm('이 사이트를 삭제하시겠습니까?')){var pd=(g.links||[])[pi]||{id:idv};saveSharedLink('gov',pd,pi<0?0:pi,false).then(function(){toast('삭제되었습니다')}).catch(function(e){alert('Supabase 삭제 실패: '+(e.message||e))})}if((act==='pub-up'||act==='pub-down')&&move(g.links,pi,act==='pub-up'?-1:1)){render();saveSharedOrder('gov',g.links).catch(function(e){alert('Supabase 순서 저장 실패: '+(e.message||e))})}return}
     });
     return;
   }
@@ -590,7 +723,7 @@ restore.onclick=function(){restoreFile.click()};
 restoreFile.onchange=function(e){
   var f=e.target.files&&e.target.files[0];if(!f)return;
   var rd=new FileReader;
-  rd.onload=function(){try{var d=JSON.parse(rd.result);if(Array.isArray(d.biz)){st.biz=d.biz.map(clean);sv(KB,st.biz)}if(Array.isArray(d.content)){st.content=d.content.map(clean);sv(KC,st.content)}if(Array.isArray(d.other)){st.other=d.other.map(clean);sv(KO,st.other)}if(Array.isArray(d.userCats)){var x=restoreCats({cats:d.userCats,catOrder:d.userCatOrder||[]});st.cats=x.cats;st.order=x.catOrder;saveCats()}render();toast('복원 완료')}catch(err){alert('파일을 읽을 수 없습니다.')}};
+  rd.onload=function(){try{var d=JSON.parse(rd.result);if(Array.isArray(d.biz)){st.biz=d.biz.map(clean);sv(KB,st.biz)}if(Array.isArray(d.content)){st.content=d.content.map(clean);sv(KC,st.content)}restoreSharedBackup(d).then(function(){render();toast('복원 완료')}).catch(function(err){alert('Supabase 복원 실패: '+(err.message||err))})}catch(err){alert('파일을 읽을 수 없습니다.')}};
   rd.readAsText(f);e.target.value='';
 };
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){['settings','catModal','linkModal'].forEach(hide);results.classList.remove('show')}});
@@ -606,7 +739,8 @@ function aiPortalToolCount(){
     return n>0?n:52;
   }catch(e){return 52}
 }
-initData();ver.textContent='data '+VER;render();
+window.hitopMigrateUserLinks=function(){return migrateLocalLinks().then(loadSharedLinks)};
+initData();ver.textContent='data '+VER;render();syncSharedLinks();
 var aiCountEl=document.getElementById('aiPortalCount');
 if(aiCountEl)aiCountEl.textContent=aiPortalToolCount()+'개 도구';
 })();
