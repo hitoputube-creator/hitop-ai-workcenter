@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>하이탑 콘텐츠 스튜디오</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#060d1f; font-family:'Malgun Gothic', -apple-system, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 20px; }
+  .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+  .header h1 { color:#F0C24B; font-size:18px; font-weight:600; margin:0; }
+  .header .sub { color:rgba(255,255,255,0.4); font-size:12px; margin-top:4px; }
+  .home-btn { background:none; border:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.6); border-radius:8px; padding:6px 12px; font-size:12px; cursor:pointer; text-decoration:none; }
+  .panel { background:#0A1730; border-radius:16px; padding:24px; }
+  .tabs { display:flex; gap:24px; margin-bottom:20px; border-bottom:1px solid rgba(240,194,75,0.25); padding-bottom:12px; }
+  .tab-btn { background:none; border:none; cursor:pointer; font-size:15px; color:rgba(255,255,255,0.5); padding-bottom:10px; margin-bottom:-13px; }
+  .tab-btn.active { color:#F0C24B; font-weight:600; border-bottom:2px solid #F0C24B; }
+  .studio-grid { display:grid; grid-template-columns: 300px 1fr; gap:16px; }
+  @media (max-width:720px) { .studio-grid { grid-template-columns: 1fr; } }
+  .label-sm { color:rgba(255,255,255,0.55); font-size:12px; margin:0 0 8px; }
+  .mode-row { display:flex; gap:6px; margin-bottom:12px; }
+  .mode-btn { flex:1; cursor:pointer; border-radius:8px; padding:8px; font-size:12px; font-weight:600; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.6); }
+  .mode-btn.active { background:rgba(240,194,75,0.15); border:1px solid #F0C24B; color:#F0C24B; }
+  textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:#fff; font-size:11.5px; padding:8px; resize:vertical; font-family:inherit; }
+  .ghost-btn { width:100%; background:transparent; border:1px solid #F0C24B; color:#F0C24B; border-radius:8px; padding:8px; font-size:12px; font-weight:600; cursor:pointer; margin-bottom:8px; }
+  .channel-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
+  .channel-btn { width:52px; height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; border-radius:10px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12); }
+  .channel-btn.active { background:rgba(240,194,75,0.15); border:1px solid #F0C24B; }
+  .channel-btn span.ic { font-size:17px; line-height:1; }
+  .channel-btn span.lb { font-size:9px; color:rgba(255,255,255,0.5); }
+  .channel-btn.active span.lb { color:#F0C24B; }
+  .check-row { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.75); font-size:12px; margin-bottom:16px; cursor:pointer; }
+  .gen-btn { width:100%; background:#F0C24B; color:#1a1300; border:none; border-radius:8px; padding:10px; font-size:13px; font-weight:600; cursor:pointer; }
+  .gen-btn:disabled { background:rgba(240,194,75,0.3); cursor:default; }
+  .result-panel { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:18px; min-height:200px; }
+  .result-box { background:rgba(255,255,255,0.04); border-radius:8px; padding:12px; white-space:pre-wrap; color:rgba(255,255,255,0.85); font-size:12px; line-height:1.6; margin-bottom:16px; }
+  .muted { color:rgba(255,255,255,0.35); font-size:12px; }
+  .error-text { color:#ff8a8a; font-size:12px; }
+  .kanban-grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; }
+  @media (max-width:720px) { .kanban-grid { grid-template-columns: 1fr 1fr; } }
+  .col-title { color:rgba(255,255,255,0.65); font-size:12px; font-weight:600; margin:0 0 8px; }
+  .card { background:#0F1D3D; border-left:3px solid #F0C24B; border-radius:0 8px 8px 0; padding:10px; margin-bottom:8px; }
+  .card .badge { background:rgba(240,194,75,0.18); color:#F0C24B; font-size:9px; padding:2px 6px; border-radius:20px; }
+  .card .title { color:#fff; font-size:12px; margin:6px 0 4px; line-height:1.4; }
+  .card .chan { color:rgba(255,255,255,0.4); font-size:10px; margin:0 0 8px; }
+  .card .row { display:flex; justify-content:space-between; align-items:center; }
+  .card button { background:none; border:none; cursor:pointer; font-size:12px; }
+  .move-btn { color:#F0C24B; }
+  .move-btn:disabled { color:rgba(255,255,255,0.2); cursor:default; }
+  .del-btn { color:rgba(255,255,255,0.3); font-size:11px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div>
+      <h1>하이탑 콘텐츠 스튜디오</h1>
+      <div class="sub">하이탑 AI 부동산 업무센터</div>
+    </div>
+    <a class="home-btn" href="../index.html">대시보드</a>
+  </div>
+  <div class="panel">
+    <div class="tabs">
+      <button class="tab-btn active" id="tabStudioBtn">콘텐츠 스튜디오</button>
+      <button class="tab-btn" id="tabKanbanBtn">콘텐츠 칸반보드 <span id="cardCountBadge"></span></button>
+    </div>
+
+    <div id="studioView">
+      <div class="studio-grid">
+        <div>
+          <p class="label-sm">재료 선택</p>
+          <div class="mode-row" id="modeRow"></div>
+          <div id="materialInputArea" style="margin-bottom:16px;"></div>
+
+          <p class="label-sm">채널 선택</p>
+          <div class="channel-row" id="channelRow"></div>
+
+          <label class="check-row">
+            <input type="checkbox" id="reinforceChk" checked style="accent-color:#F0C24B;">
+            법령·통계 근거로 신뢰도 보강 (웹검색 활용)
+          </label>
+
+          <button class="gen-btn" id="genBtn">생성 실행</button>
+        </div>
+
+        <div class="result-panel">
+          <p class="label-sm">실행보기</p>
+          <div id="resultArea"><p class="muted">재료를 고르고 채널을 선택한 뒤 생성 실행을 눌러보세요.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="kanbanView" style="display:none;">
+      <div id="kanbanArea"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const GOLD = "#F0C24B";
+const SB_URL = "https://xaxbkdnrzsghsabkdvzj.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhheGJrZG5yenNnaHNhYmtkdnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjc5NTIsImV4cCI6MjA4OTY0Mzk1Mn0.l27ZYQHLt48p7EQrZ8gbAOmJHvCfIur84CtgoWlA8Wg";
+
+const MATERIAL_MODES = [
+  { key: "news", label: "뉴스기사" },
+  { key: "listing", label: "매물소개" },
+  { key: "external", label: "외부자료" },
+];
+const CHANNELS = [
+  { key: "blog", label: "블로그", icon: "📝" },
+  { key: "cafe", label: "카페", icon: "☕" },
+  { key: "insta", label: "인스타", icon: "📷" },
+  { key: "threads", label: "스레드", icon: "🧵" },
+  { key: "youtube", label: "유튜브", icon: "▶" },
+];
+const COLUMNS = ["기획중", "작성중", "검토중", "발행완료"];
+const REWRITE_STYLE = {
+  blog: `경기도 파주시 운정신도시 23년차 공인중개사 "스마일 소장님"의 네이버 블로그 톤. 결론 먼저, 필요하면 비교표 활용. 신뢰감 있고 담백하게 800~1000자. 마지막 줄에 "하이탑부동산 031-949-8969" 문의 안내.`,
+  cafe: `경기도 파주시 운정신도시 동네 네이버 카페에 쓰는 이웃 주민 톤. 친근한 구어체, 광고처럼 보이지 않게, 500~700자.`,
+  insta: `인스타그램 카드뉴스 대본. 8장 구성으로 작성하되 각 장을 "[N장] 제목: 내용" 형식으로 짧게. 1장은 후킹 헤드라인, 마지막 장은 "하이탑부동산 031-949-8969" CTA.`,
+  threads: `스레드(Threads)용 짧은 글. 300~400자, 캐주얼하고 솔직한 톤, 첫 문장이 후킹. 해시태그 3~5개로 마무리.`,
+  youtube: `유튜브 쇼츠 대본 (50~60초). "[제목 후보 3개]" 다음 "[TTS 대본]" 형식으로. 마지막에 하이탑부동산 소개 한 줄.`,
+};
+
+let state = {
+  tab: "studio",
+  materialMode: "news",
+  newsMaterial: "",
+  listingText: "",
+  externalText: "",
+  selectedChannel: "blog",
+  reinforce: true,
+  resultText: "",
+  resultError: "",
+  genLoading: false,
+  newsLoading: false,
+  cards: [],
+  cardsLoading: true,
+  cardsError: "",
+};
+
+function sbFetch(path, method, body, extra) {
+  const h = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY, "Content-Type": "application/json" };
+  if (extra) Object.assign(h, extra);
+  const opt = { method: method || "GET", headers: h };
+  if (body != null) opt.body = JSON.stringify(body);
+  return fetch(SB_URL + path, opt).then((r) => {
+    if (!r.ok) return r.text().then((t) => { throw new Error(t || r.statusText); });
+    if (r.status === 204) return null;
+    return r.json();
+  });
+}
+
+async function callClaude(prompt, useSearch) {
+  const res = await fetch(SB_URL + "/functions/v1/content-studio-generate", {
+    method: "POST",
+    headers: { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt, useSearch: !!useSearch }),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error || "API 오류");
+  return (data.text || "").trim();
+}
+
+function extractTitle(text) {
+  const m = text.match(/제목\s*[:：]\s*(.+)/);
+  if (m) return m[1].trim().slice(0, 40);
+  return text.replace(/\s+/g, " ").slice(0, 30);
+}
+
+async function loadCards() {
+  state.cardsLoading = true; state.cardsError = ""; render();
+  try {
+    const rows = await sbFetch("/rest/v1/content_items?select=*&order=created_at.desc", "GET");
+    state.cards = rows || [];
+  } catch (e) {
+    state.cardsError = "칸반보드를 불러오지 못했어요: " + e.message;
+  }
+  state.cardsLoading = false; render();
+}
+
+function render() {
+  document.getElementById("tabStudioBtn").className = "tab-btn" + (state.tab === "studio" ? " active" : "");
+  document.getElementById("tabKanbanBtn").className = "tab-btn" + (state.tab === "kanban" ? " active" : "");
+  document.getElementById("studioView").style.display = state.tab === "studio" ? "" : "none";
+  document.getElementById("kanbanView").style.display = state.tab === "kanban" ? "" : "none";
+  document.getElementById("cardCountBadge").textContent = state.cards.length > 0 ? `(${state.cards.length})` : "";
+
+  const modeRow = document.getElementById("modeRow");
+  modeRow.innerHTML = "";
+  MATERIAL_MODES.forEach(m => {
+    const btn = document.createElement("button");
+    btn.className = "mode-btn" + (state.materialMode === m.key ? " active" : "");
+    btn.textContent = m.label;
+    btn.onclick = () => { state.materialMode = m.key; render(); };
+    modeRow.appendChild(btn);
+  });
+
+  const area = document.getElementById("materialInputArea");
+  area.innerHTML = "";
+  if (state.materialMode === "news") {
+    const fetchBtn = document.createElement("button");
+    fetchBtn.className = "ghost-btn";
+    fetchBtn.textContent = state.newsLoading ? "찾는 중..." : "최신 이슈 가져오기";
+    fetchBtn.disabled = state.newsLoading;
+    fetchBtn.onclick = fetchNews;
+    area.appendChild(fetchBtn);
+    if (state.newsMaterial) {
+      const ta = document.createElement("textarea");
+      ta.rows = 7; ta.value = state.newsMaterial;
+      ta.oninput = (e) => { state.newsMaterial = e.target.value; };
+      area.appendChild(ta);
+    }
+  } else if (state.materialMode === "listing") {
+    const ta = document.createElement("textarea");
+    ta.rows = 7; ta.placeholder = "매물 정보를 입력하세요 (주소, 면적, 가격, 특징 등)"; ta.value = state.listingText;
+    ta.oninput = (e) => { state.listingText = e.target.value; };
+    area.appendChild(ta);
+  } else {
+    const ta = document.createElement("textarea");
+    ta.rows = 7; ta.placeholder = "텍스트를 붙여넣거나 URL을 입력하세요"; ta.value = state.externalText;
+    ta.oninput = (e) => { state.externalText = e.target.value; };
+    area.appendChild(ta);
+  }
+
+  const chRow = document.getElementById("channelRow");
+  chRow.innerHTML = "";
+  CHANNELS.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "channel-btn" + (state.selectedChannel === c.key ? " active" : "");
+    btn.title = c.label;
+    btn.innerHTML = `<span class="ic">${c.icon}</span><span class="lb">${c.label}</span>`;
+    btn.onclick = () => { state.selectedChannel = c.key; render(); };
+    chRow.appendChild(btn);
+  });
+
+  document.getElementById("reinforceChk").checked = state.reinforce;
+
+  const material = currentMaterial();
+  const genBtn = document.getElementById("genBtn");
+  const canGen = material.trim().length > 0 && !state.genLoading;
+  genBtn.disabled = !canGen;
+  genBtn.textContent = state.genLoading ? "생성 중..." : "생성 실행";
+
+  const resultArea = document.getElementById("resultArea");
+  resultArea.innerHTML = "";
+  if (!state.resultText && !state.resultError && !state.genLoading) {
+    resultArea.innerHTML = '<p class="muted">재료를 고르고 채널을 선택한 뒤 생성 실행을 눌러보세요.</p>';
+  }
+  if (state.genLoading) {
+    resultArea.innerHTML = `<p style="color:${GOLD};font-size:12px;">작성 중이에요, 잠시만요...</p>`;
+  }
+  if (state.resultError && !state.genLoading) {
+    resultArea.innerHTML = `<p class="error-text">생성 중 오류가 발생했어요: ${state.resultError.replace(/</g, "&lt;")}</p>`;
+  }
+  if (state.resultText) {
+    const label = CHANNELS.find(c => c.key === state.selectedChannel).label;
+    const box = document.createElement("div");
+    box.innerHTML = `<p style="color:${GOLD};font-size:12px;font-weight:600;margin:0 0 6px;">${label}</p>
+      <div class="result-box">${state.resultText.replace(/</g,"&lt;")}</div>`;
+    resultArea.appendChild(box);
+    if (!state.genLoading) {
+      const saveBtn = document.createElement("button");
+      saveBtn.className = "ghost-btn";
+      saveBtn.style.marginTop = "4px";
+      saveBtn.textContent = "칸반보드에 저장";
+      saveBtn.onclick = saveToBoard;
+      resultArea.appendChild(saveBtn);
+    }
+  }
+
+  renderKanban();
+}
+
+function currentMaterial() {
+  if (state.materialMode === "news") return state.newsMaterial;
+  if (state.materialMode === "listing") return state.listingText;
+  return state.externalText;
+}
+
+async function fetchNews() {
+  state.newsLoading = true; state.newsMaterial = ""; render();
+  try {
+    const text = await callClaude(`최근 한 달 이내 한국 부동산 관련 소식을 하나 찾아서 정리해 주세요. 아래 형식을 정확히 지켜서 출력하세요.
+제목: (실제 기사 제목 요약, 20자 내외)
+요약: (핵심 내용 3~4문장)
+출처: (매체명)
+법령 개정, 전세사기, 중개사고, 임대차 관련 소식 중 하나를 우선하세요.`, true);
+    state.newsMaterial = text;
+  } catch (e) {
+    state.newsMaterial = "뉴스를 가져오지 못했어요: " + e.message;
+  }
+  state.newsLoading = false; render();
+}
+
+async function runGenerate() {
+  const material = currentMaterial();
+  if (!material.trim() || state.genLoading) return;
+  state.genLoading = true; state.resultText = ""; state.resultError = ""; render();
+  const modeNote = state.materialMode === "news"
+    ? "아래는 실제 뉴스 자료입니다. 그대로 베끼지 말고, 하이탑부동산 시각에서 손님에게 도움이 되는 내용으로 재구성·재작성하세요."
+    : state.materialMode === "listing"
+    ? "아래는 매물 정보입니다. 이 매물을 홍보하는 글로 작성하세요."
+    : "아래는 참고 자료입니다. 핵심만 뽑아 하이탑부동산 톤으로 재편집하세요.";
+  const prompt = `${REWRITE_STYLE[state.selectedChannel]}
+
+${modeNote}
+
+[자료]
+${material}
+
+${state.reinforce ? "가능하면 관련 법령이나 공식 통계를 근거로 덧붙여 신뢰도를 높이세요. 확실하지 않은 수치는 지어내지 마세요." : ""}
+본문만 출력하세요 (제목 별도 표시 없이).`;
+  try {
+    state.resultText = await callClaude(prompt, state.reinforce);
+  } catch (e) {
+    state.resultError = e.message;
+  }
+  state.genLoading = false; render();
+}
+
+async function saveToBoard() {
+  const material = currentMaterial();
+  const title = extractTitle(material);
+  const modeLabel = MATERIAL_MODES.find(m => m.key === state.materialMode).label;
+  const newCard = {
+    title: title || "제목 없음",
+    category: modeLabel,
+    channel: CHANNELS.find(c => c.key === state.selectedChannel).label,
+    draft: state.resultText,
+    status: "기획중",
+  };
+  try {
+    const rows = await sbFetch("/rest/v1/content_items", "POST", newCard, { Prefer: "return=representation" });
+    state.cards = [rows[0], ...state.cards];
+    state.resultText = "";
+  } catch (e) {
+    state.cardsError = "저장하지 못했어요: " + e.message;
+  }
+  render();
+}
+
+async function moveCard(id, dir) {
+  const card = state.cards.find(c => c.id === id);
+  if (!card) return;
+  const idx = COLUMNS.indexOf(card.status);
+  const next = Math.min(Math.max(idx + dir, 0), COLUMNS.length - 1);
+  const nextStatus = COLUMNS[next];
+  if (nextStatus === card.status) return;
+  try {
+    await sbFetch(`/rest/v1/content_items?id=eq.${id}`, "PATCH", { status: nextStatus });
+    state.cards = state.cards.map(c => c.id === id ? { ...c, status: nextStatus } : c);
+    render();
+  } catch (e) {
+    state.cardsError = "이동하지 못했어요: " + e.message;
+    render();
+  }
+}
+
+async function deleteCard(id) {
+  try {
+    await sbFetch(`/rest/v1/content_items?id=eq.${id}`, "DELETE");
+    state.cards = state.cards.filter(c => c.id !== id);
+    render();
+  } catch (e) {
+    state.cardsError = "삭제하지 못했어요: " + e.message;
+    render();
+  }
+}
+
+function renderKanban() {
+  const el = document.getElementById("kanbanArea");
+  el.innerHTML = "";
+  if (state.cardsLoading) {
+    el.innerHTML = '<p class="muted">불러오는 중...</p>';
+    return;
+  }
+  if (state.cardsError) {
+    el.innerHTML = `<p class="error-text">${state.cardsError.replace(/</g, "&lt;")}</p>`;
+  }
+  if (state.cards.length === 0) {
+    el.innerHTML += '<p class="muted">아직 저장된 콘텐츠가 없어요. 콘텐츠 스튜디오에서 먼저 만들어보세요.</p>';
+    return;
+  }
+  const grid = document.createElement("div");
+  grid.className = "kanban-grid";
+  COLUMNS.forEach((col, colIdx) => {
+    const colEl = document.createElement("div");
+    const count = state.cards.filter(c => c.status === col).length;
+    colEl.innerHTML = `<p class="col-title">${col} (${count})</p>`;
+    state.cards.filter(c => c.status === col).forEach(c => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <span class="badge">${c.category}</span>
+        <p class="title">${c.title}</p>
+        <p class="chan">${c.channel}</p>
+        <div class="row">
+          <div>
+            <button class="move-btn" ${colIdx === 0 ? "disabled" : ""} data-move="-1" data-id="${c.id}">◀</button>
+            <button class="move-btn" ${colIdx === COLUMNS.length - 1 ? "disabled" : ""} data-move="1" data-id="${c.id}">▶</button>
+          </div>
+          <button class="del-btn" data-del="${c.id}">삭제</button>
+        </div>`;
+      colEl.appendChild(card);
+    });
+    grid.appendChild(colEl);
+  });
+  el.appendChild(grid);
+
+  el.querySelectorAll("[data-move]").forEach(b => {
+    b.onclick = () => moveCard(b.getAttribute("data-id"), parseInt(b.getAttribute("data-move")));
+  });
+  el.querySelectorAll("[data-del]").forEach(b => {
+    b.onclick = () => deleteCard(b.getAttribute("data-del"));
+  });
+}
+
+document.getElementById("tabStudioBtn").onclick = () => { state.tab = "studio"; render(); };
+document.getElementById("tabKanbanBtn").onclick = () => { state.tab = "kanban"; render(); };
+document.getElementById("genBtn").onclick = runGenerate;
+document.getElementById("reinforceChk").onchange = (e) => { state.reinforce = e.target.checked; };
+
+render();
+loadCards();
+</script>
+</body>
+</html>

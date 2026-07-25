@@ -322,7 +322,8 @@ function conSeed(){return[
   ['c2','부부경매일기','https://www.youtube.com/@auction_couple-h4r',true],
   ['c3','하이탑블로그','https://blog.naver.com/newpajucity',true],
   ['c4','하이탑카페','https://cafe.naver.com/pajujjang',true],
-  ['c5','하이탑 Threads','https://www.threads.com/?hl=ko',true]
+  ['c5','하이탑 Threads','https://www.threads.com/?hl=ko',true],
+  ['c6','콘텐츠 스튜디오','./content-studio/index.html',false]
 ].map(row)}
 function catsSeed(){return{cats:[{id:'default-gov-sites',name:'공공사이트',links:gov.slice()}],catOrder:['default-gov-sites']}}
 function id(){return'u-'+Date.now()+'-'+Math.random().toString(36).slice(2,6)}
@@ -490,6 +491,12 @@ function initData(){
     if(!bizNames[seedItem.name])st.biz.push(clean(seedItem));
   });
   st.content=(js(KC,null)||conSeed()).map(clean);
+  // seed에 새 항목이 추가되면 기존 저장 목록에도 자동 반영(단일 소스: conSeed()).
+  var contentNames={};
+  st.content.forEach(function(l){contentNames[l.name]=true});
+  conSeed().forEach(function(seedItem){
+    if(!contentNames[seedItem.name])st.content.push(clean(seedItem));
+  });
   st.other=(js(KO,null)||[]).map(clean);
   var d=restoreCats(js(KU,null));
   st.cats=d.cats;
