@@ -73,7 +73,9 @@ h2{margin:0;font-size:16px}
 .tile:hover,.small:hover{border-color:var(--blue);background:#1b324c;transform:translateY(-1px)}
 .tile.major:hover{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,168,76,.25),0 18px 30px rgba(0,0,0,.18)}
 .tile.secondary:hover{border-color:rgba(201,168,76,.66);background:#192d43;color:var(--txt)}
+.tbody{min-width:0;overflow:hidden}
 .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ext{flex:none}
 .ext:after{content:"";display:block;width:9px;height:9px;border-top:1.7px solid currentColor;border-right:1.7px solid currentColor;opacity:.65}
 .ext:before{content:"";display:block;width:10px;height:1.7px;background:currentColor;transform:rotate(-45deg) translate(-1px,8px);opacity:.65}
 .edit-controls{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
@@ -90,10 +92,13 @@ h2{margin:0;font-size:16px}
 .side-card{min-height:0;max-height:calc(100vh - 28px);padding:13px;display:flex;flex-direction:column}
 .side-head{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding-bottom:9px}
 .count{font-size:12px;color:var(--muted)}
-.pub-list{display:flex;flex-direction:column;gap:5px;min-height:0;overflow:auto;padding-top:9px}
+.pub-list{display:flex;flex-direction:column;gap:5px;min-height:0;overflow-y:auto;overflow-x:hidden;padding-top:9px}
 .pub{min-height:36px;border-color:transparent;border-left:2px solid transparent;background:transparent;color:var(--sub);padding:0 8px;font-size:12.5px;font-weight:650;border-radius:8px}
 .pub .name:before{content:"";display:inline-block;width:7px;height:7px;margin-right:8px;border:1px solid rgba(201,168,76,.76);border-radius:2px;transform:rotate(45deg);vertical-align:1px}
 .pub:hover{background:rgba(95,159,216,.1);border-left-color:var(--gold);color:var(--txt);transform:none}
+.pub-row[draggable="true"]{cursor:grab}
+.pub-row.dragging{opacity:.45}
+.pub-row.drag-over{outline:2px dashed var(--gold);outline-offset:2px;border-radius:12px}
 .pub-toggle{margin-top:8px;width:100%;justify-content:center}
 .accs{display:flex;flex-direction:column;gap:7px}
 .acc{border:1px solid var(--line);border-radius:12px;background:#122338;overflow:hidden}
@@ -522,7 +527,7 @@ function workIcon(n){
 function desc(l){var m={'매물관리':'매물 등록과 현장 운영 관리','업무일지':'상담과 처리 내역 기록','홈페이지':'하이탑 매물 홈페이지','계약문자':'계약 안내 문자 작성','매물광고':'홈페이지 광고 매물 관리','구글캘린더':'일정과 예약 확인','상가견적서':'수익률·상가 견적 계산','중개보수':'법정 중개보수 계산','부동산포스':'외부 매물 광고 관리'};return m[l.name]||'업무 링크 바로가기'}
 function isMajor(l){return ['매물관리','업무일지','홈페이지','계약문자'].indexOf(l.name)>-1}
 function coreList(){var rank={'매물관리':0,'업무일지':1,'홈페이지':2,'계약문자':3};return st.biz.slice().sort(function(a,b){var ra=rank[a.name],rb=rank[b.name];ra=ra==null?99:ra;rb=rb==null?99:rb;return ra-rb})}
-function tile(cls,l,at,major){var maj=major?' major':'';var body=major?'<span class="major-top">'+workIcon(l.name)+'<span><span class="name">'+esc(l.name)+'</span><span class="desc">'+esc(desc(l))+'</span></span></span>':'<span><span class="name">'+esc(l.name)+'</span></span>';return'<button class="'+cls+maj+'" '+at+'>'+body+icon()+'</button>'}
+function tile(cls,l,at,major){var maj=major?' major':'';var body=major?'<span class="major-top">'+workIcon(l.name)+'<span class="tbody"><span class="name">'+esc(l.name)+'</span><span class="desc">'+esc(desc(l))+'</span></span></span>':'<span class="tbody"><span class="name">'+esc(l.name)+'</span></span>';return'<button class="'+cls+maj+'" '+at+'>'+body+icon()+'</button>'}
 function editBtns(type,idv,cid){
   var cat=cid?' data-cat="'+esc(cid)+'"':'';
   return'<div class="edit-controls">'+
@@ -593,7 +598,8 @@ function renderOther(){
   otherCount.textContent=st.other.length+'개';
   var shown=st.otherOpen?st.other:st.other.slice(0,7);
   other.innerHTML=shown.map(function(l){
-    return'<div class="pub-row">'+tile('pub',l,'data-open="other" data-id="'+esc(l.id)+'"')+(st.edit.other?editBtns('other',l.id):'')+'</div>';
+    var drag=st.edit.other?' draggable="true"':'';
+    return'<div class="pub-row" data-id="'+esc(l.id)+'"'+drag+'>'+tile('pub',l,'data-open="other" data-id="'+esc(l.id)+'"')+(st.edit.other?editBtns('other',l.id):'')+'</div>';
   }).join('')+(st.other.length>7?'<button class="mini pub-toggle" data-act="toggle-other">'+(st.otherOpen?'접기':'전체 보기')+'</button>':'');
 }
 function render(){
@@ -733,6 +739,53 @@ document.addEventListener('click',function(e){
   }
   if(!e.target.closest('.search'))results.classList.remove('show');
 });
+(function(){
+  var dragId=null;
+  function rows(){return other.querySelectorAll('.pub-row')}
+  function clearDragOver(){Array.prototype.forEach.call(rows(),function(r){r.classList.remove('drag-over')})}
+  other.addEventListener('dragstart',function(e){
+    var row=e.target.closest('.pub-row');
+    if(!row||!st.edit.other){return}
+    dragId=row.dataset.id;
+    e.dataTransfer.effectAllowed='move';
+    try{e.dataTransfer.setData('text/plain',dragId)}catch(err){}
+    row.classList.add('dragging');
+  });
+  other.addEventListener('dragend',function(){
+    var row=other.querySelector('.pub-row.dragging');
+    if(row)row.classList.remove('dragging');
+    clearDragOver();
+    dragId=null;
+  });
+  other.addEventListener('dragover',function(e){
+    if(!st.edit.other||!dragId)return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    var row=e.target.closest('.pub-row');
+    if(row&&row.dataset.id!==dragId){clearDragOver();row.classList.add('drag-over')}
+  });
+  other.addEventListener('dragleave',function(e){
+    var row=e.target.closest('.pub-row');
+    if(row)row.classList.remove('drag-over');
+  });
+  other.addEventListener('drop',function(e){
+    if(!st.edit.other||!dragId)return;
+    e.preventDefault();
+    var row=e.target.closest('.pub-row');
+    clearDragOver();
+    if(!row){dragId=null;return}
+    var toId=row.dataset.id,fromId=dragId;
+    dragId=null;
+    if(toId===fromId)return;
+    var fromIdx=st.other.findIndex(function(x){return x.id===fromId});
+    var toIdx=st.other.findIndex(function(x){return x.id===toId});
+    if(fromIdx<0||toIdx<0)return;
+    var item=st.other.splice(fromIdx,1)[0];
+    st.other.splice(toIdx,0,item);
+    render();
+    saveSharedOrder('other',st.other).catch(function(err){alert('Supabase 순서 저장 실패: '+(err.message||err))});
+  });
+})();
 bizAdd.onclick=function(e){e.preventDefault();keepScroll(function(){openLinkModal({store:'biz',mode:'add'})})};
 bizEdit.onclick=function(e){e.preventDefault();keepScroll(function(){toggleEdit('biz');render()})};
 catAdd.onclick=function(e){e.preventDefault();keepScroll(function(){openCat('add')})};
