@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>하이탑 AI 부동산 업무센터</title>
 <link rel="icon" href="favicon.ico" type="image/x-icon">
+<script src="admin-guard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="auth.js"></script>
 <style>
 :root{--bg:#071625;--panel:#101f32;--panel2:#15283d;--card:#172b42;--card2:#1b324c;--line:#294057;--line2:#35516c;--txt:#f5f8fb;--sub:#b4c2d2;--muted:#8193a8;--gold:#d8b84a;--gold2:rgba(216,184,74,.13);--blue:#5f9fd8;--blue2:rgba(95,159,216,.14);--danger:#ff8585}
 *{box-sizing:border-box}
@@ -154,6 +157,7 @@ h2{margin:0;font-size:16px}
         <div class="today-summary">오늘 요약: 미확인 문의 --건 · 오늘 일정 --개</div>
       </div>
       <button class="btn" id="setBtn">설정</button>
+      <button class="btn" id="logoutBtn">로그아웃</button>
     </div>
   </header>
 
@@ -337,7 +341,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function js(k,f){try{var raw=localStorage.getItem(k);if(raw==null)return f;var v=JSON.parse(raw);return v==null?f:v}catch(e){return f}}
 function sv(k,v){localStorage.setItem(k,JSON.stringify(v))}
 function sbFetch(path,method,body,extra){
-  var h={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+  var h={'apikey':SB_KEY,'Authorization':'Bearer '+(window.SB_AUTH_TOKEN||SB_KEY),'Content-Type':'application/json'};
   if(extra)Object.assign(h,extra);
   var opt={method:method||'GET',headers:h};
   if(body!=null)opt.body=JSON.stringify(body);
@@ -798,6 +802,7 @@ pubEdit.onclick=function(e){e.preventDefault();keepScroll(function(){toggleEdit(
 catSave.onclick=function(){var n=catName.value.trim();if(!n)return alert('카테고리 이름을 입력해주세요.');if(st.cm==='add'){var c={id:id(),name:n,links:[]};st.cats.push(c);st.order.push(c.id);st.open[c.id]=true}else findCat(st.cid).name=n;saveCats();hide('catModal');render();toast('저장되었습니다')};
 linkSave.onclick=saveLinkModal;
 setBtn.onclick=function(){show('settings')};
+document.getElementById('logoutBtn').onclick=function(){if(window.hitopWcLogout)hitopWcLogout()};
 dateBtn.onclick=function(){window.open('https://calendar.google.com','_blank','noopener')};
 storageBtn.onclick=function(){location.href='./storage-admin.html'};
 q.oninput=function(){search(q.value)};
