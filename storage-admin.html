@@ -9,7 +9,8 @@
 <style>
 :root{--bg:#071625;--panel:#101f32;--card:#172b42;--card2:#1b324c;--line:#294057;--line2:#35516c;--txt:#f5f8fb;--sub:#b4c2d2;--muted:#8193a8;--gold:#d8b84a;--gold2:rgba(216,184,74,.13);--blue:#5f9fd8;--blue2:rgba(95,159,216,.14);--danger:#ff8585}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(180deg,#0a1f35 0%,var(--bg) 48%,#06131f 100%);color:var(--txt);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;overflow-x:hidden}
+html{min-height:100%;background:var(--bg);overflow-x:hidden}
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,#0a1f35 0%,var(--bg) 48%,#06131f 100%);color:var(--txt);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif;overflow-x:hidden}
 button{font:inherit;color:inherit}
 a{color:inherit;text-decoration:none}
 .shell{width:min(900px,calc(100% - 48px));margin:auto;padding:14px 0 32px;display:flex;flex-direction:column;gap:16px}
