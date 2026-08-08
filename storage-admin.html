@@ -51,6 +51,32 @@ h1{margin:0;font-size:20px}
 .table tbody tr:last-child td{border-bottom:none}
 
 .footer{text-align:center;color:var(--muted);font-size:12px;padding-top:4px}
+
+.id-sub{display:block;font-size:10.5px;font-weight:500;color:var(--muted);margin-top:1px}
+
+.usage-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;display:flex;flex-direction:column;gap:10px}
+.usage-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.usage-text{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--txt)}
+.usage-badge{padding:3px 11px;border-radius:999px;font-size:12px;font-weight:800;flex-shrink:0}
+.usage-badge-ok{background:rgba(74,222,128,.16);color:#4ade80}
+.usage-badge-notice{background:rgba(250,204,21,.16);color:#facc15}
+.usage-badge-warning{background:rgba(251,146,60,.18);color:#fb923c}
+.usage-badge-critical{background:rgba(255,133,133,.18);color:var(--danger)}
+.usage-track{width:100%;height:10px;border-radius:999px;background:var(--card2);overflow:hidden}
+.usage-fill{height:100%;border-radius:999px;background:#4ade80;transition:width .3s ease}
+.usage-notice .usage-fill{background:#facc15}
+.usage-warning .usage-fill{background:#fb923c}
+.usage-critical .usage-fill{background:var(--danger)}
+
+.alert{border-radius:12px;padding:13px 16px;border:1px solid;display:flex;flex-direction:column;gap:4px}
+.alert-title{font-size:14px;font-weight:800}
+.alert-detail{font-size:12.5px;color:var(--sub)}
+.alert-notice{background:rgba(250,204,21,.1);border-color:rgba(250,204,21,.32)}
+.alert-notice .alert-title{color:#facc15}
+.alert-warning{background:rgba(251,146,60,.12);border-color:rgba(251,146,60,.36)}
+.alert-warning .alert-title{color:#fb923c}
+.alert-critical{background:rgba(255,133,133,.14);border-color:rgba(255,133,133,.4)}
+.alert-critical .alert-title{color:var(--danger)}
 </style>
 </head>
 <body>
@@ -69,6 +95,9 @@ h1{margin:0;font-size:20px}
   <div id="err" class="err" style="display:none"></div>
 
   <div id="content" style="display:none;flex-direction:column;gap:16px">
+    <div id="usageAlert" class="alert" style="display:none"></div>
+    <section id="usageCard" class="usage-card" style="display:none"></section>
+
     <div class="stat-row">
       <div class="stat-card">
         <div class="stat-label">총 파일 개수</div>
@@ -122,6 +151,65 @@ var DONUT_ZERO_COLOR = '#33406b';
 var BAR_COLOR = '#3987e5';
 var TABLE_TOP_N = 10;
 
+// Supabase 무료 플랜 저장공간 한도(1GiB). 플랜이 바뀌면 이 값만 수정하면 된다.
+var TOTAL_STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024;
+
+// 화면에 보이는 이름만 한글로 바꾸는 표시용 매핑 — 실제 bucket id/테이블명은 그대로 사용한다.
+var BUCKET_LABELS = {
+  'crm-attachments': '고객 상담 첨부파일',
+  'listing-images': '매물 사진',
+  'prompt-images': '프롬프트 이미지',
+  'property-images': '부동산 정보 이미지',
+  'property-proposal-images': '견적서 이미지'
+};
+
+var TABLE_LABELS = {
+  admin_users: '관리자 계정',
+  building_files: '건물 첨부파일',
+  building_floors: '건물 층 정보',
+  buildings: '건물 정보',
+  consultations: '상담 문의',
+  content_items: '콘텐츠 스튜디오',
+  crm_attachments: '고객 상담 첨부파일 기록',
+  customers: '고객 정보',
+  dashboard_shortcuts: '대시보드 바로가기',
+  drive_resources: '자료실 파일',
+  listing_intakes: 'AI 매물 초안',
+  listings: '매물 정보',
+  memos: '메모',
+  private_notes: '개인 메모',
+  prompt_templates: '프롬프트 템플릿',
+  property_infos: '부동산 정보글',
+  property_sheets: '매물 조사서',
+  recommended_files: '추천 자료',
+  recommended_properties: '추천 매물',
+  reference_properties: '참고 매물',
+  requests: '요청 내역',
+  schedules: '일정',
+  sections: '섹션',
+  user_categories: '사용자 카테고리',
+  user_links: '공유 링크',
+  visitors: '방문자 카운터',
+  work_diary: '업무일지',
+  work_sticky_notes: '포스트잇'
+};
+
+function bucketLabel(id) {
+  return BUCKET_LABELS[id] || id;
+}
+
+function tableLabel(name) {
+  return TABLE_LABELS[name] || name;
+}
+
+// 70%/85%/95% 경고 단계 — 상단 요약과 배너 둘 다 이 함수로 상태를 판단한다.
+function storageStatus(percent) {
+  if (percent >= 95) return { label: '긴급', level: 'critical' };
+  if (percent >= 85) return { label: '경고', level: 'warning' };
+  if (percent >= 70) return { label: '주의', level: 'notice' };
+  return { label: '정상', level: 'ok' };
+}
+
 function formatBytes(bytes) {
   var n = Number(bytes) || 0;
   if (n < 1024) return n + ' B';
@@ -172,6 +260,38 @@ function render(buckets, tables) {
   document.getElementById('storageTitle').textContent =
     '저장공간 (Storage) — 총 ' + totalFiles.toLocaleString() + '개 파일 · ' + formatBytes(totalBytes);
 
+  // 사용률 요약/경고 배너 — 기존 totalBytes 합계 위에 얹는 표시 전용 계산이라
+  // 저장용량 집계 로직 자체는 손대지 않는다.
+  var usagePercent = TOTAL_STORAGE_LIMIT_BYTES > 0 ? (totalBytes / TOTAL_STORAGE_LIMIT_BYTES) * 100 : 0;
+  var usage = storageStatus(usagePercent);
+  var topUsageBuckets = buckets.filter(function (b) { return Number(b.total_bytes) > 0; })
+    .slice().sort(function (a, b) { return Number(b.total_bytes || 0) - Number(a.total_bytes || 0); })
+    .slice(0, 3);
+
+  var alertEl = document.getElementById('usageAlert');
+  if (usage.level !== 'ok') {
+    var detailHtml = topUsageBuckets.length > 0
+      ? '<div class="alert-detail">가장 많이 차지하는 버킷: ' +
+        topUsageBuckets.map(function (b) { return bucketLabel(b.bucket_id) + ' ' + formatBytes(b.total_bytes); }).join(' · ') +
+        '</div>'
+      : '';
+    alertEl.className = 'alert alert-' + usage.level;
+    alertEl.innerHTML = '<div class="alert-title">⚠ 저장공간 사용량 ' + usage.label + ' — ' + usagePercent.toFixed(1) + '%</div>' + detailHtml;
+    alertEl.style.display = 'flex';
+  } else {
+    alertEl.style.display = 'none';
+  }
+
+  var usageCardEl = document.getElementById('usageCard');
+  usageCardEl.className = 'usage-card usage-' + usage.level;
+  usageCardEl.innerHTML =
+    '<div class="usage-row">' +
+      '<span class="usage-text">' + formatBytes(totalBytes) + ' / ' + formatBytes(TOTAL_STORAGE_LIMIT_BYTES) + ' · ' + usagePercent.toFixed(1) + '%</span>' +
+      '<span class="usage-badge usage-badge-' + usage.level + '">' + usage.label + '</span>' +
+    '</div>' +
+    '<div class="usage-track"><div class="usage-fill" style="width:' + Math.min(usagePercent, 100) + '%"></div></div>';
+  usageCardEl.style.display = 'flex';
+
   var sortedBuckets = buckets.slice().sort(function (a, b) { return Number(b.total_bytes || 0) - Number(a.total_bytes || 0); });
   var nonZeroBuckets = sortedBuckets.filter(function (b) { return Number(b.total_bytes) > 0; });
 
@@ -186,7 +306,7 @@ function render(buckets, tables) {
   legendEl.innerHTML = sortedBuckets.map(function (b) {
     return '<li class="legend-item">' +
       '<span class="legend-swatch" style="background:' + bucketColorOf(b.bucket_id) + '"></span>' +
-      '<span class="legend-name">' + b.bucket_id + '</span>' +
+      '<span class="legend-name">' + bucketLabel(b.bucket_id) + '<span class="id-sub">' + b.bucket_id + '</span></span>' +
       '<span class="legend-meta">' + formatBytes(b.total_bytes) + ' · ' + Number(b.file_count).toLocaleString() + '개</span>' +
       '</li>';
   }).join('');
@@ -194,7 +314,7 @@ function render(buckets, tables) {
   new Chart(document.getElementById('donutChart'), {
     type: 'doughnut',
     data: {
-      labels: nonZeroBuckets.map(function (b) { return b.bucket_id; }),
+      labels: nonZeroBuckets.map(function (b) { return bucketLabel(b.bucket_id); }),
       datasets: [{
         data: nonZeroBuckets.map(function (b) { return Number(b.total_bytes); }),
         backgroundColor: nonZeroBuckets.map(function (b) { return bucketColorOf(b.bucket_id); }),
@@ -255,7 +375,17 @@ function render(buckets, tables) {
       layout: { padding: { right: 56 } },
       scales: {
         x: { display: false, grid: { display: false } },
-        y: { grid: { display: false }, ticks: { color: 'rgba(180, 194, 210, 0.9)', font: { size: 12 } } },
+        y: {
+          grid: { display: false },
+          ticks: {
+            color: 'rgba(180, 194, 210, 0.9)',
+            font: { size: 12 },
+            callback: function (value) {
+              var raw = topTables[value] && topTables[value].table_name;
+              return raw ? tableLabel(raw) : value;
+            },
+          },
+        },
       },
       plugins: {
         legend: { display: false },
@@ -267,6 +397,10 @@ function render(buckets, tables) {
           bodyColor: '#f5f8fb',
           padding: 10,
           callbacks: {
+            title: function (items) {
+              var raw = items[0] && topTables[items[0].dataIndex] && topTables[items[0].dataIndex].table_name;
+              return raw ? tableLabel(raw) + ' (' + raw + ')' : '';
+            },
             label: function (ctx) { return (topTables[ctx.dataIndex] && topTables[ctx.dataIndex].pretty_size) || ''; },
           },
         },
@@ -282,7 +416,7 @@ function render(buckets, tables) {
     var expanded = false;
 
     moreTableBody.innerHTML = restTables.map(function (t) {
-      return '<tr><td>' + t.table_name + '</td><td>' + t.pretty_size + '</td></tr>';
+      return '<tr><td>' + tableLabel(t.table_name) + '<span class="id-sub">' + t.table_name + '</span></td><td>' + t.pretty_size + '</td></tr>';
     }).join('');
 
     moreBtn.textContent = '더보기 (' + restTables.length + '개)';
