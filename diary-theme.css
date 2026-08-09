@@ -1,0 +1,192 @@
+:root {
+  --bg: #0d1b3e;
+  --panel: #16254a;
+  --panel2: #1d2b56;
+  --card: #1d2b56;
+  --card2: #243466;
+  --line: rgba(255, 255, 255, 0.08);
+  --line2: rgba(255, 255, 255, 0.16);
+  --txt: #e1e3e4;
+  --sub: rgba(225, 227, 228, 0.70);
+  --muted: rgba(225, 227, 228, 0.45);
+  --gold: #e6c364;
+  --gold2: rgba(230, 195, 100, 0.15);
+  --blue: #60a5fa;
+  --blue2: rgba(96, 165, 250, 0.14);
+  --danger: #f87171;
+}
+
+html,
+body {
+  background: var(--bg);
+}
+
+.top {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.top::after {
+  background: linear-gradient(90deg, transparent, rgba(230, 195, 100, 0.45), transparent);
+}
+
+.logo {
+  border-color: rgba(230, 195, 100, 0.62);
+  background: linear-gradient(145deg, rgba(230, 195, 100, 0.18), rgba(255, 255, 255, 0.03) 48%, rgba(96, 165, 250, 0.08));
+  box-shadow: 0 0 0 4px rgba(230, 195, 100, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.today-summary {
+  border-color: rgba(230, 195, 100, 0.28);
+  background: rgba(230, 195, 100, 0.08);
+}
+
+.btn,
+.mini {
+  border-color: var(--line2);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.primary {
+  background: var(--gold2);
+  border-color: rgba(230, 195, 100, 0.50);
+}
+
+.primary.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #0d1b3e;
+}
+
+.search input {
+  border-color: var(--line2);
+  background: var(--color-surface, #16254a);
+}
+
+.search input:focus {
+  background: #1d2b56;
+}
+
+.storage-btn {
+  border-color: rgba(230, 195, 100, 0.42);
+  background: #16254a;
+}
+
+.storage-btn:hover {
+  background: #1d2b56;
+}
+
+.results,
+.modal {
+  background: #16254a;
+  border-color: var(--line2);
+}
+
+.panel,
+.side-card {
+  background: #16254a;
+  border-color: var(--line2);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.14);
+}
+
+.tile,
+.small,
+.pub {
+  border-color: var(--line);
+  background: #1d2b56;
+}
+
+.tile.major,
+.ai-portal-tile {
+  background: #1d2b56;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.tile.secondary,
+.small {
+  background: #16254a;
+}
+
+.tile.secondary {
+  border-left-color: rgba(230, 195, 100, 0.45);
+}
+
+.tile:hover,
+.small:hover,
+.ai-portal-tile:hover {
+  border-color: var(--blue);
+  background: #243466;
+}
+
+.tile.major:hover,
+.ai-portal-tile:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px rgba(230, 195, 100, 0.20), 0 18px 30px rgba(0, 0, 0, 0.18);
+}
+
+.tile.secondary:hover {
+  border-color: rgba(230, 195, 100, 0.66);
+  background: #1d2b56;
+}
+
+.work-mark,
+.ai-portal-mark {
+  border-color: rgba(230, 195, 100, 0.42);
+  background: rgba(230, 195, 100, 0.09);
+}
+
+.side-head {
+  border-bottom-color: var(--line);
+}
+
+.pub {
+  background: transparent;
+  border-color: transparent;
+}
+
+.pub:hover {
+  background: rgba(96, 165, 250, 0.10);
+}
+
+.acc,
+.acc:nth-child(2n),
+.acc:nth-child(3n) {
+  background: #16254a;
+  border-color: var(--line);
+}
+
+.acc-btn:hover {
+  background: rgba(96, 165, 250, 0.10);
+}
+
+.inp {
+  background: #0d1b3e;
+  border-color: var(--line);
+}
+
+.inp:focus {
+  border-color: var(--blue);
+  background: #16254a;
+}
+
+.toast {
+  background: #1d2b56;
+  border-color: var(--line2);
+}
+
+::-webkit-scrollbar-track {
+  background: #0a1530;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1d2b56;
+  border-color: #0a1530;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #243466;
+}
+
+::selection {
+  background: rgba(230, 195, 100, 0.15);
+  color: #e6c364;
+}
