@@ -12,5 +12,20 @@
   if (!hasSession) {
     var next = encodeURIComponent(location.pathname.split("/").pop() + location.search);
     location.replace("login.html?redirect=" + next);
+    return;
+  }
+
+  // 메인 업무센터(index.html)에만 업무일지와 동일한 네이비·골드 팔레트를 적용한다.
+  // 기능/데이터 로직은 건드리지 않고, 기존 인라인 스타일 뒤에 테마 CSS만 추가한다.
+  var page = location.pathname.split("/").pop() || "index.html";
+  if (page === "index.html") {
+    document.addEventListener("DOMContentLoaded", function () {
+      if (document.querySelector('link[data-hitop-diary-theme]')) return;
+      var link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "diary-theme.css?v=20260809";
+      link.setAttribute("data-hitop-diary-theme", "1");
+      document.head.appendChild(link);
+    }, { once: true });
   }
 })();
