@@ -804,7 +804,7 @@ linkSave.onclick=saveLinkModal;
 setBtn.onclick=function(){show('settings')};
 document.getElementById('logoutBtn').onclick=function(){if(window.hitopWcLogout)hitopWcLogout()};
 dateBtn.onclick=function(){window.open('https://calendar.google.com','_blank','noopener')};
-storageBtn.onclick=function(){location.href='./storage-admin.html'};
+storageBtn.onclick=function(){location.href='https://hitop-control-center.vercel.app/storage-analysis'}
 q.oninput=function(){search(q.value)};
 q.onfocus=function(){if(q.value)search(q.value)};
 results.onclick=function(e){var r=e.target.closest('.sr');if(!r)return;if(r.dataset.new==='1'||ext(r.dataset.url))window.open(r.dataset.url,'_blank','noopener');else location.href=r.dataset.url;q.value='';results.classList.remove('show')};
