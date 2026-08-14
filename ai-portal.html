@@ -30,7 +30,7 @@ h1{margin:0;font-size:20px}
 .search input:focus{border-color:var(--blue);background:#12273d}
 .edit-toolbar{display:none;gap:8px;flex-wrap:wrap}
 .shell.edit-mode .edit-toolbar{display:flex}
-.cat-section{background:linear-gradient(180deg,rgba(16,31,50,.96),#0f1d2f);border:1px solid rgba(53,81,108,.86);border-radius:12px;padding:14px}
+.cat-section{background:linear-gradient(180deg,rgba(16,31,50,.96),#0f1d2f);border:1px solid rgba(53,81,108,.86);border-radius:12px;padding:12px}
 .cat-section.featured{border-color:rgba(216,184,74,.55);background:rgba(216,184,74,.04)}
 .cat-header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .cat-toggle{flex:1;min-width:0;display:flex;align-items:center;gap:8px;background:transparent;border:0;padding:4px 0;text-align:left;cursor:pointer}
@@ -38,23 +38,22 @@ h1{margin:0;font-size:20px}
 .cat-count{font-size:11.5px;color:var(--muted);background:rgba(255,255,255,.05);padding:2px 8px;border-radius:10px;flex-shrink:0}
 .chev{width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:.18s;flex-shrink:0}
 .cat-section.open .chev{transform:rotate(225deg)}
-.cat-desc{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.cat-desc{font-size:12px;color:var(--muted);margin:3px 0 8px}
 .cat-body{display:none}
 .cat-section.open .cat-body{display:block}
 .cat-edit-controls{gap:5px;flex-wrap:wrap;align-items:center}
-.link-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:10px}
+.link-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
 .link-item{display:flex;flex-direction:column;gap:5px;min-width:0}
-.link-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;min-height:56px}
+.link-card{position:relative;width:100%;max-width:100%;overflow:hidden;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 11px;display:flex;flex-direction:column;align-items:stretch;gap:7px;min-height:104px}
 .link-card:hover{border-color:var(--blue);background:var(--card2)}
-.link-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0}
-.link-info{min-width:0;flex:1}
-.link-name{font-size:13.5px;font-weight:700;color:#fff;display:flex;align-items:center;gap:6px;min-width:0}
-.name-text{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.link-desc{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.link-arrow{font-size:14px;color:var(--muted);flex-shrink:0}
-.link-card:hover .link-arrow{color:var(--blue)}
+.link-info{min-width:0;display:flex;flex-direction:column;gap:4px;flex:1}
+.link-name{font-size:15px;line-height:1.28;font-weight:800;color:#fff;display:flex;align-items:flex-start;gap:8px;min-width:0;padding-right:70px}
+.name-text{overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-width:0}
+.link-desc{font-size:12px;line-height:1.35;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link-go{align-self:flex-start;margin-top:auto;min-height:24px;border:1px solid rgba(216,184,74,.48);border-radius:8px;background:var(--gold2);color:var(--gold);display:inline-flex;align-items:center;justify-content:center;padding:0 10px;font-size:11px;font-weight:800}
+.link-card:hover .link-go{background:rgba(216,184,74,.22);border-color:rgba(216,184,74,.72);color:#f1d66f}
 .link-invalid{font-size:12px;color:var(--danger);padding:12px 14px;border:1px dashed var(--danger);border-radius:12px}
-.badge{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:700;flex-shrink:0}
+.badge{position:absolute;right:11px;top:11px;font-size:9px;padding:1px 6px;border-radius:4px;font-weight:700;flex-shrink:0}
 .badge-free{background:rgba(34,197,94,.15);color:#4ade80}
 .badge-paid{background:rgba(239,68,68,.15);color:#f87171}
 .badge-freemium{background:rgba(234,179,8,.15);color:#facc15}
@@ -77,13 +76,18 @@ textarea.inp{min-height:60px;padding:10px 11px;resize:vertical}
 .toast{position:fixed;right:18px;bottom:18px;z-index:80;background:var(--panel);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;font-size:13px;opacity:0;transform:translateY(8px);transition:.18s;max-width:calc(100% - 36px)}
 .toast.show{opacity:1;transform:translateY(0)}
 @media(max-width:640px){
+.shell{width:calc(100% - 28px);padding-top:10px}
 .top{flex-direction:column;align-items:flex-start}
 .top-actions{width:100%}
 .top-actions .btn{flex:1;min-width:0}
 .link-grid{grid-template-columns:1fr}
+.link-card{min-height:96px}
 .cat-header{flex-direction:column;align-items:flex-start}
 .cat-edit-controls{width:100%}
 .cat-edit-controls .mini{flex:1;min-width:60px}
+}
+@media(min-width:641px) and (max-width:1024px){
+.link-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
 </head>
@@ -366,10 +370,6 @@ function buildLinkItem(cat,link){
     a.className='link-card';
     a.href=link.url;
     if(link.newTab){ a.target='_blank'; a.rel='noopener noreferrer'; }
-    var icon=document.createElement('span');
-    icon.className='link-icon';
-    icon.style.background=link.color; icon.style.color=link.textColor;
-    icon.textContent=link.icon;
     var info=document.createElement('span'); info.className='link-info';
     var nameEl=document.createElement('span'); nameEl.className='link-name';
     var nameText=document.createElement('span'); nameText.className='name-text'; nameText.textContent=link.name;
@@ -377,8 +377,8 @@ function buildLinkItem(cat,link){
     nameEl.appendChild(nameText); nameEl.appendChild(badge);
     var descEl=document.createElement('span'); descEl.className='link-desc'; descEl.textContent=link.desc;
     info.appendChild(nameEl); info.appendChild(descEl);
-    var arrow=document.createElement('span'); arrow.className='link-arrow'; arrow.textContent='↗';
-    a.appendChild(icon); a.appendChild(info); a.appendChild(arrow);
+    var go=document.createElement('span'); go.className='link-go'; go.textContent='바로가기';
+    a.appendChild(info); a.appendChild(go);
     wrap.appendChild(a);
   } else {
     var invalid=document.createElement('div');
