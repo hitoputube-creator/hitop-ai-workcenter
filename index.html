@@ -299,7 +299,8 @@ h2{margin:0;font-size:16px}
 <script>
 (function(){
 'use strict';
-var KB='hitop_biz_sc',KC='hitop_content_sc',KU='hitop_user_cats_v1',KO='hitop_other_sites_v1',KV='hitop_data_ver',MIG_OTHER='hitop_other_sites_migrated_at',MIG_CATS='hitop_user_cats_migrated_at',VER='2026-07-20-dashboard-edit-v3';
+var KB='hitop_biz_sc',KC='hitop_content_sc',KU='hitop_user_cats_v1',KO='hitop_other_sites_v1',KV='hitop_data_ver',MIG_OTHER='hitop_other_sites_migrated_at',MIG_CATS='hitop_user_cats_migrated_at',VER='2026-09-22-diary-vercel-v4';
+var DIARY_URL = 'https://haitop-realestate-diary.vercel.app/';
 var SB_URL='https://xaxbkdnrzsghsabkdvzj.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhheGJrZG5yenNnaHNhYmtkdnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjc5NTIsImV4cCI6MjA4OTY0Mzk1Mn0.l27ZYQHLt48p7EQrZ8gbAOmJHvCfIur84CtgoWlA8Wg',SL='user_links';
 var st={biz:[],content:[],cats:[],order:[],other:[],edit:{biz:false,content:false,public:false,other:false},open:{content:true},publicOpen:false,otherOpen:false,sharedReady:false,sharedError:null,cm:'add',cid:null,linkCtx:null};
 var gov=[
@@ -320,7 +321,7 @@ function bizSeed(){return[
   ['b0','홈페이지','https://hitoputube-creator.github.io/hitop-property-platform/',false],
   ['b1','매물관리','https://hitoputube-creator.github.io/haitop-realty-system/',true],
   ['b2','구글캘린더','https://calendar.google.com/calendar/u/0/r',false],
-  ['b3','업무일지','https://hitoputube-creator.github.io/haitop-realestate-diary/',false],
+  ['b3','업무일지',DIARY_URL,false],
   ['b4','계약문자','https://hitoputube-creator.github.io/Contract-Message/index.html',false],
   ['b5','중개보수','https://xn--989a00af8jnslv3dba.com/',false],
   ['b6','상가견적서','https://hitoputube-creator.github.io/Commercial-Property-Quote/',false],
@@ -492,6 +493,8 @@ function restoreCats(raw){
 function initData(){
   localStorage.setItem(KV,VER);
   st.biz=(js(KB,null)||bizSeed()).map(clean);
+  // 기존 모바일 저장 목록은 유지하고 업무일지 주소만 교체한다.
+  st.biz.forEach(function(l){if(l.name==='업무일지')l.url=DIARY_URL});
   // 저장공간 관리는 검색창 옆 전용 버튼으로 이동했으므로 핵심 업무 목록에서 제외.
   st.biz=st.biz.filter(function(l){return l.name!=='저장공간 관리'});
   // seed에 새 항목이 추가되면 기존 저장 목록에도 자동 반영(단일 소스: bizSeed()).

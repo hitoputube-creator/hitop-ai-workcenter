@@ -20,6 +20,8 @@
       style="width:100%;box-sizing:border-box;padding:14px 16px;font-size:1rem;background:#101f32;border:1px solid #294057;border-radius:10px;color:#f5f8fb;outline:none;margin-bottom:10px;" />
     <div id="loginError" style="font-size:0.82rem;color:#ff8585;text-align:center;min-height:20px;margin-bottom:10px;"></div>
     <button id="loginBtn" style="width:100%;padding:14px;background:#d8b84a;color:#071423;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">로그인</button>
+    <button id="resetBtn" type="button" style="width:100%;margin-top:12px;padding:12px;background:transparent;color:#d8b84a;border:1px solid #d8b84a;border-radius:10px;font-size:0.95rem;cursor:pointer;">비밀번호 재설정</button>
+    <p id="resetMessage" role="status" aria-live="polite" style="font-size:0.85rem;color:#d8b84a;line-height:1.6;text-align:center;"></p>
   </div>
 
   <script>
@@ -31,6 +33,40 @@
       const pwEl = document.getElementById("loginPassword");
       const errEl = document.getElementById("loginError");
       const btnEl = document.getElementById("loginBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const resetMessage = document.getElementById("resetMessage");
+      const RESET_REDIRECT_URL = "https://hitoputube-creator.github.io/hitop-ai-workcenter/reset-password.html";
+
+      resetBtn.addEventListener("click", async function () {
+        if (resetBtn.disabled) return;
+        resetMessage.textContent = "";
+        const email = emailEl.value.trim();
+        if (!email) {
+          resetMessage.textContent = "로그인 이메일을 먼저 입력하세요.";
+          emailEl.focus();
+          return;
+        }
+        if (!emailEl.checkValidity()) {
+          resetMessage.textContent = "올바른 이메일 주소를 입력하세요.";
+          emailEl.focus();
+          return;
+        }
+        resetBtn.disabled = true;
+        resetBtn.textContent = "메일 발송 중...";
+        try {
+          const { error } = await authClient.auth.resetPasswordForEmail(email, {
+            redirectTo: RESET_REDIRECT_URL
+          });
+          // 계정 존재 여부를 유추할 수 있는 서버 오류 원문은 노출하지 않는다.
+          if (error) throw error;
+          resetMessage.textContent = "입력한 이메일로 재설정 링크를 보냈습니다. 메일함과 스팸함을 확인하세요.";
+        } catch (error) {
+          resetMessage.textContent = "재설정 메일을 요청하지 못했습니다. 잠시 후 다시 시도하세요.";
+        } finally {
+          resetBtn.disabled = false;
+          resetBtn.textContent = "비밀번호 재설정";
+        }
+      });
 
       // redirect 파라미터는 같은 사이트 안의 파일명(+쿼리)만 허용한다 (오픈 리다이렉트 방지).
       function getRedirectTarget() {
