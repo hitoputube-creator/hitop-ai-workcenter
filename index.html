@@ -60,6 +60,9 @@ h2{margin:0;font-size:16px}
 .note{font-size:12px;color:var(--muted);margin-top:4px}
 .actions{display:flex;gap:6px;flex-wrap:wrap}
 .core{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.floor-status-shortcut{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:13px 16px;border:1px solid rgba(216,184,74,.55);border-radius:10px;background:#152b43;color:#f5f8fb;text-decoration:none;font-weight:700}
+.floor-status-shortcut:hover{background:#203b59;border-color:var(--gold)}
+.floor-status-shortcut small{color:var(--sub);font-weight:500}
 .work-item,.tool-item,.pub-row{display:flex;flex-direction:column;gap:6px;min-width:0}
 .tile,.small,.pub{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--txt);display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;cursor:pointer;transition:border-color .15s,background .15s,transform .15s,box-shadow .15s;width:100%}
 .tile{min-height:58px;padding:0 14px;font-size:14px;font-weight:750}
@@ -186,6 +189,7 @@ h2{margin:0;font-size:16px}
           </div>
         </div>
         <div class="core" id="biz"></div>
+        <a class="floor-status-shortcut" href="https://hitoputube-creator.github.io/haitop-realty-system/floor-status-overview.html"><span>🏢 건물별 1층 현황 <small>평면도와 호실 업종 보기</small></span><span aria-hidden="true">→</span></a>
       </section>
 
       <section class="panel">
