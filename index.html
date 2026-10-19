@@ -319,7 +319,6 @@ var gov=[
 ].map(function(x){return{id:x[0],name:x[1],url:x[2],desc:'',newTab:true,icon:''}});
 function row(x){return{id:x[0],name:x[1],url:x[2],newTab:x[3],icon:'',desc:''}}
 function bizSeed(){return[
-  ['b0','홈페이지','https://hitoputube-creator.github.io/hitop-property-platform/',false],
   ['b1','매물관리',PROPERTY_MAIN_URL,true],
   ['b2','구글캘린더','https://calendar.google.com/calendar/u/0/r',false],
   ['b3','업무일지',DIARY_URL,false],
@@ -501,7 +500,7 @@ function initData(){
     if(l.name==='매물관리')l.url=PROPERTY_MAIN_URL;
   });
   // 저장공간 관리는 검색창 옆 전용 버튼으로 이동했으므로 핵심 업무 목록에서 제외.
-  st.biz=st.biz.filter(function(l){return l.name!=='저장공간 관리'});
+  st.biz=st.biz.filter(function(l){return l.name!=='저장공간 관리'&&l.name!=='홈페이지'});
   // seed에 새 항목이 추가되면 기존 저장 목록에도 자동 반영(단일 소스: bizSeed()).
   var bizNames={};
   st.biz.forEach(function(l){bizNames[l.name]=true});
@@ -567,7 +566,7 @@ function toggleEdit(scope){
   st.edit[scope]=next;
 }
 function renderBiz(){
-  biz.innerHTML=coreList().slice(0,10).map(function(l){
+  biz.innerHTML=coreList().map(function(l){
     var major=isMajor(l),cls=major?'tile':'tile secondary';
     return'<div class="work-item '+(major?'major-item':'secondary')+'">'+tile(cls,l,'data-open="biz" data-id="'+esc(l.id)+'"',major)+(st.edit.biz?editBtns('biz',l.id):'')+'</div>';
   }).join('');
