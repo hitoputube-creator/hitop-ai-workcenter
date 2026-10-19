@@ -66,7 +66,6 @@ h2{margin:0;font-size:16px}
 .work-item.secondary{grid-column:span 2}
 .tile.major{min-height:118px;align-items:flex-start;flex-direction:column;justify-content:space-between;padding:16px;background:linear-gradient(180deg,#203954,#172b42);border-color:rgba(95,159,216,.38)}
 .tile.major .name{font-size:16px}
-.work-item.major-item > .tile.major{flex:1}
 .major-top{display:flex;flex-direction:column;gap:11px;min-width:0}
 .work-mark{width:34px;height:34px;border:1px solid rgba(201,168,76,.42);border-radius:10px;background:rgba(201,168,76,.09);color:var(--gold);display:grid;place-items:center}
 .work-mark svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -320,6 +319,7 @@ var gov=[
 ].map(function(x){return{id:x[0],name:x[1],url:x[2],desc:'',newTab:true,icon:''}});
 function row(x){return{id:x[0],name:x[1],url:x[2],newTab:x[3],icon:'',desc:''}}
 function bizSeed(){return[
+  ['b0','홈페이지','https://hitoputube-creator.github.io/hitop-property-platform/',false],
   ['b1','매물관리',PROPERTY_MAIN_URL,true],
   ['b2','구글캘린더','https://calendar.google.com/calendar/u/0/r',false],
   ['b3','업무일지',DIARY_URL,false],
@@ -327,8 +327,7 @@ function bizSeed(){return[
   ['b5','중개보수','https://xn--989a00af8jnslv3dba.com/',false],
   ['b6','상가견적서','https://hitoputube-creator.github.io/Commercial-Property-Quote/',false],
   ['b7','매물광고','https://hitoputube-creator.github.io/hitop-property-platform/listings.html',false],
-  ['b8','부동산포스','https://www.rfine.kr/manage/',false],
-  ['b9','이미지 작업실','https://hitop-image-studio.bluezebra32.chatgpt.site',true]
+  ['b8','부동산포스','https://www.rfine.kr/manage/',false]
 ].map(row)}
 function conSeed(){return[
   ['c1','하이탑부동산TV','https://www.youtube.com/@hitop_ai',true],
@@ -501,7 +500,7 @@ function initData(){
     if(l.name==='매물관리')l.url=PROPERTY_MAIN_URL;
   });
   // 저장공간 관리는 검색창 옆 전용 버튼으로 이동했으므로 핵심 업무 목록에서 제외.
-  st.biz=st.biz.filter(function(l){return l.name!=='저장공간 관리'&&l.name!=='홈페이지'});
+  st.biz=st.biz.filter(function(l){return l.name!=='저장공간 관리'});
   // seed에 새 항목이 추가되면 기존 저장 목록에도 자동 반영(단일 소스: bizSeed()).
   var bizNames={};
   st.biz.forEach(function(l){bizNames[l.name]=true});
@@ -530,7 +529,6 @@ function move(arr,i,d){var j=i+d;if(i<0||j<0||j>=arr.length)return false;var x=a
 function icon(){return'<span class="ext"></span>'}
 function workIcon(n){
   var p={
-    '이미지 작업실':'<rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-3 4 4"/>',
     '매물관리':'<path d="M4 10.5 12 4l8 6.5"/><path d="M6.5 9.5V20h11V9.5"/><path d="M10 20v-6h4v6"/>',
     '업무일지':'<path d="M7 4h8l3 3v13H7z"/><path d="M14 4v4h4"/><path d="M9.5 12h5"/><path d="M9.5 16h5"/>',
     '홈페이지':'<path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M9 20v-5h6v5"/>',
@@ -538,9 +536,9 @@ function workIcon(n){
   };
   return'<span class="work-mark" aria-hidden="true"><svg viewBox="0 0 24 24">'+(p[n]||'<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>')+'</svg></span>';
 }
-function desc(l){var m={'이미지 작업실':'도면 변환·이미지 편집','매물관리':'매물 등록과 현장 운영 관리','업무일지':'상담과 처리 내역 기록','홈페이지':'하이탑 매물 홈페이지','계약문자':'계약 안내 문자 작성','매물광고':'홈페이지 광고 매물 관리','구글캘린더':'일정과 예약 확인','상가견적서':'수익률·상가 견적 계산','중개보수':'법정 중개보수 계산','부동산포스':'외부 매물 광고 관리'};return m[l.name]||'업무 링크 바로가기'}
-function isMajor(l){return ['매물관리','업무일지','홈페이지','계약문자','이미지 작업실'].indexOf(l.name)>-1}
-function coreList(){var rank={'매물관리':0,'업무일지':1,'홈페이지':2,'계약문자':3,'이미지 작업실':4};return st.biz.slice().sort(function(a,b){var ra=rank[a.name],rb=rank[b.name];ra=ra==null?99:ra;rb=rb==null?99:rb;return ra-rb})}
+function desc(l){var m={'매물관리':'매물 등록과 현장 운영 관리','업무일지':'상담과 처리 내역 기록','홈페이지':'하이탑 매물 홈페이지','계약문자':'계약 안내 문자 작성','매물광고':'홈페이지 광고 매물 관리','구글캘린더':'일정과 예약 확인','상가견적서':'수익률·상가 견적 계산','중개보수':'법정 중개보수 계산','부동산포스':'외부 매물 광고 관리'};return m[l.name]||'업무 링크 바로가기'}
+function isMajor(l){return ['매물관리','업무일지','홈페이지','계약문자'].indexOf(l.name)>-1}
+function coreList(){var rank={'매물관리':0,'업무일지':1,'홈페이지':2,'계약문자':3};return st.biz.slice().sort(function(a,b){var ra=rank[a.name],rb=rank[b.name];ra=ra==null?99:ra;rb=rb==null?99:rb;return ra-rb})}
 function tile(cls,l,at,major){var maj=major?' major':'';var body=major?'<span class="major-top">'+workIcon(l.name)+'<span class="tbody"><span class="name">'+esc(l.name)+'</span><span class="desc">'+esc(desc(l))+'</span></span></span>':'<span class="tbody"><span class="name">'+esc(l.name)+'</span></span>';return'<button class="'+cls+maj+'" '+at+'>'+body+icon()+'</button>'}
 function editBtns(type,idv,cid){
   var cat=cid?' data-cat="'+esc(cid)+'"':'';
@@ -567,7 +565,7 @@ function toggleEdit(scope){
   st.edit[scope]=next;
 }
 function renderBiz(){
-  biz.innerHTML=coreList().map(function(l){
+  biz.innerHTML=coreList().slice(0,10).map(function(l){
     var major=isMajor(l),cls=major?'tile':'tile secondary';
     return'<div class="work-item '+(major?'major-item':'secondary')+'">'+tile(cls,l,'data-open="biz" data-id="'+esc(l.id)+'"',major)+(st.edit.biz?editBtns('biz',l.id):'')+'</div>';
   }).join('');
