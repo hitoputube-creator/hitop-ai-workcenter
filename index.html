@@ -66,6 +66,7 @@ h2{margin:0;font-size:16px}
 .work-item.secondary{grid-column:span 2}
 .tile.major{min-height:118px;align-items:flex-start;flex-direction:column;justify-content:space-between;padding:16px;background:linear-gradient(180deg,#203954,#172b42);border-color:rgba(95,159,216,.38)}
 .tile.major .name{font-size:16px}
+.work-item.major-item > .tile.major{flex:1}
 .major-top{display:flex;flex-direction:column;gap:11px;min-width:0}
 .work-mark{width:34px;height:34px;border:1px solid rgba(201,168,76,.42);border-radius:10px;background:rgba(201,168,76,.09);color:var(--gold);display:grid;place-items:center}
 .work-mark svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -537,7 +538,7 @@ function workIcon(n){
   };
   return'<span class="work-mark" aria-hidden="true"><svg viewBox="0 0 24 24">'+(p[n]||'<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>')+'</svg></span>';
 }
-function desc(l){var m={'이미지 작업실':'화질 보정·도면 벡터화·블로그 이미지','매물관리':'매물 등록과 현장 운영 관리','업무일지':'상담과 처리 내역 기록','홈페이지':'하이탑 매물 홈페이지','계약문자':'계약 안내 문자 작성','매물광고':'홈페이지 광고 매물 관리','구글캘린더':'일정과 예약 확인','상가견적서':'수익률·상가 견적 계산','중개보수':'법정 중개보수 계산','부동산포스':'외부 매물 광고 관리'};return m[l.name]||'업무 링크 바로가기'}
+function desc(l){var m={'이미지 작업실':'도면 변환·이미지 편집','매물관리':'매물 등록과 현장 운영 관리','업무일지':'상담과 처리 내역 기록','홈페이지':'하이탑 매물 홈페이지','계약문자':'계약 안내 문자 작성','매물광고':'홈페이지 광고 매물 관리','구글캘린더':'일정과 예약 확인','상가견적서':'수익률·상가 견적 계산','중개보수':'법정 중개보수 계산','부동산포스':'외부 매물 광고 관리'};return m[l.name]||'업무 링크 바로가기'}
 function isMajor(l){return ['매물관리','업무일지','홈페이지','계약문자','이미지 작업실'].indexOf(l.name)>-1}
 function coreList(){var rank={'매물관리':0,'업무일지':1,'홈페이지':2,'계약문자':3,'이미지 작업실':4};return st.biz.slice().sort(function(a,b){var ra=rank[a.name],rb=rank[b.name];ra=ra==null?99:ra;rb=rb==null?99:rb;return ra-rb})}
 function tile(cls,l,at,major){var maj=major?' major':'';var body=major?'<span class="major-top">'+workIcon(l.name)+'<span class="tbody"><span class="name">'+esc(l.name)+'</span><span class="desc">'+esc(desc(l))+'</span></span></span>':'<span class="tbody"><span class="name">'+esc(l.name)+'</span></span>';return'<button class="'+cls+maj+'" '+at+'>'+body+icon()+'</button>'}
