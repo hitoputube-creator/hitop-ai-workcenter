@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<script>
+(function(){var k="sb-xaxbkdnrzsghsabkdvzj-auth-token",ok=false;try{ok=!!localStorage.getItem(k)}catch(e){}
+if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+encodeURIComponent("shorts-studio/index.html"))}})();
+</script>
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>하이탑 쇼츠 스튜디오</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Jua&family=Noto+Sans+KR:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0f16;--panel:#151b24;--panel2:#0f141b;--line:#252e3b;--txt:#eaf0f6;--mut:#8a96a6;--gold:#ffd400;--gold2:#ffb800;--ok:#3ddc97;--red:#ff5d5d;--r:14px}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(1200px 600px at 75% -10%,#16223a 0%,var(--bg) 60%);color:var(--txt);font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;font-size:14px;display:flex;flex-direction:column;overflow:hidden}
+  header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);flex-shrink:0;flex-wrap:wrap}
+  .logo{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:grid;place-items:center;font-size:19px;color:#111}
+  header h1{margin:0;font-size:17px}
+  header p{margin:2px 0 0;font-size:12px;color:var(--mut)}
+  .seg{margin-left:auto;display:flex;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px}
+  .seg button{background:transparent;padding:8px 16px;border-radius:9px;color:var(--mut)}
+  .seg button.on{background:var(--gold);color:#111}
+  main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(340px,400px) minmax(300px,1fr) minmax(340px,400px);gap:16px;padding:16px 20px}
+  .col{overflow:auto;min-height:0;display:flex;flex-direction:column;gap:12px;padding-right:4px}
+  .col::-webkit-scrollbar{width:8px}.col::-webkit-scrollbar-thumb{background:#2b3544;border-radius:8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+  .card h2{margin:0 0 10px;font-size:14.5px;display:flex;align-items:center;gap:8px}
+  .num{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#111;display:grid;place-items:center;font-size:12px;font-weight:800;flex-shrink:0}
+  label{display:block;font-size:12px;color:var(--mut);margin:10px 0 4px}
+  .card h2+label{margin-top:0}
+  input[type=text],input[type=number],select,textarea{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:13.5px;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:0;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,212,0,.15)}
+  textarea{line-height:1.6;resize:vertical}
+  input[type=range]{width:100%;accent-color:var(--gold)}
+  input[type=color]{width:100%;height:36px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:3px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  button{font-family:inherit;cursor:pointer;border:0;border-radius:11px;padding:9px 13px;font-size:13.5px;font-weight:700;background:#263040;color:var(--txt)}
+  button:hover{filter:brightness(1.18)}button:disabled{opacity:.5;cursor:default}
+  .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:#111}
+  .wide{width:100%}.mt{margin-top:8px}
+  .hint{font-size:12px;color:var(--mut);line-height:1.6;margin-top:8px}
+  .warn{font-size:12.5px;color:#ffb454;margin-top:8px;line-height:1.5}
+  .pills{display:flex;gap:6px;flex-wrap:wrap}
+  .pills button{padding:7px 12px;font-size:13px;background:var(--panel2);border:1px solid var(--line);color:var(--mut)}
+  .pills button.on{background:var(--gold);color:#111;border-color:var(--gold)}
+  /* 사진 */
+  #thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .th{position:relative;width:62px;height:62px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .th img{width:100%;height:100%;object-fit:cover}
+  .th b{position:absolute;left:3px;top:3px;background:rgba(0,0,0,.65);border-radius:8px;font-size:10px;padding:1px 6px}
+  .th i{position:absolute;right:2px;top:2px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.7);font-style:normal;text-align:center;line-height:18px;font-size:11px;cursor:pointer}
+  /* 가운데 */
+  #center{align-items:center;overflow:hidden}
+  #stagewrap{flex:1 1 0;min-height:160px;max-width:100%;aspect-ratio:9/16;background:#000;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  canvas#cv{width:100%;height:100%;display:block}
+  #ctl{display:flex;align-items:center;gap:10px;width:100%;max-width:420px;flex-shrink:0}
+  #btnPlay{width:44px;height:44px;border-radius:50%;padding:0;font-size:15px;background:var(--gold);color:#111;flex-shrink:0}
+  #scrub{flex:1;accent-color:var(--gold)}
+  #timeLabel{font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--mut);min-width:84px;text-align:right}
+  #btnSave{width:100%;max-width:420px;padding:14px;font-size:15.5px;border-radius:13px;flex-shrink:0;box-shadow:0 8px 24px rgba(255,184,0,.22)}
+  #status{font-size:12.5px;color:var(--gold);text-align:center;min-height:34px;line-height:1.5;max-width:420px;flex-shrink:0}
+  #status.ok{color:var(--ok)}
+  /* 컷 목록 */
+  #cutList{display:flex;flex-direction:column;gap:6px}
+  .cutItem{display:flex;gap:9px;align-items:center;padding:8px 10px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);cursor:pointer}
+  .cutItem.sel{border-color:var(--gold);background:#1c2433}
+  .cutItem .n{width:22px;height:22px;border-radius:50%;background:#2a3547;display:grid;place-items:center;font-size:11px;flex-shrink:0}
+  .cutItem.sel .n{background:var(--gold);color:#111}
+  .cutItem .t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+  .cutItem .ly{font-size:11px;color:var(--mut)}
+  .cutItem .tm{font-size:11px;color:var(--gold);font-variant-numeric:tabular-nums}
+  /* 파형 */
+  #wfBox{display:none;margin-top:10px}
+  #wfScroll{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:#0a0e14}
+  #wfInner{position:relative;height:96px}
+  #wf{display:block;height:96px;cursor:pointer}
+  #wfHead{position:absolute;top:0;bottom:0;width:2px;background:var(--red);pointer-events:none}
+  .small{font-size:12px;color:var(--mut)}
+  .flex{display:flex;align-items:center;gap:8px}
+  .grow{flex:1}
+  @media(max-width:1100px){body{overflow:auto;height:auto}main{grid-template-columns:1fr}.col{overflow:visible}#stagewrap{height:70vh;flex:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">🎬</div>
+  <div><h1>하이탑 쇼츠 스튜디오</h1><p>대본 → 음성 올리기 → 자동 편집 → 영상 저장</p></div>
+  <div class="seg"><button id="modeListing" class="on">🏠 매물 영상</button><button id="modeInfo">📰 정보 영상</button></div>
+</header>
+<main>
+  <!-- 왼쪽 -->
+  <section class="col" id="left">
+    <div class="card" id="listingCard">
+      <h2><span class="num">1</span>매물 정보</h2>
+      <label>매물 종류</label>
+      <select id="ptype"><option>아파트</option><option>상가</option><option>토지</option><option>공장·창고</option><option>오피스텔</option><option>기타</option></select>
+      <div class="row"><div><label id="lb_area">지역</label><input type="text" id="area"></div><div><label id="lb_name">단지명</label><input type="text" id="name"></div></div>
+      <div class="row"><div><label id="lb_complex">동/단지</label><input type="text" id="complex"></div><div><label id="lb_size">평형</label><input type="text" id="size"></div></div>
+      <div class="row"><div><label id="lb_type">거래종류</label><input type="text" id="type"></div><div><label id="lb_price">가격</label><input type="text" id="price"></div></div>
+      <label id="lb_f1">포인트 1 (큰 글자 / 작은 글자)</label><div class="row"><input type="text" id="f1"><input type="text" id="s1"></div>
+      <label>포인트 2</label><div class="row"><input type="text" id="f2"><input type="text" id="s2"></div>
+      <label>포인트 3</label><div class="row"><input type="text" id="f3"><input type="text" id="s3"></div>
+      <div class="row"><div><label>가격 화면 부제</label><input type="text" id="sub2"></div><div><label>마무리 문구</label><input type="text" id="outro"></div></div>
+      <button class="wide btn-gold mt" id="btnMakeCuts">✨ 이 정보로 컷 만들기</button>
+      <div class="hint">내용을 고친 뒤 눌러야 오른쪽 컷에 반영돼요. 컷을 직접 고친 내용은 다시 만들면 덮어써져요.</div>
+    </div>
+    <div class="card" id="infoCard" style="display:none">
+      <h2><span class="num">1</span>정보 영상 화면 스타일</h2>
+      <div class="pills" id="infoStyle"><button data-v="card" class="on">🟦 글자 카드</button><button data-v="photo">🖼 사진 배경</button></div>
+      <div class="hint">글자 카드는 사진 없이 큰 글자로 보여줘요. 사진 배경은 아래에 올린 사진 위에 글자가 나와요.</div>
+    </div>
+    <div class="card">
+      <h2><span class="num">2</span>사진</h2>
+      <button class="wide" id="btnPhoto">📷 사진 추가 (여러 장 가능)</button>
+      <input type="file" id="photoFile" accept="image/*" multiple style="display:none">
+      <div id="thumbs"></div>
+      <div class="hint" id="photoHint">컷마다 사진이 차례로 돌아가며 들어가요. 컷마다 바꾸려면 오른쪽 컷 편집에서 고르세요.</div>
+    </div>
+    <div class="card">
+      <h2><span class="num">3</span>대본 (한 줄 = 한 컷)</h2>
+      <textarea id="script" rows="9"></textarea>
+      <button class="wide mt" id="btnCopy">📋 대본 복사 (AI Studio에 붙여넣기)</button>
+      <div class="hint">문장 사이에 AI Studio에서 "문장마다 1초 쉬고 읽어줘"라고 하면 자동 나누기가 더 정확해요.</div>
+    </div>
+    <div class="card">
+      <h2><span class="num">4</span>음성 올리기</h2>
+      <button class="wide btn-gold" id="btnVoice">📂 음성 파일 올리기</button>
+      <input type="file" id="voiceFile" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac,.webm" multiple style="display:none">
+      <div class="hint">• 파일 <b>하나</b>(전체 대본)를 올리면 쉬는 곳에서 자동으로 문장을 나눠요.<br>• 문장별 파일 <b>여러 개</b>를 한 번에 선택하면 이름 순서대로 붙여요. (가장 정확해요)</div>
+      <div id="voiceInfo" class="small" style="margin-top:8px"></div>
+      <div id="voiceWarn" class="warn"></div>
+      <div id="wfBox">
+        <div class="flex" style="margin-bottom:6px"><span class="small">파형 위 노란 선을 끌어 문장 경계를 맞춰요 · 구간을 누르면 들려줘요</span></div>
+        <div id="wfScroll"><div id="wfInner"><canvas id="wf"></canvas><div id="wfHead"></div></div></div>
+        <div class="flex mt"><span class="small">확대</span><input type="range" id="wfZoom" min="30" max="300" value="80" class="grow"><button id="btnResplit" title="대본 줄 수에 맞춰 자동으로 다시 나누기">🔄 자동 나누기 다시</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 가운데 -->
+  <section class="col" id="center">
+    <div id="stagewrap"><canvas id="cv" width="1080" height="1920"></canvas></div>
+    <div id="ctl"><button id="btnPlay">▶</button><input type="range" id="scrub" min="0" max="1000" value="0"><span id="timeLabel">0:00 / 0:00</span></div>
+    <button id="btnSave" class="btn-gold">⏺ 영상 저장 (음성·배경음 포함)</button>
+    <div id="status">대본을 확인하고 음성을 올려보세요</div>
+  </section>
+
+  <!-- 오른쪽 -->
+  <section class="col" id="right">
+    <div class="card">
+      <h2>🎞 컷 목록 <span class="small" id="cutCount"></span></h2>
+      <div id="cutList"></div>
+    </div>
+    <div class="card" id="inspector"></div>
+    <div class="card">
+      <h2>🎨 전체 스타일 <span class="small">(자동 저장)</span></h2>
+      <div class="row"><div><label>글꼴</label><select id="gFont"><option value="basic">기본 (고딕)</option><option value="black">블랙한산스</option><option value="dohyeon">도현체</option><option value="jua">주아체</option></select></div>
+      <div><label>테두리 굵기</label><input type="range" id="gStroke" min="0" max="20" value="10"></div></div>
+      <div class="row"><div><label>글자색</label><input type="color" id="gMain" value="#ffffff"></div><div><label>강조색</label><input type="color" id="gAccent" value="#ffd400"></div></div>
+      <div class="row"><div><label>글자 크기 <span class="small" id="vSize"></span></label><input type="range" id="gSize" min="60" max="130" value="100"></div>
+      <div><label>글자 위치 위↑/아래↓</label><input type="range" id="gY" min="-250" max="250" value="0"></div></div>
+      <label>글자가 소리보다 먼저 나오는 시간 <span class="small" id="vLead"></span></label><input type="range" id="gLead" min="0" max="80" value="30">
+    </div>
+    <div class="card">
+      <h2>🏷 상호·연락처 (항상 표시)</h2>
+      <div class="row"><div><label>상호</label><input type="text" id="gBiz"></div><div><label>전화번호</label><input type="text" id="gTel"></div></div>
+      <div class="row"><div><label>위치</label><select id="gWmPos"><option value="bottom">아래쪽</option><option value="top">위쪽</option></select></div><div><label>모양</label><select id="gWmStyle"><option value="bar">바 모양</option><option value="text">작은 글자</option></select></div></div>
+    </div>
+    <div class="card">
+      <h2>🎵 소리</h2>
+      <label style="display:flex;gap:8px;align-items:center;color:var(--txt)"><input type="checkbox" id="gMusicOn" checked> 배경음 넣기</label>
+      <div class="row"><div><label>배경음 크기</label><input type="range" id="gMusic" min="0" max="150" value="80"></div><div><label>음성 크기</label><input type="range" id="gVoice" min="40" max="200" value="115"></div></div>
+    </div>
+  </section>
+</main>
+<script>
+const W=1080,H=1920;
+const $=id=>document.getElementById(id);
+const cv=$('cv'),ctx=cv.getContext('2d');
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const easeOutCubic=p=>1-Math.pow(1-p,3);
+const easeInOut=p=>p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+const easeOutBack=p=>{const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(p-1,3)+c1*Math.pow(p-1,2)};
+const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const fmt=t=>{t=Math.max(0,t);const m=Math.floor(t/60),s=t-m*60;return m+':'+(s<10?'0':'')+s.toFixed(1)};
+const r2=x=>Math.round(x*100)/100;
+
+const FIELD_IDS=['area','name','complex','size','type','price','f1','s1','f2','s2','f3','s3','sub2','outro'];
+const CALL='상담은 하이탑부동산, 공삼일 구사구 팔구육구!';
+const PRESETS={
+ '아파트':{labels:{area:'지역',name:'단지명',complex:'동/단지',size:'평형',type:'거래종류',price:'가격',f1:'포인트 1 (큰 글자 / 작은 글자)'},
+  v:{area:'운정아파트',name:'가람마을',complex:'동문11단지',size:'34평',type:'전세',price:'3.75억',f1:'넓은 거실',s1:'탁 트인 개방감',f2:'채광 좋은 집',s2:'햇살이 가득 들어와요',f3:'2층 집',s3:'계단으로 이용이 편리해요',sub2:'지금 바로 입주 가능한 매물',outro:'전세 · 매매 · 월세 상담'},
+  script:['운정 가람마을, 동문 11단지!','34평 전세, 삼억 칠천오백만 원!','탁 트인 넓은 거실이 자랑이에요.','채광이 좋아 집안 가득 햇살이 들어와요.','2층이라 계단으로 이용도 편리해요.',CALL]},
+ '상가':{labels:{area:'위치',name:'상가·건물명',complex:'층·호수',size:'전용면적',type:'거래종류',price:'보증금/월세 또는 매매가'},
+  v:{area:'운정신도시 상가',name:'운정 중심상가',complex:'1층 101호',size:'전용 25평',type:'월세',price:'보증금 3천 / 월 180',f1:'대로변 코너',s1:'눈에 확 띄는 입지',f2:'유동인구 풍부',s2:'배후 세대가 탄탄해요',f3:'주차 편리',s3:'손님 오시기 좋아요',sub2:'바로 영업 가능한 상가',outro:'임대 · 매매 · 창업 상담'},
+  script:['운정신도시 상가, 1층 101호!','전용 25평, 보증금 삼천에 월세 백팔십!','대로변 코너라 눈에 확 띄어요.','유동인구가 많고 배후 세대가 탄탄해요.','주차도 편리해서 손님 오시기 좋아요.',CALL]},
+ '토지':{labels:{area:'위치',name:'지목·용도',complex:'세부 위치',size:'면적',type:'거래종류',price:'가격'},
+  v:{area:'파주 운정',name:'근린생활 부지',complex:'운정3지구',size:'300평',type:'매매',price:'평당 2천만',f1:'반듯한 정형지',s1:'건축하기 좋은 땅',f2:'도로에 접함',s2:'진입이 편리해요',f3:'개발 호재',s3:'미래 가치가 높아요',sub2:'투자 가치 높은 토지',outro:'토지 · 건축 · 투자 상담'},
+  script:['파주 운정, 근린생활 부지!','삼백 평, 평당 이천만 원!','반듯한 정형지라 건축하기 좋아요.','도로에 접해 진입이 편리해요.','개발 호재로 미래 가치가 높아요.',CALL]},
+ '공장·창고':{labels:{area:'위치',name:'건물 종류',complex:'동·호수',size:'면적',type:'거래종류',price:'보증금/월세 또는 매매가'},
+  v:{area:'파주 산업단지',name:'공장·창고',complex:'1동 전체',size:'500평',type:'임대',price:'보증금 5천 / 월 600',f1:'높은 층고',s1:'물건 적재가 편해요',f2:'화물차 진입 OK',s2:'대형 차량도 여유 있어요',f3:'전기 증설 가능',s3:'설비 걱정 없어요',sub2:'바로 입주 가능한 공장',outro:'임대 · 매매 · 입지 상담'},
+  script:['파주 산업단지, 공장 창고!','오백 평, 보증금 오천에 월 육백!','층고가 높아 물건 적재가 편해요.','화물차와 대형 차량도 진입이 쉬워요.','전기 증설이 가능해 설비 걱정이 없어요.',CALL]},
+ '오피스텔':{labels:{area:'위치',name:'오피스텔명',complex:'층·호수',size:'전용면적',type:'거래종류',price:'보증금/월세 또는 매매가'},
+  v:{area:'운정신도시',name:'운정 오피스텔',complex:'12층 1203호',size:'전용 20평',type:'월세',price:'보증금 1천 / 월 70',f1:'풀옵션',s1:'몸만 들어오세요',f2:'역세권',s2:'출퇴근이 편해요',f3:'신축급 컨디션',s3:'깨끗하게 관리됐어요',sub2:'바로 입주 가능한 오피스텔',outro:'월세 · 전세 · 매매 상담'},
+  script:['운정신도시 오피스텔, 12층 1203호!','전용 20평, 보증금 천에 월세 칠십!','풀옵션이라 몸만 들어오시면 돼요.','역세권이라 출퇴근이 편해요.','신축급 컨디션으로 깨끗하게 관리됐어요.',CALL]},
+ '기타':{labels:{area:'위치(태그)',name:'큰 제목',complex:'소제목',size:'크게 보일 정보',type:'거래종류',price:'가격·조건'},
+  v:{area:'',name:'',complex:'',size:'',type:'',price:'',f1:'',s1:'',f2:'',s2:'',f3:'',s3:'',sub2:'',outro:''},
+  script:['','','','','',CALL]}
+};
+
+
+const FONTS={
+  basic:"'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif",
+  black:"'Black Han Sans','Noto Sans KR','Malgun Gothic',sans-serif",
+  dohyeon:"'Do Hyeon','Noto Sans KR','Malgun Gothic',sans-serif",
+  jua:"'Jua','Noto Sans KR','Malgun Gothic',sans-serif"
+};
+let FONT=FONTS.basic;
+
+/* ---------- 전체 설정 ---------- */
+const G={mode:'listing',infoStyle:'card',font:'basic',main:'#ffffff',accent:'#ffd400',sizeK:1,yOff:0,stroke:10,
+  wmPos:'bottom',wmStyle:'bar',biz:'하이탑부동산',tel:'031-949-8969',lead:0.3,musicOn:true,musicVol:0.8,voiceVol:1.15};
+const SAVE_KEYS=['infoStyle','font','main','accent','sizeK','yOff','stroke','wmPos','wmStyle','biz','tel','lead','musicOn','musicVol','voiceVol'];
+function saveG(){try{const o={};SAVE_KEYS.forEach(k=>o[k]=G[k]);localStorage.setItem('haitop_studio_v1',JSON.stringify(o))}catch(e){}}
+function loadG(){try{const o=JSON.parse(localStorage.getItem('haitop_studio_v1')||'null');if(o)SAVE_KEYS.forEach(k=>{if(o[k]!==undefined)G[k]=o[k]})}catch(e){}}
+
+/* ---------- 데이터 ---------- */
+let cuts=[],photos=[],sel=0;
+const V={buf:null,b:[],mode:'',peaks:null,files:0,name:''};
+const V0=0.35;
+const mk=(layout,o)=>Object.assign({layout,chip:'',big:'',pill:'',sub:'',narr:'',photo:-1,autoText:false,autoLayout:false},o||{});
+const voiceOK=()=>!!(V.buf&&cuts.length>0&&V.b.length===cuts.length+1);
+
+let TLc=null;
+function invalidate(){TLc=null;draw()}
+function TL(){
+  if(TLc)return TLc;
+  const N=cuts.length,s=[];let total;
+  if(N===0){TLc={s:[0],e:[3],total:3,N:0};return TLc}
+  if(voiceOK()){
+    for(let i=0;i<N;i++)s.push(i===0?0:Math.max(s[i-1]+0.8,V0+V.b[i]-V.b[0]-G.lead));
+    total=Math.max(V0+V.b[N]-V.b[0]+1.5,s[N-1]+2.5);
+  }else{
+    for(let i=0;i<N;i++)s.push(i*3.2);
+    total=N*3.2+0.5;
+  }
+  const e=s.slice(1).concat(total);
+  TLc={s,e,total,N};return TLc;
+}
+
+/* ---------- 그리기 도구 ---------- */
+const CAMS=[{a:[.5,.5,1.0],b:[.5,.5,1.2]},{a:[.65,.55,1.1],b:[.75,.55,1.3]},{a:[.3,.5,1.0],b:[.72,.5,1.0]},{a:[.5,.5,1.25],b:[.6,.48,1.0]},{a:[.82,.55,1.3],b:[.5,.5,1.0]},{a:[.5,.5,1.0],b:[.5,.5,1.15]}];
+function drawPhoto(cam,lt,dur,img){
+  const p=easeInOut(clamp(lt/dur));
+  const a=cam.a,b=cam.b;
+  let cx=a[0]+(b[0]-a[0])*p,cy=a[1]+(b[1]-a[1])*p,z=a[2]+(b[2]-a[2])*p;
+  const iw=img.width,ih=img.height,s=Math.max(H/ih,W/iw)*z,sw=W/s,sh=H/s,hw=sw/2/iw,hh=sh/2/ih;
+  cx=clamp(cx,hw,1-hw);cy=clamp(cy,hh,1-hh);
+  ctx.drawImage(img,cx*iw-sw/2,cy*ih-sh/2,sw,sh,0,0,W,H);
+}
+function overlay(dark){
+  ctx.fillStyle=`rgba(8,12,24,${dark})`;ctx.fillRect(0,0,W,H);
+  let g=ctx.createLinearGradient(0,0,0,H*0.45);g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H*0.45);
+  g=ctx.createLinearGradient(0,H*0.5,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.7)');
+  ctx.fillStyle=g;ctx.fillRect(0,H*0.5,W,H*0.5);
+}
+function cardBG(i,lt){
+  const g=ctx.createLinearGradient(0,0,W*0.6,H);g.addColorStop(0,'#17284d');g.addColorStop(.55,'#0d1630');g.addColorStop(1,'#060a14');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const gx=W*(0.25+0.5*((i*0.37)%1))+Math.sin(lt*0.6)*60,gy=H*0.32+Math.cos(lt*0.5)*50;
+  const rg=ctx.createRadialGradient(gx,gy,0,gx,gy,700);
+  rg.addColorStop(0,hexA(G.accent,.22));rg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=2;
+  for(let x=0;x<=W;x+=90){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<=H;y+=90){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+}
+function hexA(hex,a){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+
+function charsIn(text,cx,cy,size,color,lt,delay,o={}){
+  const maxW=o.maxW||960;
+  ctx.save();ctx.font=`900 ${size}px ${FONT}`;
+  const chars=[...text];
+  let widths=chars.map(c=>ctx.measureText(c).width+(o.space||0));
+  let total=widths.reduce((a,b)=>a+b,0);
+  if(total>maxW){size=size*maxW/total;ctx.font=`900 ${size}px ${FONT}`;widths=chars.map(c=>ctx.measureText(c).width+(o.space||0));total=widths.reduce((a,b)=>a+b,0)}
+  ctx.textBaseline='middle';ctx.textAlign='left';
+  let x=cx-total/2;
+  chars.forEach((c,i)=>{
+    const p=clamp((lt-delay-i*(o.stagger??0.06))/0.5);
+    if(p>0){
+      const e=easeOutBack(p);
+      ctx.save();ctx.globalAlpha=clamp(p*3)*(o.alpha??1);
+      ctx.translate(x+widths[i]/2,cy+(1-e)*(o.rise??90));
+      const sc=0.5+0.5*e;ctx.scale(sc,sc);
+      ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=26;ctx.shadowOffsetY=8;
+      if(o.stroke){ctx.lineWidth=o.stroke;ctx.strokeStyle='rgba(0,0,0,.7)';ctx.lineJoin='round';ctx.textAlign='center';ctx.strokeText(c,0,0)}
+      ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(c,0,0);
+      ctx.restore();
+    }
+    x+=widths[i];
+  });
+  ctx.restore();
+}
+function wrapLines(text,size,maxW){
+  ctx.save();ctx.font=`900 ${size}px ${FONT}`;
+  let parts=text.split('\n').map(s=>s.trim()).filter(Boolean);
+  if(parts.length===1&&ctx.measureText(text).width>maxW&&text.includes(' ')){
+    let best=-1,bd=1e9;const mid=text.length/2;
+    for(let i=0;i<text.length;i++)if(text[i]===' '){const d=Math.abs(i-mid);if(d<bd){bd=d;best=i}}
+    parts=[text.slice(0,best).trim(),text.slice(best+1).trim()];
+  }
+  const mw=Math.max(...parts.map(p=>ctx.measureText(p).width));
+  let s=size;if(mw>maxW)s=Math.max(size*0.45,size*maxW/mw);
+  ctx.restore();return {lines:parts,size:s};
+}
+function bigInfo(text,size){
+  if(!text)return {lines:[],size,dy:0};
+  const r=wrapLines(text,size,960);
+  if(r.lines.length>1)r.size=Math.min(r.size,size*0.8);
+  r.dy=(r.lines.length-1)*r.size*1.18/2;return r;
+}
+function bigText(text,cx,cy,size,color,lt,delay,o){
+  if(!text)return;
+  const r=bigInfo(text,size),n=r.lines.length,lh=r.size*1.18;
+  r.lines.forEach((ln,k)=>charsIn(ln,cx,cy+(k-(n-1)/2)*lh,r.size,color,lt,delay+k*0.25,Object.assign({},o,{maxW:960})));
+}
+function pill(text,cx,cy,size,bg,fg,lt,delay){
+  if(!text)return;
+  const p=clamp((lt-delay)/0.5);if(p<=0)return;
+  const e=easeOutBack(p);
+  ctx.save();ctx.font=`900 ${size}px ${FONT}`;
+  let tw=ctx.measureText(text).width;const pad=size*0.6;let w=tw+pad*2,h=size*1.6;
+  if(w>980){const k=980/w;size*=k;ctx.font=`900 ${size}px ${FONT}`;tw=ctx.measureText(text).width;w=tw+pad*2*k;h=size*1.6}
+  ctx.translate(cx,cy);ctx.scale(e,e);ctx.globalAlpha=clamp(p*3);
+  ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=30;ctx.shadowOffsetY=10;
+  ctx.fillStyle=bg;rr(-w/2,-h/2,w,h,h/2);ctx.fill();ctx.shadowColor='transparent';
+  ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,0,size*0.04);
+  ctx.restore();
+}
+function line(cx,cy,maxW,color,lt,delay){
+  const p=easeOutCubic(clamp((lt-delay)/0.5));if(p<=0)return;
+  ctx.save();ctx.fillStyle=color;ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=14;
+  rr(cx-maxW*p/2,cy-6,maxW*p,12,6);ctx.fill();ctx.restore();
+}
+function subText(text,cx,cy,size,lt,delay){
+  if(!text)return;
+  const p=easeOutCubic(clamp((lt-delay)/0.6));if(p<=0)return;
+  ctx.save();ctx.globalAlpha=p;ctx.font=`700 ${size}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';
+  let s=size;while(ctx.measureText(text).width>960&&s>20){s-=2;ctx.font=`700 ${s}px ${FONT}`}
+  ctx.shadowColor='rgba(0,0,0,.7)';ctx.shadowBlur=20;ctx.shadowOffsetY=5;
+  ctx.fillStyle='#fff';ctx.fillText(text,cx,cy+(1-p)*30);ctx.restore();
+}
+function chip(text,cx,cy,lt,delay){
+  if(!text)return;
+  const p=easeOutCubic(clamp((lt-delay)/0.4));if(p<=0)return;
+  ctx.save();ctx.globalAlpha=p;ctx.font=`900 40px ${FONT}`;
+  const w=ctx.measureText(text).width+70;
+  ctx.fillStyle=hexA(G.accent,.95);rr(cx-w/2,cy-34+(1-p)*-20,w,68,34);ctx.fill();
+  ctx.fillStyle='#111';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,cx,cy+(1-p)*-20+2);ctx.restore();
+}
+
+/* ---------- 컷 그리기 ---------- */
+const DARK={title:.42,price:.5,point:.4,card:.5,outro:.62};
+function drawCut(c,lt){
+  const K=G.sizeK,Y=G.yOff,M=G.main,A=G.accent,ST=G.stroke,cx=W/2;
+  switch(c.layout){
+    case 'title':{const d=bigInfo(c.big,250*K).dy;
+      chip(c.chip,cx,620+Y-d,lt,0.2);bigText(c.big,cx,850+Y,250*K,M,lt,0.5,{stroke:ST});
+      line(cx,1010+Y+d,560,A,lt,1.3);subText(c.sub,cx,1100+Y+d,76*K,lt,1.5);break}
+    case 'price':
+      bigText(c.big,cx,720+Y,340*K,A,lt,0.1,{stroke:ST+2,stagger:.12});
+      pill(c.pill,cx,1090+Y,130*K,A,'#111',lt,1.0);
+      if(lt>1.0&&lt<1.2){ctx.fillStyle=`rgba(255,255,255,${(1.2-lt)/0.2*.6})`;ctx.fillRect(0,0,W,H)}
+      subText(c.sub,cx,1280+Y,54*K,lt,2.0);break;
+    case 'point':{const d=bigInfo(c.big,230*K).dy;
+      chip(c.chip,cx,640+Y-d,lt,0.1);bigText(c.big,cx,860+Y,230*K,M,lt,0.3,{stroke:ST});
+      line(cx,1000+Y+d,520,A,lt,1.0);subText(c.sub,cx,1090+Y+d,64*K,lt,1.2);break}
+    case 'outro':{
+      subText(c.sub,cx,600+Y,56*K,lt,0.1);
+      bigText(c.big||G.biz,cx,780+Y,190*K,M,lt,0.3,{stroke:ST,stagger:.07});
+      const p=clamp((lt-1.2)/.5);
+      if(p>0){const pulse=1+0.04*Math.sin(lt*8);ctx.save();ctx.translate(cx,1010+Y);ctx.scale(pulse,pulse);ctx.translate(-cx,-(1010+Y));
+        pill(c.pill||('☎ '+G.tel),cx,1010+Y,110*K,A,'#111',lt,1.2);ctx.restore()}
+      subText(c.chip,cx,1200+Y,60*K,lt,2.0);break}
+    default:{ // card
+      const d=bigInfo(c.big,180*K).dy;
+      chip(c.chip,cx,560+Y-d,lt,0.1);
+      bigText(c.big,cx,880+Y,180*K,M,lt,0.3,{stroke:ST});
+      line(cx,1110+Y+d,520,A,lt,1.2);subText(c.sub,cx,1210+Y+d,60*K,lt,1.4)}
+  }
+}
+function photoFor(i){
+  if(!photos.length)return null;
+  const c=cuts[i];const k=(c&&c.photo>=0&&c.photo<photos.length)?c.photo:i%photos.length;
+  return photos[k].img;
+}
+function watermark(t){
+  const p=easeOutCubic(clamp((t-0.3)/0.6));if(p<=0)return;
+  ctx.save();ctx.globalAlpha=p;
+  if(G.wmStyle==='bar'){
+    const w=900,h=120,x=(W-w)/2,y=(G.wmPos==='top'?110:1560)+(1-p)*(G.wmPos==='top'?-40:40);
+    ctx.fillStyle='rgba(10,14,28,.82)';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=24;rr(x,y,w,h,60);ctx.fill();ctx.shadowColor='transparent';
+    ctx.fillStyle=G.accent;ctx.beginPath();ctx.arc(x+60,y+60,34,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#111';ctx.font=`900 36px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☎',x+60,y+62);
+    ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=`900 42px ${FONT}`;ctx.fillText(G.biz,x+118,y+60);
+    ctx.textAlign='right';ctx.fillStyle=G.accent;ctx.font=`900 52px ${FONT}`;ctx.fillText(G.tel,x+w-40,y+62);
+  }else{
+    const y=G.wmPos==='top'?150:1700;
+    ctx.font=`900 44px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=14;ctx.shadowOffsetY=3;
+    ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillText(G.biz+'  ☎ '+G.tel,W/2,y);
+  }
+  ctx.restore();
+}
+function draw(){renderFrame(curT)}
+let curT=0;
+function renderFrame(t){
+  const T=TL();ctx.clearRect(0,0,W,H);
+  if(!T.N){cardBG(0,t);ctx.fillStyle='#8b949e';ctx.font=`700 44px ${FONT}`;ctx.textAlign='center';ctx.fillText('왼쪽에 대본을 입력해주세요',W/2,H/2);watermark(t);return}
+  let i=T.s.findIndex((s,k)=>t>=s&&t<T.e[k]);if(i<0)i=T.N-1;
+  const c=cuts[i],dur=T.e[i]-T.s[i],lt=clamp(t-T.s[i],0,dur);
+  const usePhoto=(G.mode==='listing'||G.infoStyle==='photo')&&photoFor(i);
+  ctx.save();
+  if(usePhoto){drawPhoto(CAMS[i%6],lt,dur,photoFor(i));overlay(DARK[c.layout]??.5)}
+  else{cardBG(i,lt);if(G.mode==='listing'&&!photos.length){ctx.fillStyle='rgba(255,255,255,.35)';ctx.font=`700 36px ${FONT}`;ctx.textAlign='center';ctx.fillText('사진을 추가하면 배경으로 들어가요',W/2,H-120)}}
+  const fade=1-clamp((lt-(dur-0.25))/0.25);
+  ctx.globalAlpha=i===T.N-1?1:fade;
+  drawCut(c,lt);
+  ctx.restore();
+  if(lt<0.18&&i>0){ctx.fillStyle=`rgba(255,255,255,${(1-lt/0.18)*.55})`;ctx.fillRect(0,0,W,H)}
+  watermark(t);
+}
+
+/* ===================== 대본 ↔ 컷 ===================== */
+const scriptLines=()=>$('script').value.split('\n').map(x=>x.trim()).filter(Boolean);
+function autoSplit(s){
+  s=s.trim();
+  const strip=x=>x.replace(/[,，.!?…。\s]+$/,'').trim();
+  const cl=s.split(/(?<=[,，.!?…。])\s*/).filter(Boolean);
+  let big=strip(cl[0]||''),i=1;
+  while(big.length<5&&i<cl.length){big=(big+' '+strip(cl[i])).trim();i++}
+  let sub=cl.slice(i).join(' ').trim();
+  if(!sub&&big.length>16){let k=big.lastIndexOf(' ',16);if(k<4)k=16;sub=big.slice(k).trim();big=big.slice(0,k).trim()}
+  return {big,sub:sub.slice(0,42)};
+}
+const INFO_SAMPLE=['전세 계약 전, 이것만은 꼭 확인하세요!','첫째, 등기부등본으로 근저당부터 확인해요.','둘째, 보증금이 시세와 비슷한지 살펴보세요.','셋째, 전세보증보험 가입이 가능한지 확인하세요.','잔금 치르기 전에 등기부를 한 번 더 확인하세요.',CALL];
+function syncFromScript(){
+  const lines=scriptLines(),N=lines.length;
+  while(cuts.length>N)cuts.pop();
+  while(cuts.length<N)cuts.push(mk('card',{autoText:true,autoLayout:true}));
+  lines.forEach((ln,i)=>{
+    const c=cuts[i];c.narr=ln;
+    if(c.autoLayout)c.layout=(i===N-1&&N>1)?'outro':'card';
+    if(c.autoText){
+      const a=autoSplit(ln);
+      if(c.layout==='outro'){c.big='';c.sub='';c.pill='';c.chip='편하게 전화주세요!'}
+      else{c.big=a.big;c.sub=a.sub;c.chip=i===0?'하이탑 부동산 정보':'POINT '+i}
+    }
+  });
+  if(sel>=cuts.length)sel=Math.max(0,cuts.length-1);
+  TLc=null;
+}
+function makeListingCuts(){
+  const f={};FIELD_IDS.forEach(k=>f[k]=$(k).value.trim());
+  const lines=scriptLines();
+  cuts=[
+    mk('title',{chip:[f.area,f.type].filter(Boolean).join(' · '),big:f.name,sub:f.complex}),
+    mk('price',{big:f.size,pill:(f.type+' '+f.price).trim(),sub:f.sub2}),
+    mk('point',{chip:'POINT 1',big:f.f1,sub:f.s1}),
+    mk('point',{chip:'POINT 2',big:f.f2,sub:f.s2}),
+    mk('point',{chip:'POINT 3',big:f.f3,sub:f.s3}),
+    mk('outro',{sub:f.outro,big:'',pill:'',chip:'편하게 전화주세요!'})
+  ];
+  for(let i=0;i<lines.length;i++){
+    if(i<cuts.length)cuts[i].narr=lines[i];
+    else cuts.push(mk('card',{autoText:true,autoLayout:true,narr:lines[i]}));
+  }
+  cuts=cuts.slice(0,Math.max(lines.length,0)||6);
+  syncFromScript();
+  sel=0;TLc=null;renderCutList();renderInspector();checkVoice();draw();
+}
+/* 매물 종류 */
+const typeStore={};let curType='아파트';
+function applyType(tp){
+  const P=PRESETS[tp];
+  Object.entries(P.labels).forEach(([k,v])=>{const l=$('lb_'+k);if(l)l.textContent=v});
+  const st=typeStore[tp]||{v:P.v,script:P.script.join('\n')};
+  FIELD_IDS.forEach(k=>$(k).value=st.v[k]||'');
+  $('script').value=st.script;curType=tp;
+}
+$('ptype').addEventListener('change',()=>{
+  const o={};FIELD_IDS.forEach(k=>o[k]=$(k).value);
+  typeStore[curType]={v:o,script:$('script').value};
+  applyType($('ptype').value);makeListingCuts();
+  setStatus($('ptype').value+' 항목으로 바꿨어요. 사진과 내용을 확인해주세요');
+});
+$('btnMakeCuts').onclick=makeListingCuts;
+
+/* ===================== 모드 ===================== */
+const modeStore={};
+function setMode(m){
+  if(m===G.mode)return;
+  modeStore[G.mode]={script:$('script').value,cuts,V:Object.assign({},V),sel,wm:{pos:G.wmPos,style:G.wmStyle}};
+  G.mode=m;
+  const st=modeStore[m];
+  $('modeListing').classList.toggle('on',m==='listing');$('modeInfo').classList.toggle('on',m==='info');
+  $('listingCard').style.display=m==='listing'?'':'none';$('infoCard').style.display=m==='info'?'':'none';
+  if(st){$('script').value=st.script;cuts=st.cuts;sel=st.sel;Object.assign(V,st.V)}
+  else if(m==='info'){
+    $('script').value=INFO_SAMPLE.join('\n');cuts=[];sel=0;
+    Object.assign(V,{buf:null,b:[],mode:'',peaks:null,files:0,name:''});
+    G.wmStyle='text';G.wmPos='top';
+    syncFromScript();
+  }
+  if(st&&st.wm){G.wmPos=st.wm.pos;G.wmStyle=st.wm.style}
+  syncG();
+  $('photoHint').textContent=m==='info'?'사진 배경 스타일을 쓸 때만 필요해요. 글자 카드는 사진 없이도 돼요.':'컷마다 사진이 차례로 돌아가며 들어가요. 컷마다 바꾸려면 오른쪽 컷 편집에서 고르세요.';
+  TLc=null;renderCutList();renderInspector();checkVoice();drawWave();draw();updateUI();
+  setStatus(m==='info'?'정보 영상: 대본을 내용에 맞게 바꿔주세요 (지금은 예시예요)':'매물 영상 모드');
+}
+$('modeListing').onclick=()=>setMode('listing');$('modeInfo').onclick=()=>setMode('info');
+$('infoStyle').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  G.infoStyle=b.dataset.v;$('infoStyle').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));saveG();draw();
+});
+
+/* ===================== 사진 ===================== */
+$('btnPhoto').onclick=()=>$('photoFile').click();
+$('photoFile').onchange=e=>{
+  [...e.target.files].forEach(f=>{
+    const url=URL.createObjectURL(f),im=new Image();
+    im.onload=()=>{photos.push({img:im,url,name:f.name});renderThumbs();renderInspector();draw();setStatus('사진 '+photos.length+'장',true)};
+    im.src=url;
+  });
+  e.target.value='';
+};
+function renderThumbs(){
+  $('thumbs').innerHTML='';
+  photos.forEach((p,i)=>{
+    const d=document.createElement('div');d.className='th';
+    d.innerHTML='<img src="'+p.url+'"><b>'+(i+1)+'</b><i title="삭제">✕</i>';
+    d.querySelector('i').onclick=()=>{photos.splice(i,1);cuts.forEach(c=>{if(c.photo===i)c.photo=-1;else if(c.photo>i)c.photo--});renderThumbs();renderInspector();draw()};
+    $('thumbs').appendChild(d);
+  });
+}
+
+/* ===================== 컷 목록 / 편집 ===================== */
+const LAYOUTS={title:'제목형',price:'가격형',point:'포인트형',card:'카드형',outro:'마무리형'};
+const LBL={title:{chip:'상단 작은 라벨',big:'큰 글자',pill:'',sub:'작은 글자'},price:{chip:'',big:'큰 글자(금색)',pill:'강조 박스',sub:'작은 글자'},
+  point:{chip:'상단 작은 라벨',big:'큰 글자',pill:'',sub:'작은 글자'},card:{chip:'상단 작은 라벨',big:'큰 글자 (줄바꿈 가능)',pill:'',sub:'작은 글자'},
+  outro:{chip:'하단 문구',big:'상호 (비우면 전체설정 상호)',pill:'전화 박스 (비우면 전체설정 번호)',sub:'상단 작은 글자'}};
+function cutLabel(c){return c.big||c.narr||c.sub||c.chip||'(비어 있음)'}
+function renderCutList(){
+  const T=TL(),box=$('cutList');box.innerHTML='';$('cutCount').textContent=cuts.length?'('+cuts.length+'개)':'';
+  cuts.forEach((c,i)=>{
+    const d=document.createElement('div');d.className='cutItem'+(i===sel?' sel':'');
+    d.innerHTML='<span class="n">'+(i+1)+'</span><span class="t">'+esc(cutLabel(c))+'</span><span class="ly">'+LAYOUTS[c.layout]+'</span><span class="tm">'+fmt(T.s[i]||0)+'</span>';
+    d.onclick=()=>{selectCut(i,true)};box.appendChild(d);
+  });
+  if(!cuts.length)box.innerHTML='<div class="hint">왼쪽 대본에 문장을 한 줄씩 입력하세요.</div>';
+}
+function refreshCutList(){
+  const T=TL(),items=$('cutList').children;
+  cuts.forEach((c,i)=>{const it=items[i];if(!it)return;it.querySelector('.t').textContent=cutLabel(c);it.querySelector('.ly').textContent=LAYOUTS[c.layout];it.querySelector('.tm').textContent=fmt(T.s[i]||0)});
+}
+function selectCut(i,seekTo){
+  sel=i;[...$('cutList').children].forEach((d,k)=>d.classList.toggle('sel',k===i));
+  renderInspector();
+  if(seekTo&&!playing){setT(TL().s[i]+Math.min(1.6,(TL().e[i]-TL().s[i])*0.6))}
+  drawWave();
+}
+function renderInspector(){
+  const box=$('inspector');
+  if(!cuts.length){box.innerHTML='';return}
+  const c=cuts[sel],L=LBL[c.layout];
+  box.innerHTML='<h2>✏️ 컷 '+(sel+1)+' 편집</h2>'
+    +'<label>화면 모양</label><select id="iLayout">'+Object.entries(LAYOUTS).map(([k,v])=>'<option value="'+k+'"'+(k===c.layout?' selected':'')+'>'+v+'</option>').join('')+'</select>'
+    +(L.chip!==''?'<label id="lChip">'+L.chip+'</label><input type="text" id="iChip">':'')
+    +'<label id="lBig">'+L.big+'</label><textarea id="iBig" rows="2"></textarea>'
+    +(L.pill!==''?'<label>'+L.pill+'</label><input type="text" id="iPill">':'')
+    +'<label>'+L.sub+'</label><input type="text" id="iSub">'
+    +'<label>이 컷의 대사 (음성 대본)</label><textarea id="iNarr" rows="2"></textarea>'
+    +'<label>사진</label><select id="iPhoto"><option value="-1">자동</option>'+photos.map((p,i)=>'<option value="'+i+'"'+(c.photo===i?' selected':'')+'>사진 '+(i+1)+'</option>').join('')+'</select>'
+    +'<div class="flex mt"><button id="iPlay" class="grow">🔊 이 컷 음성 듣기</button><button id="iAuto" title="대사에서 큰 글자·작은 글자를 다시 자동으로 만들어요">↺ 자동 글자</button></div>';
+  const set=(id,v)=>{const e=$(id);if(e)e.value=v};
+  set('iChip',c.chip);set('iBig',c.big);set('iPill',c.pill);set('iSub',c.sub);set('iNarr',c.narr);
+  const bind=(id,key,manual)=>{const e=$(id);if(!e)return;e.oninput=()=>{c[key]=e.value;if(manual)c.autoText=false;refreshCutList();draw()}};
+  bind('iChip','chip',true);bind('iBig','big',true);bind('iPill','pill',true);bind('iSub','sub',true);
+  $('iLayout').onchange=()=>{c.layout=$('iLayout').value;c.autoLayout=false;renderCutList();renderInspector();draw()};
+  $('iPhoto').onchange=()=>{c.photo=+$('iPhoto').value;draw()};
+  $('iNarr').oninput=()=>{
+    c.narr=$('iNarr').value.replace(/\n/g,' ');
+    $('script').value=cuts.map(x=>x.narr).join('\n');
+    if(c.autoText){const a=autoSplit(c.narr);c.big=a.big;c.sub=a.sub;set('iBig',c.big);set('iSub',c.sub)}
+    updateScriptDependent();refreshCutList();draw();
+  };
+  $('iAuto').onclick=()=>{c.autoText=true;const a=autoSplit(c.narr);c.big=a.big;c.sub=a.sub;renderInspector();refreshCutList();draw()};
+  $('iPlay').onclick=()=>playSeg(sel);
+}
+
+/* ===================== 음성 ===================== */
+let curAC=null;
+function toMono(buf){
+  const n=buf.length,out=mkBuf(n,buf.sampleRate),o=out.getChannelData(0),ch=buf.numberOfChannels;
+  for(let c=0;c<ch;c++){const d=buf.getChannelData(c);for(let i=0;i<n;i++)o[i]+=d[i]/ch}
+  return out;
+}
+function mkBuf(len,sr){return new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,1,sr).createBuffer(1,Math.max(1,len),sr)}
+function trimBuf(buf){
+  const d=buf.getChannelData(0),sr=buf.sampleRate;let pk=0;
+  for(let i=0;i<d.length;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}
+  const thr=Math.max(0.008,pk*0.03);let a=0,b=d.length-1;
+  while(a<d.length&&Math.abs(d[a])<thr)a++;
+  while(b>0&&Math.abs(d[b])<thr)b--;
+  if(a>=b)return buf;
+  a=Math.max(0,a-Math.floor(sr*0.04));b=Math.min(d.length-1,b+Math.floor(sr*0.12));
+  const out=mkBuf(b-a+1,sr);out.getChannelData(0).set(d.subarray(a,b+1));return out;
+}
+function concatClips(clips,gapSec){
+  const sr=clips[0].sampleRate,gap=Math.floor(sr*gapSec);
+  const total=clips.reduce((x,c)=>x+c.length,0)+gap*(clips.length-1);
+  const out=mkBuf(total,sr),o=out.getChannelData(0),b=[];let pos=0;
+  clips.forEach(c=>{b.push(pos/sr);o.set(c.getChannelData(0),pos);pos+=c.length+gap});
+  b.push((pos-gap)/sr);
+  return {buf:out,b};
+}
+/* 쉬는 구간으로 N개 문장 경계 찾기 → [시작, 경계..., 끝] 또는 null */
+function detectBounds(buf,lens,n){
+  const d=buf.getChannelData(0),sr=buf.sampleRate,win=Math.floor(sr*0.02);
+  const cnt=Math.floor(d.length/win);if(cnt<20)return null;
+  const rms=new Float32Array(cnt);let mx=0;
+  for(let i=0;i<cnt;i++){let s=0;for(let j=i*win;j<(i+1)*win;j++)s+=d[j]*d[j];rms[i]=Math.sqrt(s/win);if(rms[i]>mx)mx=rms[i]}
+  if(mx<=0)return null;
+  const thr=mx*0.05;let first=0,last=cnt-1;
+  while(first<cnt&&rms[first]<thr)first++;while(last>0&&rms[last]<thr)last--;
+  const t0=first*0.02,t1=(last+1)*0.02;
+  const out=[Math.max(0,t0-0.05)];
+  if(n>1){
+    const gaps=[];let i=first;
+    while(i<=last){if(rms[i]<thr){let j=i;while(j<=last&&rms[j]<thr)j++;const len=(j-i)*0.02;if(len>=0.15)gaps.push({end:j*0.02,len});i=j}else i++}
+    if(gaps.length<n-1)return null;
+    const sum=lens.reduce((a,b)=>a+b,0);let cum=0,prev=t0;
+    for(let k=1;k<n;k++){
+      cum+=lens[k-1];const e=t0+(t1-t0)*cum/sum;
+      let best=null,bc=1e9;
+      for(const g of gaps){if(g.end<prev+0.8)continue;const c=Math.abs(g.end-e)-3*g.len;if(c<bc){bc=c;best=g}}
+      if(!best)return null;out.push(best.end-0.05);prev=best.end;
+    }
+  }
+  out.push(Math.min(buf.duration,t1+0.15));
+  return out;
+}
+function splitVoice(){
+  const N=cuts.length;if(!V.buf||!N)return;
+  const lens=cuts.map(c=>c.narr.length||10);
+  const det=detectBounds(V.buf,lens,N);
+  if(det){V.b=det;V.auto=true}
+  else{ // 글자 수 비율로 나눔
+    const sum=lens.reduce((a,b)=>a+b,0),dur=V.buf.duration;let cum=0;V.b=[0];
+    lens.forEach(l=>{cum+=l;V.b.push(dur*cum/sum)});V.auto=false;
+  }
+  V.peaks=null;
+}
+$('btnVoice').onclick=()=>$('voiceFile').click();
+$('voiceFile').onchange=async e=>{
+  const files=[...e.target.files].sort((a,b)=>a.name.localeCompare(b.name,'ko',{numeric:true}));e.target.value='';
+  if(!files.length)return;
+  if(!cuts.length){setStatus('먼저 왼쪽에 대본을 입력해주세요');return}
+  setStatus('🎧 음성 파일을 읽는 중...');
+  try{
+    const oc=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(1,44100,44100);
+    const bufs=[];for(const f of files){bufs.push(toMono(await oc.decodeAudioData(await f.arrayBuffer())))}
+    if(files.length===1){
+      V.buf=bufs[0];V.mode='single';V.files=1;V.name=files[0].name;splitVoice();
+    }else{
+      const r=concatClips(bufs.map(trimBuf),0.25);V.buf=r.buf;V.b=r.b;V.mode='multi';V.files=files.length;V.name=files.length+'개 파일';V.auto=true;V.peaks=null;
+    }
+    TLc=null;checkVoice();drawWave();renderCutList();draw();updateUI();
+    if(voiceOK())setStatus(V.mode==='single'?(V.auto?'음성을 문장 '+cuts.length+'개로 나눴어요 ✔ 파형의 노란 선이 맞는지 확인하세요':'쉬는 구간을 못 찾아 글자 수로 나눴어요. 파형의 노란 선을 끌어 맞춰주세요'):'문장별 파일 '+files.length+'개를 붙였어요 ✔',true);
+  }catch(err){setStatus('음성 파일을 읽지 못했어요. mp3/wav 파일인지 확인해주세요')}
+};
+$('btnResplit').onclick=()=>{
+  if(V.mode==='multi'){setStatus('문장별 파일은 자동 나누기를 쓰지 않아요. 파일을 다시 올려주세요');return}
+  splitVoice();TLc=null;checkVoice();drawWave();renderCutList();draw();updateUI();setStatus('다시 나눴어요 ✔',true);
+};
+function updateScriptDependent(){
+  // 대본 줄 수가 바뀌었을 때
+  if(V.buf&&V.mode==='single'&&V.b.length!==cuts.length+1&&cuts.length){splitVoice()}
+  TLc=null;checkVoice();drawWave();
+}
+function checkVoice(){
+  const N=cuts.length;
+  $('wfBox').style.display=V.buf?'block':'none';
+  $('voiceInfo').textContent=V.buf?('🎙 '+V.name+' · '+V.buf.duration.toFixed(1)+'초'):'아직 올린 음성이 없어요. 음성 없이도 영상은 저장돼요.';
+  let w='';
+  if(V.buf&&V.b.length!==N+1)w='⚠ 음성 문장 수('+(V.b.length-1)+')와 대본 줄 수('+N+')가 달라서 음성에 맞춘 편집을 쓰지 않고 있어요. 줄 수를 맞춰주세요.';
+  $('voiceWarn').textContent=w;
+}
+
+/* ---------- 파형 ---------- */
+const wf=$('wf'),wctx=wf.getContext('2d');let wpps=80;
+function calcPeaks(){
+  const d=V.buf.getChannelData(0),sr=V.buf.sampleRate,n=Math.ceil(V.buf.duration*100),p=new Float32Array(n),step=sr/100;let mx=0.0001;
+  for(let i=0;i<n;i++){let m=0;const a=Math.floor(i*step),b=Math.min(d.length,Math.floor((i+1)*step));for(let j=a;j<b;j+=4){const v=Math.abs(d[j]);if(v>m)m=v}p[i]=m;if(m>mx)mx=m}
+  for(let i=0;i<n;i++)p[i]/=mx;V.peaks=p;
+}
+function drawWave(){
+  if(!V.buf)return;if(!V.peaks)calcPeaks();
+  const w=Math.max(200,Math.ceil(V.buf.duration*wpps)),h=96;wf.width=w;wf.height=h;wf.style.width=w+'px';
+  wctx.clearRect(0,0,w,h);
+  const ok=V.b.length>=2;
+  if(ok){for(let i=0;i<V.b.length-1;i++){
+    const x0=V.b[i]*wpps,x1=V.b[i+1]*wpps;
+    wctx.fillStyle=(i===sel)?'rgba(255,212,0,.16)':(i%2?'rgba(255,255,255,.04)':'rgba(255,255,255,.09)');wctx.fillRect(x0,0,x1-x0,h);
+  }}
+  wctx.fillStyle='rgba(120,190,255,.85)';
+  for(let x=0;x<w;x+=2){const v=V.peaks[Math.min(V.peaks.length-1,Math.floor(x/wpps*100))];const bh=Math.max(1,v*h*0.78);wctx.fillRect(x,(h-bh)/2,1.4,bh)}
+  if(ok){
+    wctx.font='bold 12px sans-serif';
+    for(let i=0;i<V.b.length;i++){
+      const x=V.b[i]*wpps;wctx.fillStyle='#ffd400';wctx.fillRect(x-1.5,0,3,h);
+      wctx.beginPath();wctx.moveTo(x-6,0);wctx.lineTo(x+6,0);wctx.lineTo(x,9);wctx.fill();
+      if(i<V.b.length-1){wctx.fillStyle='#fff';wctx.fillText(String(i+1),x+6,h-6)}
+    }
+  }
+  updateWaveHead();
+}
+function updateWaveHead(){
+  if(!V.buf||!V.b.length){return}
+  const x=(V.b[0]+(curT-V0))*wpps;$('wfHead').style.left=Math.max(0,x)+'px';$('wfHead').style.display=(curT>=V0&&x<=wf.width)?'block':'none';
+}
+$('wfZoom').oninput=()=>{wpps=+$('wfZoom').value;drawWave()};
+wf.addEventListener('pointerdown',e=>{
+  if(!V.buf||V.b.length<2)return;
+  const r=wf.getBoundingClientRect(),x=e.clientX-r.left,sec=x/wpps;
+  let k=-1,bd=9;V.b.forEach((b,i)=>{const d=Math.abs(b*wpps-x);if(d<bd){bd=d;k=i}});
+  if(k>=0){
+    e.preventDefault();
+    const mv=ev=>{
+      const s=(ev.clientX-r.left)/wpps,lo=k===0?0:V.b[k-1]+0.15,hi=k===V.b.length-1?V.buf.duration:V.b[k+1]-0.15;
+      V.b[k]=r2(clamp(s,lo,hi));TLc=null;drawWave();draw();refreshCutList();updateUI();
+    };
+    const up=()=>{removeEventListener('pointermove',mv);removeEventListener('pointerup',up);if(!playing)setT(TL().s[Math.min(k,cuts.length-1)]+0.9)};
+    addEventListener('pointermove',mv);addEventListener('pointerup',up);return;
+  }
+  for(let i=0;i<V.b.length-1;i++)if(sec>=V.b[i]&&sec<V.b[i+1]){selectCut(i,false);playSeg(i);break}
+});
+function playSeg(i){
+  if(!V.buf||!voiceOK()){setStatus('음성을 올리고 문장 수를 맞춘 뒤 들을 수 있어요');return}
+  try{curAC&&curAC.close()}catch(e){}
+  curAC=new (window.AudioContext||window.webkitAudioContext)();
+  const s=curAC.createBufferSource();s.buffer=V.buf;const g=curAC.createGain();g.gain.value=G.voiceVol;
+  s.connect(g).connect(curAC.destination);s.start(0,V.b[i],V.b[i+1]-V.b[i]);
+}
+
+/* ===================== 소리 / 재생 / 저장 ===================== */
+let ac=null,dest=null,master=null,music=null,voiceG=null,playing=false,raf=null,recorder=null,playT0=0;
+function noiseBuf(){const b=ac.createBuffer(1,ac.sampleRate*1,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;return b}
+function kick(t){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(42,t+.15);g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.connect(g).connect(music);o.start(t);o.stop(t+.32)}
+function hat(t,nb){const s=ac.createBufferSource();s.buffer=nb;const f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=7500;const g=ac.createGain();g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);s.connect(f).connect(g).connect(music);s.start(t,0,.08)}
+function tone(t,fr,type,vol,dur){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=fr;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g).connect(music);o.start(t);o.stop(t+dur+.02)}
+function whoosh(t,nb){const s=ac.createBufferSource();s.buffer=nb;const f=ac.createBiquadFilter();f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.exponentialRampToValueAtTime(4000,t+.35);const g=ac.createGain();g.gain.setValueAtTime(.001,t);g.gain.exponentialRampToValueAtTime(.5,t+.2);g.gain.exponentialRampToValueAtTime(.001,t+.45);s.connect(f).connect(g).connect(music);s.start(t,0,.5)}
+function impact(t){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(30,t+.4);g.gain.setValueAtTime(1,t);g.gain.exponentialRampToValueAtTime(.001,t+.6);o.connect(g).connect(music);o.start(t);o.stop(t+.65)}
+function applyVolumes(){
+  if(!music)return;
+  music.gain.value=G.musicOn?G.musicVol*(voiceOK()?0.35:1):0;voiceG.gain.value=G.voiceVol;
+}
+function ensureAudio(){
+  ac=new (window.AudioContext||window.webkitAudioContext)();dest=ac.createMediaStreamDestination();
+  master=ac.createGain();master.gain.value=.85;master.connect(ac.destination);master.connect(dest);
+  music=ac.createGain();music.connect(master);voiceG=ac.createGain();voiceG.connect(master);applyVolumes();
+}
+function scheduleAudio(from){
+  const T=TL(),t0=ac.currentTime+0.3;playT0=t0;
+  const nb=noiseBuf(),at=te=>Math.max(ac.currentTime+0.005,t0+(te-from)),total=T.total;
+  const roots=[110,87.3,130.8,98],chords=[[440,523.25,659.25],[349.2,440,523.25],[523.25,659.25,784],[392,493.9,587.3]];
+  for(let i=Math.max(0,Math.floor(from*2));i<total*2;i++){
+    const te=i*.5;if(te<from-0.001)continue;kick(at(te));hat(at(te)+.25,nb);
+    const ci=Math.floor(i/4)%4;if(i%2===0)tone(at(te),roots[ci],'sine',.28,.45);
+  }
+  for(let i=Math.max(0,Math.floor(from*4));i<total*4;i++){
+    const te=i*.25;if(te<from-0.001)continue;
+    const ci=Math.floor(i/8)%4,pat=[0,1,2,1,0,1,2,1][i%8];tone(at(te),chords[ci][pat],'triangle',.09,.28);
+  }
+  T.s.forEach((s,i)=>{if(i>0&&s>=from-0.01){whoosh(Math.max(ac.currentTime+0.005,at(s)-.15),nb);impact(at(s))}});
+  if(voiceOK()){
+    const vEnd=V0+V.buf.duration-V.b[0];
+    if(vEnd>from){
+      const src=ac.createBufferSource();src.buffer=V.buf;src.connect(voiceG);
+      if(from<=V0)src.start(at(V0),V.b[0]);else src.start(t0,V.b[0]+(from-V0));
+    }
+  }
+  const fadeAt=at(total-1.2);
+  master.gain.setValueAtTime(.85,Math.max(fadeAt,ac.currentTime));master.gain.linearRampToValueAtTime(0,Math.max(at(total),ac.currentTime+0.05));
+  applyVolumes();
+  return t0;
+}
+function setStatus(m,ok){const s=$('status');s.textContent=m;s.className=ok?'ok':''}
+function setT(t){curT=clamp(t,0,TL().total-0.002);draw();updateUI()}
+function updateUI(){
+  const T=TL();$('timeLabel').textContent=fmt(Math.min(curT,T.total))+' / '+fmt(T.total);
+  $('scrub').value=Math.round(clamp(curT/T.total)*1000);updateWaveHead();
+}
+$('scrub').addEventListener('input',()=>{if(recorder)return;if(playing)stopPlayback();setT($('scrub').value/1000*TL().total)});
+function startPlayback(rec){
+  if(playing)return;
+  if(!cuts.length){setStatus('대본을 먼저 입력해주세요');return}
+  let from=curT;if(rec||from>=TL().total-0.05)from=0;
+  curT=from;ensureAudio();
+  const t0=scheduleAudio(from),T=TL().total;let mr=null,chunks=[],ext='webm';
+  if(rec){
+    if(!window.MediaRecorder){setStatus('이 브라우저는 저장을 지원하지 않아요. 크롬이나 엣지에서 열어주세요');return}
+    const stream=cv.captureStream(30);dest.stream.getAudioTracks().forEach(tr=>stream.addTrack(tr));
+    const types=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'];
+    const mime=types.find(m=>MediaRecorder.isTypeSupported(m))||'';ext=mime.includes('mp4')?'mp4':'webm';
+    mr=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:8000000}:{videoBitsPerSecond:8000000});
+    mr.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    mr.onstop=()=>{
+      const blob=new Blob(chunks,{type:mr.mimeType||'video/webm'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+      a.download='하이탑_쇼츠_'+((cuts[0]&&cuts[0].big)||'영상').replace(/[\\/:*?"<>|\s]/g,'')+'.'+ext;a.click();
+      setStatus('저장 완료 ✔ ('+ext+') 다운로드 폴더를 확인하세요',true);
+      recorder=null;$('btnSave').disabled=false;$('btnSave').textContent='⏺ 영상 저장 (음성·배경음 포함)';
+    };
+    mr.start();recorder=mr;$('btnSave').disabled=true;$('btnSave').textContent='⏺ 저장 중... 이 탭을 그대로 두세요';
+    setStatus('저장 중입니다. 영상 길이만큼 걸려요. 다른 탭으로 옮기지 마세요');
+  }else setStatus('▶ 재생 중');
+  playing=true;$('btnPlay').textContent='⏸';
+  try{ac.resume()}catch(e){}
+  const myAc=ac;
+  const loop=()=>{
+    if(!playing||ac!==myAc)return;
+    const lat=Math.min(0.5,Math.max(0,myAc.outputLatency||myAc.baseLatency||0));
+    const x=from+Math.max(0,myAc.currentTime-t0-lat);
+    if(x<T){curT=x;draw();updateUI();raf=requestAnimationFrame(loop)}
+    else{curT=T-0.002;draw();updateUI();playing=false;cancelAnimationFrame(raf);$('btnPlay').textContent='▶';
+      if(mr&&mr.state!=='inactive')setTimeout(()=>mr.stop(),400);else setStatus('재생 완료');
+      const a=myAc;setTimeout(()=>{try{a.close()}catch(e){}},900)}
+  };
+  raf=requestAnimationFrame(loop);
+}
+function stopPlayback(){
+  if(!playing||recorder)return;
+  playing=false;cancelAnimationFrame(raf);$('btnPlay').textContent='▶';try{ac&&ac.close()}catch(e){}setStatus('일시정지');
+}
+$('btnPlay').onclick=()=>{if(recorder)return;playing?stopPlayback():startPlayback(false)};
+$('btnSave').onclick=()=>startPlayback(true);
+addEventListener('keydown',e=>{
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input'&&e.target.type!=='range'||tag==='textarea'||tag==='select')return;
+  if(e.code==='Space'){e.preventDefault();$('btnPlay').click()}
+});
+
+/* ===================== 설정 연결 ===================== */
+function syncG(){
+  $('gFont').value=G.font;$('gStroke').value=G.stroke;$('gMain').value=G.main;$('gAccent').value=G.accent;
+  $('gSize').value=Math.round(G.sizeK*100);$('gY').value=G.yOff;$('gLead').value=Math.round(G.lead*100);
+  $('gBiz').value=G.biz;$('gTel').value=G.tel;$('gWmPos').value=G.wmPos;$('gWmStyle').value=G.wmStyle;
+  $('gMusicOn').checked=G.musicOn;$('gMusic').value=Math.round(G.musicVol*100);$('gVoice').value=Math.round(G.voiceVol*100);
+  $('vSize').textContent=Math.round(G.sizeK*100)+'%';$('vLead').textContent=G.lead.toFixed(2)+'초';
+  FONT=FONTS[G.font]||FONTS.basic;
+  $('infoStyle').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===G.infoStyle));
+}
+function bindG(id,key,conv,after){
+  const e=$(id);const h=()=>{G[key]=conv(e);$('vSize').textContent=Math.round(G.sizeK*100)+'%';$('vLead').textContent=G.lead.toFixed(2)+'초';saveG();if(after)after();TLc=null;draw();updateUI();refreshCutList()};
+  e.addEventListener('input',h);e.addEventListener('change',h);
+}
+bindG('gFont','font',e=>e.value,()=>{FONT=FONTS[G.font];document.fonts&&document.fonts.load('900 60px '+FONTS[G.font].split(',')[0]).then(()=>draw())});
+bindG('gStroke','stroke',e=>+e.value);bindG('gMain','main',e=>e.value);bindG('gAccent','accent',e=>e.value);
+bindG('gSize','sizeK',e=>e.value/100);bindG('gY','yOff',e=>+e.value);bindG('gLead','lead',e=>e.value/100);
+bindG('gBiz','biz',e=>e.value.trim());bindG('gTel','tel',e=>e.value.trim());
+bindG('gWmPos','wmPos',e=>e.value);bindG('gWmStyle','wmStyle',e=>e.value);
+bindG('gMusicOn','musicOn',e=>e.checked,applyVolumes);bindG('gMusic','musicVol',e=>e.value/100,applyVolumes);bindG('gVoice','voiceVol',e=>e.value/100,applyVolumes);
+$('script').addEventListener('input',()=>{syncFromScript();updateScriptDependent();renderCutList();renderInspector();draw();updateUI()});
+$('btnCopy').onclick=async()=>{
+  try{await navigator.clipboard.writeText($('script').value)}catch(e){$('script').select();document.execCommand('copy')}
+  setStatus('대본 복사 완료 ✔ AI Studio에 붙여넣으세요',true);
+};
+
+/* ===================== 시작 ===================== */
+loadG();syncG();
+applyType('아파트');
+makeListingCuts();
+renderCutList();renderInspector();checkVoice();curT=2;draw();updateUI();
+document.fonts&&document.fonts.ready.then(()=>{FONT=FONTS[G.font]||FONTS.basic;draw()});
+draw();
+
+</script>
+</body>
+</html>
