@@ -123,6 +123,7 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
       <h2><span class="num">3</span>대본 (한 줄 = 한 컷)</h2>
       <textarea id="script" rows="9"></textarea>
       <div class="hint" id="fillNote"></div>
+      <button class="wide mt btn-gold" id="btnGenScript" title="위 매물 정보로 대본 1~5줄을 새로 써요">✍️ 매물 정보로 대본 만들기</button>
       <button class="wide mt" id="btnRefill" title="대본 내용으로 매물 정보와 화면 글자를 전부 다시 채워요">🔄 대본에서 다시 채우기</button>
       <button class="wide mt" id="btnCopy">📋 대본 복사 (AI Studio에 붙여넣기)</button>
       <a class="wide mt" id="btnTTS" href="https://huggingface.co/spaces/Qwen/Qwen3-TTS" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;background:#ffd400;color:#1a1400;font-weight:700;text-decoration:none;border-radius:10px;padding:10px 12px">🔊 TTS 사이트 바로가기 (Qwen3-TTS)</a>
@@ -682,6 +683,62 @@ $('btnRefill').onclick=()=>{
   cuts.forEach((c,i)=>{if(i<5)c.manual=false});
   fillFromScript(true);renderCutList();renderInspector();draw();
   if(!$('fillNote').textContent)$('fillNote').textContent='대본에서 읽을 새 내용이 없어요.';
+};
+
+
+/* ===== 매물 정보 → 대본 만들기 (가격은 TTS가 읽기 좋게 한글로) ===== */
+const DK=['','일','이','삼','사','오','육','칠','팔','구'];
+function chunk4(n){
+  let o='';const t=Math.floor(n/1000),h=Math.floor(n%1000/100),te=Math.floor(n%100/10),u=n%10;
+  if(t)o+=(t===1?'':DK[t])+'천';if(h)o+=(h===1?'':DK[h])+'백';if(te)o+=(te===1?'':DK[te])+'십';if(u)o+=DK[u];
+  return o;
+}
+function numToKor(n){
+  n=Math.round(n);if(n===0)return '영';
+  const eok=Math.floor(n/1e8),man=Math.floor(n%1e8/1e4),rest=n%1e4,parts=[];
+  if(eok)parts.push(chunk4(eok%10000||eok)+'억'.replace(/^/,''));
+  if(man)parts.push((man===1?'':chunk4(man))+'만');
+  if(rest)parts.push(chunk4(rest));
+  return parts.join(' ');
+}
+const UNITV={'억':1e8,'천만':1e7,'백만':1e6,'만':1e4,'천':1e3,'백':100};
+function priceToSpoken(txt){
+  if(!txt)return '';
+  const monthly=/보증금|월/.test(txt);
+  const RUN=/(?:\d+(?:\.\d+)?\s*(?:억|천만|백만|만|천|백)?\s*)+/g;
+  let out=txt.replace(RUN,run=>{
+    let sum=0,hasBig=false;
+    run.replace(/(\d+(?:\.\d+)?)\s*(억|천만|백만|만|천|백)?/g,(m,d,u)=>{
+      const v=parseFloat(d);
+      if(u==='억'||u==='천만'||u==='백만'||u==='만')hasBig=true;
+      sum+=Math.round(v*(u?UNITV[u]:1));return m;
+    });
+    const trail=/\s$/.test(run)?' ':'';
+    if(monthly&&!hasBig)return numToKor(sum)+trail;       // 보증금·월세는 '만 원' 단위
+    return numToKor(sum)+' 원'+trail;
+  });
+  out=out.replace(/원\s*원/g,'원').replace(/\s*원\s*원/g,' 원').replace(/\s*\/\s*월\s*/,'에 월세 ').replace(/\s+/g,' ').trim();
+  return out;
+}
+function buildScript(){
+  const f={};FIELD_IDS.forEach(k=>f[k]=$(k).value.trim());
+  const L=[];
+  L.push((f.area+' '+f.name).trim()+(f.complex?', '+f.complex:'')+'!');
+  const sp=priceToSpoken(f.price);
+  L.push([f.size,[f.type,sp].filter(Boolean).join(' ')].filter(Boolean).join(', ')+'!');
+  [[f.f1,f.s1],[f.f2,f.s2],[f.f3,f.s3]].forEach(([a,b])=>{
+    const t=[a,b].filter(Boolean).join(', ');L.push(t?t.replace(/[.!?。]+$/,'')+'.':'이 매물의 장점을 적어주세요.');
+  });
+  const old=scriptLines();L.push(old.length>=6?old[old.length-1]:CALL);
+  return L;
+}
+$('btnGenScript').onclick=()=>{
+  if(G.mode!=='listing')return;
+  const L=buildScript();
+  $('script').value=L.join('\n');
+  makeListingCuts();
+  $('fillNote').textContent='✅ 매물 정보로 대본을 만들었어요. 2줄 가격 읽기를 꼭 확인하고, 문장은 자유롭게 고치세요: '+L[1];
+  $('price').classList.add('chk');
 };
 
 /* ===== 유튜브 올리기 글 (제목·설명·태그) 만들기 ===== */
