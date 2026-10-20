@@ -122,6 +122,8 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
     <div class="card">
       <h2><span class="num">3</span>대본 (한 줄 = 한 컷)</h2>
       <textarea id="script" rows="9"></textarea>
+      <div class="hint" id="fillNote"></div>
+      <button class="wide mt" id="btnRefill" title="대본 내용으로 매물 정보와 화면 글자를 전부 다시 채워요">🔄 대본에서 다시 채우기</button>
       <button class="wide mt" id="btnCopy">📋 대본 복사 (AI Studio에 붙여넣기)</button>
       <div class="hint">문장 사이에 AI Studio에서 "문장마다 1초 쉬고 읽어줘"라고 하면 자동 나누기가 더 정확해요.</div>
     </div>
@@ -554,8 +556,116 @@ function makeListingCuts(){
   }
   cuts=cuts.slice(0,Math.max(lines.length,0)||6);
   syncFromScript();
+  prevLines=scriptLines();
+  const fn=$('fillNote');if(fn)fn.textContent='';
   sel=0;TLc=null;E.sel=null;E.drag=null;updateAdjUI();renderCutList();renderInspector();checkVoice();draw();
 }
+/* ===== 대본 → 매물 정보 자동 채우기 =====
+   대본 줄을 고치면 그 줄에 해당하는 매물 정보 칸과 화면 글자가 따라 바뀜.
+   1줄=위치·이름·동호수 / 2줄=면적·거래종류·가격 / 3~5줄=포인트 1~3 / 6줄=마무리(건드리지 않음)
+   직접 고친 컷(c.manual)은 덮어쓰지 않고, [대본에서 다시 채우기]를 누르면 전부 다시 채움 */
+const KD={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9};
+function korToNum(s){
+  let total=0,sec=0,cur=0;
+  for(const ch of s.replace(/\s+/g,'')){
+    if(/\d/.test(ch))cur=cur*10+(+ch);
+    else if(ch in KD)cur=KD[ch];
+    else if(ch==='십'||ch==='백'||ch==='천'){sec+=(cur||1)*({'십':10,'백':100,'천':1000}[ch]);cur=0}
+    else if(ch==='만'||ch==='억'){total+=((sec+cur)||1)*(ch==='만'?1e4:1e8);sec=0;cur=0}
+  }
+  return total+sec+cur;
+}
+const NUMRUN=/(?<![가-힣\d])[일이삼사오육칠팔구십백천만억\d]+(?:\s+[일이삼사오육칠팔구십백천만억\d]+)*/g;
+const hasUnit=r=>/[십백천만억\d]/.test(r);
+const trimNum=x=>String(Math.round(x*10000)/10000);
+function fmtPriceRun(r){
+  const n=korToNum(r);
+  if(/억/.test(r))return trimNum(n/1e8)+'억';
+  if(/만/.test(r)){const m=n/1e4;return (m>=1000&&m%1000===0?(m/1000)+'천':trimNum(m))+'만'}
+  return (n>=1000&&n%1000===0)?(n/1000)+'천':String(n);
+}
+const TYPE_RE=/(반전세|전세|월세|매매|임대)/;
+const cleanTail=s=>s.replace(/[!?.。…]+$/,'').replace(/[,，]+$/,'').trim();
+function parseLine1(ln){
+  const parts=cleanTail(ln).split(/[,，]/).map(x=>x.trim()).filter(Boolean),o={};
+  if(parts.length>=2){
+    const tk=parts[0].split(/\s+/);
+    if(tk.length>=2){o.area=tk[0];o.name=tk.slice(1).join(' ')}else o.name=parts[0];
+    o.complex=parts.slice(1).join(' ');
+  }else if(parts.length===1)o.name=parts[0];
+  return o;
+}
+function parseLine2(ln){
+  const parts=cleanTail(ln).split(/[,，]/).map(x=>x.trim()).filter(Boolean),o={};
+  let A=parts[0]||'',B=parts.slice(1).join(' ');
+  const tm=A.match(TYPE_RE)||(B.match(/^(반전세|전세|월세|매매|임대)/));
+  if(tm)o.type=tm[1];
+  if(parts.length>=2){
+    const size=A.replace(TYPE_RE,'').replace(NUMRUN,r=>hasUnit(r)?String(korToNum(r)):r).replace(/\s+(평|㎡|m²)/,'$1').replace(/\s+/g,' ').trim();
+    if(size)o.size=size;
+  }
+  const P=(parts.length>=2?B:'').replace(/^(반전세|전세|월세|매매|임대)\s*/,'');
+  if(P&&/[십백천만억\d삼오칠]/.test(P)){
+    let p=P.replace(NUMRUN,r=>hasUnit(r)?fmtPriceRun(r):r);
+    p=p.replace(/\s*원\s*/g,' ').replace(/에\s*월세\s*/,' / 월 ').replace(/\s+/g,' ').trim();
+    if(p)o.price=p;
+  }
+  return o;
+}
+function applyFieldsToCuts(idxs){
+  const f={};FIELD_IDS.forEach(k=>f[k]=$(k).value.trim());
+  const put=(i,o)=>{const c=cuts[i];if(!c||c.manual)return;Object.assign(c,o)};
+  idxs.forEach(i=>{
+    if(i===0||i===1)put(0,{chip:[f.area,f.type].filter(Boolean).join(' · '),big:f.name,sub:f.complex});
+    if(i===1)put(1,{big:f.size,pill:(f.type+' '+f.price).trim()});
+    if(i>=2&&i<=4)put(i,{big:f['f'+(i-1)],sub:f['s'+(i-1)]});
+  });
+}
+let prevLines=[];
+const NICE={area:'지역',name:'이름',complex:'동/단지',size:'면적',type:'거래종류',price:'가격',f1:'포인트1',s1:'포인트1 부제',f2:'포인트2',s2:'포인트2 부제',f3:'포인트3',s3:'포인트3 부제'};
+(function(){const st=document.createElement('style');st.textContent='input.chk{outline:2px solid #ffd400;background:#3a3300}';document.head.appendChild(st);
+  $('price').addEventListener('input',()=>$('price').classList.remove('chk'))})();
+function fillFromScript(force){
+  const lines=scriptLines(),note=$('fillNote');
+  if(G.mode!=='listing'){prevLines=lines;return}
+  const tpl=cuts.length>=5&&cuts[0].layout==='title'&&cuts[1].layout==='price'&&[2,3,4].every(i=>cuts[i].layout==='point');
+  if(!tpl){prevLines=lines;note.textContent='';return}
+  if(!force&&lines.length!==prevLines.length){
+    note.textContent='⚠️ 줄 수가 달라졌어요. 1줄 제목 · 2줄 가격 · 3~5줄 포인트 · 6줄 마무리 순서가 맞는지 확인하세요.';
+    prevLines=lines;return;
+  }
+  const changed=[];
+  for(let i=0;i<5&&i<lines.length;i++)if(force||lines[i]!==prevLines[i])changed.push(i);
+  prevLines=lines;
+  if(!changed.length)return;
+  const said=[],skipped=[];let priceNew=false;
+  const setF=(k,v)=>{if(v!==undefined&&v!==''&&$(k).value!==v){$(k).value=v;said.push((NICE[k]||k)+' '+v);if(k==='price')priceNew=true}};
+  changed.forEach(i=>{
+    const ln=lines[i];
+    if(i===0&&curType!=='기타'){const o=parseLine1(ln);['area','name','complex'].forEach(k=>setF(k,o[k]))}
+    else if(i===1&&curType!=='기타'){
+      const o=parseLine2(ln);['type','size','price'].forEach(k=>setF(k,o[k]));
+      if(!o.price)skipped.push('가격');
+    }else if(i>=2){
+      const a=autoSplit(ln),n=i-1;setF('f'+n,a.big);setF('s'+n,a.sub);
+    }
+  });
+  applyFieldsToCuts(changed);
+  const manualHit=changed.filter(i=>cuts[i]&&cuts[i].manual).map(i=>(i+1)+'줄');
+  $('price').classList.toggle('chk',priceNew||$('price').classList.contains('chk'));
+  let msg='';
+  if(said.length)msg='✅ 대본에서 매물 정보를 채웠어요: '+said.join(' · ');
+  if(priceNew)msg+=' — 💛 가격이 맞는지 꼭 확인하세요!';
+  if(skipped.length&&changed.includes(1))msg+=' (2줄에서 '+skipped.join('·')+'은 못 읽어서 그대로 뒀어요)';
+  if(manualHit.length)msg+=' (직접 고친 컷('+manualHit.join(', ')+')의 화면 글자는 그대로 뒀어요)';
+  note.textContent=msg;
+}
+$('btnRefill').onclick=()=>{
+  cuts.forEach((c,i)=>{if(i<5)c.manual=false});
+  fillFromScript(true);renderCutList();renderInspector();draw();
+  if(!$('fillNote').textContent)$('fillNote').textContent='대본에서 읽을 새 내용이 없어요.';
+};
+
 /* 매물 종류 */
 const typeStore={};let curType='아파트';
 function applyType(tp){
@@ -581,6 +691,7 @@ function setMode(m){
   G.mode=m;
   const st=modeStore[m];
   $('modeListing').classList.toggle('on',m==='listing');$('modeInfo').classList.toggle('on',m==='info');
+  $('btnRefill').style.display=m==='listing'?'':'none';$('fillNote').textContent='';
   $('listingCard').style.display=m==='listing'?'':'none';$('infoCard').style.display=m==='info'?'':'none';
   if(st){$('script').value=st.script;cuts=st.cuts;sel=st.sel;Object.assign(V,st.V)}
   else if(m==='info'){
@@ -590,6 +701,7 @@ function setMode(m){
     syncFromScript();
   }
   if(st&&st.wm){G.wmPos=st.wm.pos;G.wmStyle=st.wm.style}
+  prevLines=scriptLines();
   syncG();
   $('photoHint').textContent=m==='info'?'사진 배경 스타일을 쓸 때만 필요해요. 글자 카드는 사진 없이도 돼요.':'컷마다 사진이 차례로 돌아가며 들어가요. 컷마다 바꾸려면 오른쪽 컷 편집에서 고르세요.';
   E.sel=null;E.drag=null;E.cutI=-1;updateAdjUI();
@@ -661,17 +773,18 @@ function renderInspector(){
     +'<div class="flex mt"><button id="iPlay" class="grow">🔊 이 컷 음성 듣기</button><button id="iAuto" title="대사에서 큰 글자·작은 글자를 다시 자동으로 만들어요">↺ 자동 글자</button></div>';
   const set=(id,v)=>{const e=$(id);if(e)e.value=v};
   set('iChip',c.chip);set('iBig',c.big);set('iPill',c.pill);set('iSub',c.sub);set('iNarr',c.narr);
-  const bind=(id,key,manual)=>{const e=$(id);if(!e)return;e.oninput=()=>{c[key]=e.value;if(manual)c.autoText=false;refreshCutList();draw()}};
+  const bind=(id,key,manual)=>{const e=$(id);if(!e)return;e.oninput=()=>{c[key]=e.value;if(manual){c.autoText=false;c.manual=true}refreshCutList();draw()}};
   bind('iChip','chip',true);bind('iBig','big',true);bind('iPill','pill',true);bind('iSub','sub',true);
   $('iLayout').onchange=()=>{c.layout=$('iLayout').value;c.autoLayout=false;c.adj={};E.sel=null;updateAdjUI();renderCutList();renderInspector();draw()};
   $('iPhoto').onchange=()=>{c.photo=+$('iPhoto').value;draw()};
   $('iNarr').oninput=()=>{
     c.narr=$('iNarr').value.replace(/\n/g,' ');
     $('script').value=cuts.map(x=>x.narr).join('\n');
+    fillFromScript();set('iChip',c.chip);set('iBig',c.big);set('iPill',c.pill);set('iSub',c.sub);
     if(c.autoText){const a=autoSplit(c.narr);c.big=a.big;c.sub=a.sub;set('iBig',c.big);set('iSub',c.sub)}
     updateScriptDependent();refreshCutList();draw();
   };
-  $('iAuto').onclick=()=>{c.autoText=true;const a=autoSplit(c.narr);c.big=a.big;c.sub=a.sub;renderInspector();refreshCutList();draw()};
+  $('iAuto').onclick=()=>{c.autoText=true;c.manual=false;const a=autoSplit(c.narr);c.big=a.big;c.sub=a.sub;renderInspector();refreshCutList();draw()};
   $('iPlay').onclick=()=>playSeg(sel);
 }
 
@@ -949,7 +1062,7 @@ bindG('gSize','sizeK',e=>e.value/100);bindG('gY','yOff',e=>+e.value);bindG('gLea
 bindG('gBiz','biz',e=>e.value.trim());bindG('gTel','tel',e=>e.value.trim());
 bindG('gWmPos','wmPos',e=>e.value);bindG('gWmStyle','wmStyle',e=>e.value);
 bindG('gMusicOn','musicOn',e=>e.checked,applyVolumes);bindG('gMusic','musicVol',e=>e.value/100,applyVolumes);bindG('gVoice','voiceVol',e=>e.value/100,applyVolumes);
-$('script').addEventListener('input',()=>{syncFromScript();updateScriptDependent();renderCutList();renderInspector();draw();updateUI()});
+$('script').addEventListener('input',()=>{fillFromScript();syncFromScript();updateScriptDependent();renderCutList();renderInspector();draw();updateUI()});
 $('btnCopy').onclick=async()=>{
   try{await navigator.clipboard.writeText($('script').value)}catch(e){$('script').select();document.execCommand('copy')}
   setStatus('대본 복사 완료 ✔ AI Studio에 붙여넣으세요',true);
