@@ -46,6 +46,24 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
   .pills{display:flex;gap:6px;flex-wrap:wrap}
   .pills button{padding:7px 12px;font-size:13px;background:var(--panel2);border:1px solid var(--line);color:var(--mut)}
   .pills button.on{background:var(--gold);color:#111;border-color:var(--gold)}
+  /* 단계 번호: 보이는 카드만 1,2,3… 자동으로 매겨요 */
+  #left{counter-reset:stp}
+  #left .card h2 .num{counter-increment:stp}
+  #left .card h2 .num::before{content:counter(stp)}
+  #left.info #infoCard{order:-2}#left.info #photoCard{order:-1}
+  /* 특징 칩 */
+  .chips button{padding:6px 11px;font-size:12.5px}
+  .chips button .x{margin-left:5px;opacity:.7}
+  .chkrow{display:flex;gap:8px;align-items:center;color:var(--txt)}
+  .selRow{display:flex;gap:6px;align-items:center;padding:6px 8px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);margin-top:6px}
+  .selRow .no{width:20px;height:20px;border-radius:50%;background:var(--gold);color:#111;display:grid;place-items:center;font-size:11px;font-weight:800;flex-shrink:0}
+  .selRow .nm{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .selRow .nm small{color:var(--mut);margin-left:6px;font-size:11.5px}
+  .selRow button{padding:3px 9px;font-size:12px}
+  /* 강조색 팔레트 */
+  .sw{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .sw button{padding:6px 11px;font-size:12px;border:2px solid transparent}
+  .sw button.on{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.3)}
   /* 사진 */
   #thumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .th{position:relative;width:62px;height:62px;border-radius:9px;overflow:hidden;border:1px solid var(--line)}
@@ -93,44 +111,64 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
 <main>
   <!-- 왼쪽 -->
   <section class="col" id="left">
-    <div class="card" id="listingCard">
-      <h2><span class="num">1</span>매물 정보</h2>
+    <div class="card" id="infoCard" style="display:none">
+      <h2><span class="num"></span>정보 영상 화면 스타일</h2>
+      <div class="pills" id="infoStyle"><button data-v="card" class="on">🟦 글자 카드</button><button data-v="photo">🖼 사진 배경</button></div>
+      <div class="hint">글자 카드는 사진 없이 큰 글자로 보여줘요. 사진 배경은 아래에 올린 사진 위에 글자가 나와요.</div>
+    </div>
+    <div class="card lm" id="listingCard">
+      <h2><span class="num"></span>매물 정보</h2>
       <label>매물 종류</label>
       <select id="ptype"><option>아파트</option><option>상가</option><option>토지</option><option>공장·창고</option><option>오피스텔</option><option>기타</option></select>
       <div class="row"><div><label id="lb_area">지역</label><input type="text" id="area"></div><div><label id="lb_name">단지명</label><input type="text" id="name"></div></div>
       <div class="row"><div><label id="lb_complex">동/단지</label><input type="text" id="complex"></div><div><label id="lb_size">평형</label><input type="text" id="size"></div></div>
       <div class="row"><div><label id="lb_type">거래종류</label><input type="text" id="type"></div><div><label id="lb_price">가격</label><input type="text" id="price"></div></div>
-      <label id="lb_f1">포인트 1 (큰 글자 / 작은 글자)</label><div class="row"><input type="text" id="f1"><input type="text" id="s1"></div>
+      <div class="hint">여기까지가 매물 기본 정보예요. 다음 단계에서 특징을 고르면 대본이 만들어져요.</div>
+    </div>
+    <div class="card lm" id="featCard">
+      <h2><span class="num"></span>특징 고르기 <span class="small">(3~5개 권장)</span></h2>
+      <div class="hint" style="margin-top:0">눌러서 고르세요. 고른 순서가 그대로 컷 순서예요.</div>
+      <div class="pills chips mt" id="featChips"></div>
+      <label>내 칩 <span class="small">(✕ 누르면 삭제)</span></label>
+      <div class="pills chips" id="myChips"></div>
+      <label>직접 추가 <span class="small">(작은 글자는 "~입니다" 말투로 적으면 대본이 자연스러워요)</span></label>
+      <div class="row"><input type="text" id="cfBig" placeholder="큰 글자 (예: 올수리)"><input type="text" id="cfSub" placeholder="작은 글자 (예: 깔끔하게 수리 완료)"></div>
+      <label class="chkrow"><input type="checkbox" id="cfSave" checked> 내 칩으로도 저장해 두기</label>
+      <button class="wide mt" id="cfAdd">➕ 특징 추가</button>
+      <label>고른 특징 <span class="small" id="featCnt"></span></label>
+      <div id="featSel"></div>
+    </div>
+    <div class="card" id="scriptCard">
+      <h2><span class="num"></span>대본 (한 줄 = 한 컷)</h2>
+      <button class="wide btn-gold lm" id="btnGenScript" title="고른 특징으로 대본을 쓰고, 포인트까지 자동으로 나눠요">✍️ 특징으로 대본 만들기</button>
+      <textarea id="script" rows="9" class="mt"></textarea>
+      <div class="hint" id="fillNote"></div>
+      <button class="wide mt lm" id="btnRefill" title="대본을 고친 뒤 눌러요. 대본 줄을 포인트 1~5로 나눠서 화면 글자를 다시 채워요">✂️ 대본에서 포인트 나누기</button>
+      <button class="wide mt" id="btnCopy">📋 대본 복사 (AI Studio에 붙여넣기)</button>
+      <a class="wide mt" id="btnTTS" href="https://huggingface.co/spaces/Qwen/Qwen3-TTS" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;background:#ffd400;color:#1a1400;font-weight:700;text-decoration:none;border-radius:10px;padding:10px 12px">🔊 TTS 사이트 바로가기 (Qwen3-TTS)</a>
+      <div class="hint">문장 사이에 AI Studio에서 "문장마다 1초 쉬고 읽어줘"라고 하면 자동 나누기가 더 정확해요.</div>
+    </div>
+    <div class="card lm" id="pointsCard">
+      <h2><span class="num"></span>포인트 <span class="small">(화면에 나오는 큰 글자 / 작은 글자)</span></h2>
+      <div class="hint" style="margin-top:0">대본에서 자동으로 채워져요. 직접 고치거나 새로 적어도 돼요. 비워 둔 포인트는 컷이 만들어지지 않아요.</div>
+      <label id="lb_f1">포인트 1</label><div class="row"><input type="text" id="f1"><input type="text" id="s1"></div>
       <label>포인트 2</label><div class="row"><input type="text" id="f2"><input type="text" id="s2"></div>
       <label>포인트 3</label><div class="row"><input type="text" id="f3"><input type="text" id="s3"></div>
+      <label>포인트 4</label><div class="row"><input type="text" id="f4"><input type="text" id="s4"></div>
+      <label>포인트 5</label><div class="row"><input type="text" id="f5"><input type="text" id="s5"></div>
       <div class="row"><div><label>가격 화면 부제</label><input type="text" id="sub2"></div><div><label>마무리 문구</label><input type="text" id="outro"></div></div>
       <button class="wide btn-gold mt" id="btnMakeCuts">✨ 이 정보로 컷 만들기</button>
       <div class="hint">내용을 고친 뒤 눌러야 오른쪽 컷에 반영돼요. 컷을 직접 고친 내용은 다시 만들면 덮어써져요.</div>
     </div>
-    <div class="card" id="infoCard" style="display:none">
-      <h2><span class="num">1</span>정보 영상 화면 스타일</h2>
-      <div class="pills" id="infoStyle"><button data-v="card" class="on">🟦 글자 카드</button><button data-v="photo">🖼 사진 배경</button></div>
-      <div class="hint">글자 카드는 사진 없이 큰 글자로 보여줘요. 사진 배경은 아래에 올린 사진 위에 글자가 나와요.</div>
-    </div>
-    <div class="card">
-      <h2><span class="num">2</span>사진</h2>
+    <div class="card" id="photoCard">
+      <h2><span class="num"></span>사진</h2>
       <button class="wide" id="btnPhoto">📷 사진 추가 (여러 장 가능)</button>
       <input type="file" id="photoFile" accept="image/*" multiple style="display:none">
       <div id="thumbs"></div>
       <div class="hint" id="photoHint">컷마다 사진이 차례로 돌아가며 들어가요. 컷마다 바꾸려면 오른쪽 컷 편집에서 고르세요.</div>
     </div>
     <div class="card">
-      <h2><span class="num">3</span>대본 (한 줄 = 한 컷)</h2>
-      <textarea id="script" rows="9"></textarea>
-      <div class="hint" id="fillNote"></div>
-      <button class="wide mt btn-gold" id="btnGenScript" title="위 매물 정보로 대본 1~5줄을 새로 써요">✍️ 매물 정보로 대본 만들기</button>
-      <button class="wide mt" id="btnRefill" title="대본 내용으로 매물 정보와 화면 글자를 전부 다시 채워요">🔄 대본에서 다시 채우기</button>
-      <button class="wide mt" id="btnCopy">📋 대본 복사 (AI Studio에 붙여넣기)</button>
-      <a class="wide mt" id="btnTTS" href="https://huggingface.co/spaces/Qwen/Qwen3-TTS" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;background:#ffd400;color:#1a1400;font-weight:700;text-decoration:none;border-radius:10px;padding:10px 12px">🔊 TTS 사이트 바로가기 (Qwen3-TTS)</a>
-      <div class="hint">문장 사이에 AI Studio에서 "문장마다 1초 쉬고 읽어줘"라고 하면 자동 나누기가 더 정확해요.</div>
-    </div>
-    <div class="card">
-      <h2><span class="num">4</span>음성 올리기</h2>
+      <h2><span class="num"></span>음성 올리기</h2>
       <button class="wide btn-gold" id="btnVoice">📂 음성 파일 올리기</button>
       <input type="file" id="voiceFile" accept="audio/*,.mp3,.wav,.m4a,.ogg,.aac,.webm" multiple style="display:none">
       <div class="hint">• 파일 <b>하나</b>(전체 대본)를 올리면 쉬는 곳에서 자동으로 문장을 나눠요.<br>• 문장별 파일 <b>여러 개</b>를 한 번에 선택하면 이름 순서대로 붙여요. (가장 정확해요)</div>
@@ -189,6 +227,8 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
       <div class="row"><div><label>글꼴</label><select id="gFont"><option value="basic">기본 (고딕)</option><option value="black">블랙한산스</option><option value="dohyeon">도현체</option><option value="jua">주아체</option></select></div>
       <div><label>테두리 굵기</label><input type="range" id="gStroke" min="0" max="20" value="10"></div></div>
       <div class="row"><div><label>글자색</label><input type="color" id="gMain" value="#ffffff"></div><div><label>강조색</label><input type="color" id="gAccent" value="#ffd400"></div></div>
+      <div class="sw" id="accSw"></div>
+      <div class="hint" style="margin-top:6px">매물 종류를 바꾸면 종류별 기본 색으로 바뀌어요. 마음에 안 들면 여기서 다시 고르세요.</div>
       <div class="row"><div><label>글자 크기 <span class="small" id="vSize"></span></label><input type="range" id="gSize" min="60" max="130" value="100"></div>
       <div><label>글자 위치 위↑/아래↓</label><input type="range" id="gY" min="-250" max="250" value="0"></div></div>
       <label>글자가 소리보다 먼저 나오는 시간 <span class="small" id="vLead"></span></label><input type="range" id="gLead" min="0" max="80" value="30">
@@ -218,7 +258,8 @@ const esc=t=>String(t).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const fmt=t=>{t=Math.max(0,t);const m=Math.floor(t/60),s=t-m*60;return m+':'+(s<10?'0':'')+s.toFixed(1)};
 const r2=x=>Math.round(x*100)/100;
 
-const FIELD_IDS=['area','name','complex','size','type','price','f1','s1','f2','s2','f3','s3','sub2','outro'];
+const FIELD_IDS=['area','name','complex','size','type','price','f1','s1','f2','s2','f3','s3','f4','s4','f5','s5','sub2','outro'];
+const MAXP=5; // 포인트 최대 개수
 const CALL='상담은 하이탑부동산, 공삼일 구사구 팔구육구!';
 const PRESETS={
  '아파트':{labels:{area:'지역',name:'단지명',complex:'동/단지',size:'평형',type:'거래종류',price:'가격',f1:'포인트 1 (큰 글자 / 작은 글자)'},
@@ -241,6 +282,74 @@ const PRESETS={
   script:['','','','','',CALL]}
 };
 
+/* ---------- 특징 칩 (큰 글자, 작은 글자, 대본 한 줄 · "~입니다" 말투) ---------- */
+const FEATS={
+ '아파트':[
+  ['넓은 거실','탁 트인 개방감','탁 트인 넓은 거실이 자랑입니다.'],
+  ['채광 좋은 집','햇살이 가득 들어옵니다','채광이 좋아 집안 가득 햇살이 들어옵니다.'],
+  ['2층 집','계단으로 이용이 편리합니다','2층이라 계단으로 이용도 편리합니다.'],
+  ['올수리','깔끔하게 수리 완료','올수리를 마쳐 바로 살기 좋은 집입니다.'],
+  ['남향','따뜻하고 밝은 집','남향이라 따뜻하고 밝은 집입니다.'],
+  ['로얄층','조망이 시원합니다','로얄층이라 조망이 시원합니다.'],
+  ['역세권','출퇴근이 편리합니다','역세권이라 출퇴근이 편리합니다.'],
+  ['학교 가까움','아이 키우기 좋습니다','학교가 가까워 아이 키우기 좋습니다.'],
+  ['주차 편리','주차 걱정 없습니다','주차가 편리해 걱정이 없습니다.'],
+  ['즉시 입주','바로 입주 가능합니다','즉시 입주가 가능합니다.'],
+  ['신축급 컨디션','깨끗하게 관리됐습니다','신축급 컨디션으로 깨끗하게 관리됐습니다.'],
+  ['생활편의 우수','마트·병원이 가깝습니다','마트와 병원이 가까워 생활이 편리합니다.']],
+ '상가':[
+  ['대로변 코너','눈에 확 띄는 입지','대로변 코너라 눈에 확 띕니다.'],
+  ['1층 상가','접근성이 좋습니다','1층이라 접근성이 좋습니다.'],
+  ['유동인구 풍부','배후 세대가 탄탄합니다','유동인구가 많고 배후 세대가 탄탄합니다.'],
+  ['주차 편리','손님 오시기 좋습니다','주차가 편리해 손님 오시기 좋습니다.'],
+  ['권리금 없음','부담 없이 시작합니다','권리금이 없어 부담 없이 시작할 수 있습니다.'],
+  ['업종 제한 적음','다양한 업종 가능합니다','업종 제한이 적어 다양한 업종이 가능합니다.'],
+  ['인테리어 완료','바로 영업 가능합니다','인테리어가 되어 있어 바로 영업이 가능합니다.'],
+  ['넓은 전면','간판 노출이 좋습니다','전면이 넓어 간판 노출이 좋습니다.'],
+  ['역세권','출퇴근 수요가 탄탄합니다','역세권이라 출퇴근 수요가 탄탄합니다.']],
+ '토지':[
+  ['반듯한 정형지','건축하기 좋은 땅','반듯한 정형지라 건축하기 좋습니다.'],
+  ['도로에 접함','진입이 편리합니다','도로에 접해 진입이 편리합니다.'],
+  ['개발 호재','미래 가치가 높습니다','개발 호재로 미래 가치가 높습니다.'],
+  ['평탄한 지형','토목 비용 절감','평탄한 지형이라 토목 비용을 줄일 수 있습니다.'],
+  ['용도지역 우수','활용도가 높습니다','용도지역이 좋아 활용도가 높습니다.'],
+  ['전기·수도 인접','인입이 쉽습니다','전기와 수도가 가까워 인입이 쉽습니다.'],
+  ['주변 개발 활발','투자 가치가 충분합니다','주변 개발이 활발해 투자 가치가 충분합니다.'],
+  ['넓은 면적','활용 폭이 넓습니다','면적이 넓어 활용 폭이 넓습니다.']],
+ '공장·창고':[
+  ['높은 층고','물건 적재가 편합니다','층고가 높아 물건 적재가 편합니다.'],
+  ['화물차 진입 OK','대형 차량도 여유 있습니다','화물차와 대형 차량도 진입이 쉽습니다.'],
+  ['전기 증설 가능','설비 걱정 없습니다','전기 증설이 가능해 설비 걱정이 없습니다.'],
+  ['호이스트 설치','중량물 작업이 편합니다','호이스트가 설치되어 중량물 작업이 편리합니다.'],
+  ['넓은 마당','상하차 공간이 충분합니다','넓은 마당이 있어 상하차 공간이 충분합니다.'],
+  ['도로 접함','물류 이동이 편합니다','도로에 접해 물류 이동이 편리합니다.'],
+  ['사무실 완비','바로 업무 시작','사무실이 갖춰져 있어 바로 업무를 시작할 수 있습니다.'],
+  ['IC 가까움','물류 접근성이 우수합니다','고속도로 IC가 가까워 물류 접근성이 우수합니다.']],
+ '오피스텔':[
+  ['풀옵션','몸만 들어오시면 됩니다','풀옵션이라 몸만 들어오시면 됩니다.'],
+  ['역세권','출퇴근이 편리합니다','역세권이라 출퇴근이 편리합니다.'],
+  ['신축급 컨디션','깨끗하게 관리됐습니다','신축급 컨디션으로 깨끗하게 관리됐습니다.'],
+  ['높은 층','조망이 좋습니다','높은 층이라 조망이 좋습니다.'],
+  ['편의시설 가까움','생활이 편리합니다','편의시설이 가까워 생활이 편리합니다.'],
+  ['보안 우수','안심하고 지낼 수 있습니다','보안이 우수해 안심하고 지낼 수 있습니다.'],
+  ['주차 가능','주차 걱정 없습니다','주차가 가능해 걱정이 없습니다.'],
+  ['즉시 입주','바로 입주 가능합니다','즉시 입주가 가능합니다.']],
+ '기타':[
+  ['즉시 입주','바로 입주 가능합니다','즉시 입주가 가능합니다.'],
+  ['교통 편리','이동이 편리합니다','교통이 편리해 이동이 쉽습니다.'],
+  ['주차 편리','주차 걱정 없습니다','주차가 편리해 걱정이 없습니다.'],
+  ['상태 양호','깨끗하게 관리됐습니다','상태가 양호하고 깨끗하게 관리됐습니다.'],
+  ['가격 협의 가능','문의 주세요','가격 협의가 가능합니다.']]
+};
+/* 종류를 처음 열었을 때 미리 골라 두는 특징 (큰 글자 기준) */
+const DEFAULT_FEATS={'아파트':['넓은 거실','채광 좋은 집','2층 집'],'상가':['대로변 코너','유동인구 풍부','주차 편리'],'토지':['반듯한 정형지','도로에 접함','개발 호재'],'공장·창고':['높은 층고','화물차 진입 OK','전기 증설 가능'],'오피스텔':['풀옵션','역세권','신축급 컨디션'],'기타':[]};
+const featObj=a=>({big:a[0],sub:a[1],line:a[2]});
+const featKey=f=>f.big+'|'+f.sub;
+
+/* ---------- 강조색 ---------- */
+const ACCENTS=[['노랑','#ffd400'],['민트','#3ee8c4'],['스카이','#4cc3ff'],['오렌지','#ff8a2a'],['연두','#a6e22e'],['핑크','#ff6fae'],['라벤더','#b69cff']];
+/* 매물 종류별 기본 강조색: 종류를 바꾸면 자동으로 이 색이 됨 */
+const TYPE_ACCENT={'아파트':'#4cc3ff','상가':'#3ee8c4','토지':'#a6e22e','공장·창고':'#ff8a2a','오피스텔':'#b69cff','기타':'#ffd400'};
 
 const FONTS={
   basic:"'Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif",
@@ -287,6 +396,10 @@ function rec(key,x,y,w,h){
 
 /* ---------- 데이터 ---------- */
 let cuts=[],photos=[],sel=0;
+let ptMap=[];        // 컷에 들어간 포인트 칸 번호 (예: [1,2,4]) — 컷 2+j 번이 포인트 ptMap[j]
+let selFeats=[];     // 고른 특징 (순서 = 컷 순서)
+let headRef=[];      // 칸(지역·이름·가격)과 맞춰 둔 대본 1·2줄 — 이 줄이 달라졌을 때만 대본에서 다시 읽어요
+let myChips={};      // 종류별 내 칩
 const V={buf:null,b:[],mode:'',peaks:null,files:0,name:''};
 const V0=0.35;
 const mk=(layout,o)=>Object.assign({layout,chip:'',big:'',pill:'',sub:'',narr:'',photo:-1,autoText:false,autoLayout:false,adj:{}},o||{});
@@ -338,6 +451,8 @@ function cardBG(i,lt){
   for(let y=0;y<=H;y+=90){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
 }
 function hexA(hex,a){const h=hex.replace('#','');const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+/* 강조색 위에 올리는 글자색: 밝은 색이면 어두운 글자, 어두운 색이면 흰 글자 */
+function inkOn(hex){const h=String(hex||'#ffd400').replace('#','');const n=parseInt(h.length===3?h.split('').map(c=>c+c).join(''):h,16);const L=0.299*(n>>16&255)+0.587*(n>>8&255)+0.114*(n&255);return L>150?'#111':'#fff'}
 function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 
 function charsIn(text,cx,cy,size,color,lt,delay,o={}){
@@ -433,7 +548,7 @@ function chip(text,cx,cy,lt,delay){
   ctx.save();ctx.globalAlpha=p;ctx.font=`900 40px ${FONT}`;
   const w=ctx.measureText(text).width+70;
   ctx.fillStyle=hexA(G.accent,.95);rr(cx-w/2,cy-34+(1-p)*-20,w,68,34);ctx.fill();
-  ctx.fillStyle='#111';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,cx,cy+(1-p)*-20+2);ctx.restore();
+  ctx.fillStyle=inkOn(G.accent);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,cx,cy+(1-p)*-20+2);ctx.restore();
 }
 
 /* ---------- 컷 그리기 ---------- */
@@ -449,7 +564,7 @@ function drawCut(c,lt){
       AD('sub',cx,1100+Y+d,()=>subText(c.sub,cx,1100+Y+d,76*K,lt,1.5));break}
     case 'price':
       AD('big',cx,720+Y,()=>bigText(c.big,cx,720+Y,340*K,A,lt,0.1,{stroke:ST+2,stagger:.12}));
-      AD('pill',cx,1090+Y,()=>pill(c.pill,cx,1090+Y,130*K,A,'#111',lt,1.0));
+      AD('pill',cx,1090+Y,()=>pill(c.pill,cx,1090+Y,130*K,A,inkOn(A),lt,1.0));
       if(lt>1.0&&lt<1.2){ctx.fillStyle=`rgba(255,255,255,${(1.2-lt)/0.2*.6})`;ctx.fillRect(0,0,W,H)}
       AD('sub',cx,1280+Y,()=>subText(c.sub,cx,1280+Y,54*K,lt,2.0));break;
     case 'point':{const d=bigInfo(c.big,230*K).dy;
@@ -462,7 +577,7 @@ function drawCut(c,lt){
       AD('pill',cx,1010+Y,()=>{
         const p=clamp((lt-1.2)/.5),pulse=p>0?1+0.04*Math.sin(lt*8):1;
         ctx.save();ctx.translate(cx,1010+Y);ctx.scale(pulse,pulse);ctx.translate(-cx,-(1010+Y));
-        pill(c.pill||('☎ '+G.tel),cx,1010+Y,110*K,A,'#111',lt,1.2);ctx.restore()});
+        pill(c.pill||('☎ '+G.tel),cx,1010+Y,110*K,A,inkOn(A),lt,1.2);ctx.restore()});
       AD('chip',cx,1200+Y,()=>subText(c.chip,cx,1200+Y,60*K,lt,2.0,'chip'));break}
     default:{ // card
       const d=bigInfo(c.big,180*K).dy;
@@ -488,7 +603,7 @@ function watermark(t){
       const x=x0,y=y0+(1-p)*(top?-40:40);
       ctx.fillStyle='rgba(10,14,28,.82)';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=24;rr(x,y,w,h,60);ctx.fill();ctx.shadowColor='transparent';
       ctx.fillStyle=G.accent;ctx.beginPath();ctx.arc(x+60,y+60,34,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#111';ctx.font=`900 36px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☎',x+60,y+62);
+      ctx.fillStyle=inkOn(G.accent);ctx.font=`900 36px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☎',x+60,y+62);
       ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=`900 42px ${FONT}`;ctx.fillText(G.biz,x+118,y+60);
       ctx.textAlign='right';ctx.fillStyle=G.accent;ctx.font=`900 52px ${FONT}`;ctx.fillText(G.tel,x+w-40,y+62);
     }else{
@@ -565,27 +680,31 @@ function syncFromScript(){
 function makeListingCuts(){
   const f={};FIELD_IDS.forEach(k=>f[k]=$(k).value.trim());
   const lines=scriptLines();
+  /* 비어 있지 않은 포인트만 컷으로 만들어요 (1~5개) */
+  ptMap=[];for(let n=1;n<=MAXP;n++)if(f['f'+n]||f['s'+n])ptMap.push(n);
   cuts=[
     mk('title',{chip:[f.area,f.type].filter(Boolean).join(' · '),big:f.name,sub:f.complex}),
-    mk('price',{big:f.size,pill:(f.type+' '+f.price).trim(),sub:f.sub2}),
-    mk('point',{chip:'POINT 1',big:f.f1,sub:f.s1}),
-    mk('point',{chip:'POINT 2',big:f.f2,sub:f.s2}),
-    mk('point',{chip:'POINT 3',big:f.f3,sub:f.s3}),
+    mk('price',{big:f.size,pill:(f.type+' '+f.price).trim(),sub:f.sub2})
+  ].concat(ptMap.map((n,j)=>mk('point',{chip:'POINT '+(j+1),big:f['f'+n],sub:f['s'+n]})),[
     mk('outro',{sub:f.outro,big:'',pill:'',chip:'편하게 전화주세요!'})
-  ];
-  for(let i=0;i<lines.length;i++){
-    if(i<cuts.length)cuts[i].narr=lines[i];
-    else cuts.push(mk('card',{autoText:true,autoLayout:true,narr:lines[i]}));
+  ]);
+  const tplLen=cuts.length;
+  /* 대본 줄이 컷보다 많으면 모자란 만큼 일반 카드 컷을 마무리 컷 앞에 끼워 넣어요 (마무리는 항상 맨 끝) */
+  if(lines.length>tplLen){
+    const outroCut=cuts.pop();
+    for(let i=0;i<lines.length-tplLen;i++)cuts.push(mk('card',{autoText:true,autoLayout:true}));
+    cuts.push(outroCut);
   }
-  cuts=cuts.slice(0,Math.max(lines.length,0)||6);
+  for(let i=0;i<lines.length&&i<cuts.length;i++)cuts[i].narr=lines[i];
+  cuts=cuts.slice(0,Math.max(lines.length,0)||tplLen);
   syncFromScript();
-  prevLines=scriptLines();
+  prevLines=scriptLines();headRef=[prevLines[0],prevLines[1]];
   const fn=$('fillNote');if(fn)fn.textContent='';
   sel=0;TLc=null;E.sel=null;E.drag=null;updateAdjUI();renderCutList();renderInspector();checkVoice();draw();
 }
 /* ===== 대본 → 매물 정보 자동 채우기 =====
    대본 줄을 고치면 그 줄에 해당하는 매물 정보 칸과 화면 글자가 따라 바뀜.
-   1줄=위치·이름·동호수 / 2줄=면적·거래종류·가격 / 3~5줄=포인트 1~3 / 6줄=마무리(건드리지 않음)
+   1줄=위치·이름·동호수 / 2줄=면적·거래종류·가격 / 3줄부터=포인트 1~5 / 마지막 줄=마무리(건드리지 않음)
    직접 고친 컷(c.manual)은 덮어쓰지 않고, [대본에서 다시 채우기]를 누르면 전부 다시 채움 */
 const KD={'일':1,'이':2,'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9};
 function korToNum(s){
@@ -641,24 +760,24 @@ function applyFieldsToCuts(idxs){
   idxs.forEach(i=>{
     if(i===0||i===1)put(0,{chip:[f.area,f.type].filter(Boolean).join(' · '),big:f.name,sub:f.complex});
     if(i===1)put(1,{big:f.size,pill:(f.type+' '+f.price).trim()});
-    if(i>=2&&i<=4)put(i,{big:f['f'+(i-1)],sub:f['s'+(i-1)]});
+    if(i>=2&&i<2+ptMap.length){const n=ptMap[i-2];put(i,{big:f['f'+n],sub:f['s'+n]})}
   });
 }
 let prevLines=[];
-const NICE={area:'지역',name:'이름',complex:'동/단지',size:'면적',type:'거래종류',price:'가격',f1:'포인트1',s1:'포인트1 부제',f2:'포인트2',s2:'포인트2 부제',f3:'포인트3',s3:'포인트3 부제'};
+const NICE={area:'지역',name:'이름',complex:'동/단지',size:'면적',type:'거래종류',price:'가격',f1:'포인트1',s1:'포인트1 부제',f2:'포인트2',s2:'포인트2 부제',f3:'포인트3',s3:'포인트3 부제',f4:'포인트4',s4:'포인트4 부제',f5:'포인트5',s5:'포인트5 부제'};
 (function(){const st=document.createElement('style');st.textContent='input.chk{outline:2px solid #ffd400;background:#3a3300}';document.head.appendChild(st);
   $('price').addEventListener('input',()=>$('price').classList.remove('chk'))})();
 function fillFromScript(force){
   const lines=scriptLines(),note=$('fillNote');
   if(G.mode!=='listing'){prevLines=lines;return}
-  const tpl=cuts.length>=5&&cuts[0].layout==='title'&&cuts[1].layout==='price'&&[2,3,4].every(i=>cuts[i].layout==='point');
+  const tpl=cuts.length>=2&&cuts[0].layout==='title'&&cuts[1].layout==='price'&&ptMap.every((_,j)=>cuts[2+j]&&cuts[2+j].layout==='point');
   if(!tpl){prevLines=lines;note.textContent='';return}
   if(!force&&lines.length!==prevLines.length){
     note.textContent='⚠️ 줄 수가 달라졌어요. 1줄 제목 · 2줄 가격 · 3~5줄 포인트 · 6줄 마무리 순서가 맞는지 확인하세요.';
     prevLines=lines;return;
   }
   const changed=[];
-  for(let i=0;i<5&&i<lines.length;i++)if(force||lines[i]!==prevLines[i])changed.push(i);
+  for(let i=0;i<2+ptMap.length&&i<lines.length;i++)if(force||lines[i]!==prevLines[i])changed.push(i);
   prevLines=lines;
   if(!changed.length)return;
   const said=[],skipped=[];let priceNew=false;
@@ -670,10 +789,12 @@ function fillFromScript(force){
       const o=parseLine2(ln);['type','size','price'].forEach(k=>setF(k,o[k]));
       if(!o.price)skipped.push('가격');
     }else if(i>=2){
-      const a=autoSplit(ln),n=i-1;setF('f'+n,a.big);setF('s'+n,a.sub);
+      const n=ptMap[i-2];
+      if(n){const a=autoSplit(ln);setF('f'+n,a.big);setF('s'+n,a.sub)}
     }
   });
   applyFieldsToCuts(changed);
+  if(changed.includes(0)||changed.includes(1))headRef=[lines[0],lines[1]];
   const manualHit=changed.filter(i=>cuts[i]&&cuts[i].manual).map(i=>(i+1)+'줄');
   $('price').classList.toggle('chk',priceNew||$('price').classList.contains('chk'));
   let msg='';
@@ -683,11 +804,52 @@ function fillFromScript(force){
   if(manualHit.length)msg+=' (직접 고친 컷('+manualHit.join(', ')+')의 화면 글자는 그대로 뒀어요)';
   note.textContent=msg;
 }
-$('btnRefill').onclick=()=>{
-  cuts.forEach((c,i)=>{if(i<5)c.manual=false});
-  fillFromScript(true);renderCutList();renderInspector();draw();
-  if(!$('fillNote').textContent)$('fillNote').textContent='대본에서 읽을 새 내용이 없어요.';
-};
+/* ===== 대본 → 포인트 나누기 =====
+   1줄(위치·이름)·2줄(면적·거래·가격)은 직접 고쳤을 때만 읽고,
+   3줄부터 마지막 상담 줄 앞까지를 포인트 1~5로 나눠 화면 글자를 다시 채워요.
+   특징 칩으로 만든 줄은 칩의 큰 글자/작은 글자를 그대로 쓰고, 직접 쓴 줄은 자동으로 나눠요. */
+function featByLine(ln){
+  const all=[].concat(selFeats,(FEATS[curType]||[]).map(featObj),myChips[curType]||[]);
+  return all.find(x=>x.line===ln)||null;
+}
+function splitScriptToPoints(){
+  const note=$('fillNote');
+  if(G.mode!=='listing')return;
+  const lines=scriptLines();
+  if(lines.length<3){note.textContent='⚠️ 대본이 3줄 이상 있어야 나눌 수 있어요. (1줄 제목 · 2줄 가격 · 3줄부터 포인트 · 마지막 줄 상담 문구)';return}
+  const hasOutro=/상담|문의|전화/.test(lines[lines.length-1]);
+  let mid=lines.slice(2,hasOutro?lines.length-1:lines.length);
+  const over=mid.length>MAXP;if(over)mid=mid.slice(0,MAXP);
+  const said=[],skipped=[];let priceNew=false;
+  const setF=(k,v)=>{if(v!==undefined&&v!==''&&$(k).value!==v){$(k).value=v;said.push((NICE[k]||k)+' '+v);if(k==='price')priceNew=true}};
+  /* 1·2줄: 칸과 맞춰 둔 그대로면 건드리지 않고(칸이 원본), 대본에서 달라졌을 때만 읽어요 */
+  const headSame=lines[0]===headRef[0]&&lines[1]===headRef[1];
+  if(!headSame&&curType!=='기타'){
+    const o1=parseLine1(lines[0]);['area','name','complex'].forEach(k=>setF(k,o1[k]));
+    const o2=parseLine2(lines[1]);['type','size','price'].forEach(k=>setF(k,o2[k]));
+    if(!o2.price)skipped.push('가격');
+  }
+  mid.forEach((ln,j)=>{const a=featByLine(ln)||autoSplit(ln);$('f'+(j+1)).value=a.big;$('s'+(j+1)).value=a.sub||''});
+  for(let n=mid.length+1;n<=MAXP;n++){$('f'+n).value='';$('s'+n).value=''}
+  const M=mid.length;
+  /* 컷 구성(제목·가격·포인트 M개·마무리)이 그대로면 글자만 바꿔서 컷별 사진·글자 위치 조절을 살리고, 달라졌으면 컷을 새로 만들어요 */
+  const same=hasOutro&&cuts.length===lines.length&&cuts.length===M+3&&ptMap.length===M&&cuts[0].layout==='title'&&cuts[1].layout==='price'&&cuts[cuts.length-1].layout==='outro'&&cuts.slice(2,2+M).every(c=>c.layout==='point');
+  if(same){
+    ptMap=mid.map((_,j)=>j+1);
+    cuts.forEach((c,i)=>{if(i<2+M)c.manual=false});
+    applyFieldsToCuts([...Array(2+M).keys()]);
+    syncFromScript();prevLines=scriptLines();headRef=[lines[0],lines[1]];
+    TLc=null;renderCutList();renderInspector();checkVoice();draw();
+  }else makeListingCuts();
+  let msg=M?'✅ 대본을 포인트 '+M+'개로 나눴어요.':'⚠️ 포인트로 나눌 줄이 없어요. 3줄부터가 포인트예요.';
+  if(over)msg+=' (포인트는 최대 '+MAXP+'개라서 남는 '+(lines.length-2-(hasOutro?1:0)-MAXP)+'줄은 일반 카드 컷으로 넣었어요)';
+  if(said.length)msg+=' 바뀐 칸: '+said.join(' · ');
+  if(priceNew)msg+=' — 💛 가격이 맞는지 꼭 확인하세요!';
+  if(skipped.length)msg+=' (2줄에서 '+skipped.join('·')+'은 못 읽어서 그대로 뒀어요)';
+  $('price').classList.toggle('chk',priceNew||$('price').classList.contains('chk'));
+  note.textContent=msg;
+}
+$('btnRefill').onclick=splitScriptToPoints;
 
 
 /* ===== 매물 정보 → 대본 만들기 (가격은 TTS가 읽기 좋게 한글로) ===== */
@@ -730,18 +892,21 @@ function buildScript(){
   L.push((f.area+' '+f.name).trim()+(f.complex?', '+f.complex:'')+'!');
   const sp=priceToSpoken(f.price);
   L.push([f.size,[f.type,sp].filter(Boolean).join(' ')].filter(Boolean).join(', ')+'!');
-  [[f.f1,f.s1],[f.f2,f.s2],[f.f3,f.s3]].forEach(([a,b])=>{
-    const t=[a,b].filter(Boolean).join(', ');L.push(t?t.replace(/[.!?。]+$/,'')+'.':'이 매물의 장점을 적어주세요.');
-  });
-  const old=scriptLines();L.push(old.length>=6?old[old.length-1]:CALL);
+  /* 고른 특징이 있으면 그 문장들을, 없으면 포인트 칸에 적은 내용을 대본으로 써요 */
+  if(selFeats.length)selFeats.slice(0,MAXP).forEach(ft=>L.push(ft.line));
+  else for(let n=1;n<=MAXP;n++){const t=[f['f'+n],f['s'+n]].filter(Boolean).join(', ');if(t)L.push(t.replace(/[.!?。]+$/,'')+'.')}
+  const old=scriptLines(),lastOld=old[old.length-1]||'';
+  L.push(old.length>=4&&/상담|문의|전화/.test(lastOld)?lastOld:CALL);
   return L;
 }
 $('btnGenScript').onclick=()=>{
   if(G.mode!=='listing')return;
   const L=buildScript();
+  headRef=[L[0],L[1]];
   $('script').value=L.join('\n');
-  makeListingCuts();
-  $('fillNote').textContent='✅ 매물 정보로 대본을 만들었어요. 2줄 가격 읽기를 꼭 확인하고, 문장은 자유롭게 고치세요: '+L[1];
+  splitScriptToPoints();
+  const n=Math.max(0,L.length-3);
+  $('fillNote').textContent=(n?'✅ '+(selFeats.length?'특징 ':'포인트 칸 내용 ')+n+'개로 대본을 만들고 포인트까지 나눴어요.':'⚠️ 고른 특징이 없어요. 위에서 특징을 골라 다시 눌러보세요.')+' 2줄 가격 읽기를 꼭 확인하고, 문장은 자유롭게 고치세요: '+L[1];
   $('price').classList.add('chk');
 };
 
@@ -755,11 +920,11 @@ function buildYT(){
   if(G.mode==='listing'){
     const loc=/파주/.test(f.area)?f.area:('파주 '+f.area).trim();
     title=[loc,f.name,f.complex,f.size,f.type,f.price].filter(Boolean).join(' ')+' 매물';
-    [[f.f1,f.s1],[f.f2,f.s2],[f.f3,f.s3]].forEach(([a,b])=>{if(a)pts.push('✔ '+a+(b?' - '+b:''))});
+    [1,2,3,4,5].map(n=>[f['f'+n],f['s'+n]]).forEach(([a,b])=>{if(a)pts.push('✔ '+a+(b?' - '+b:''))});
     const info=[['📍 위치',[f.area,f.name,f.complex].filter(Boolean).join(' ')],['📐 면적',f.size],['💰 '+(f.type||'조건'),f.price]].filter(x=>x[1]).map(x=>x[0]+': '+x[1]);
     pts=info.concat(pts.length?['']:[],pts);
     /* 이 매물 소개글: 대본 2~5줄을 자연스러운 문장으로 */
-    const story=lines.slice(0,Math.min(5,lines.length-1)).join(' ').trim();
+    const story=lines.slice(0,Math.max(1,lines.length-1)).join(' ').trim();
     const ex=($('ytExtra')?$('ytExtra').value.trim():'');
     if(story)pts.push('','📝 매물 소개',story);
     if(ex)pts.push('',ex);
@@ -793,20 +958,103 @@ document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{
   b.textContent='✅ 복사했어요';setTimeout(()=>b.textContent=old,1400);
 });
 
+/* ===================== 특징 고르기 ===================== */
+const MYKEY='haitop_shorts_chips_v1';
+try{myChips=JSON.parse(localStorage.getItem(MYKEY)||'{}')||{}}catch(e){myChips={}}
+function saveMy(){try{localStorage.setItem(MYKEY,JSON.stringify(myChips))}catch(e){}}
+const hasFeat=f=>selFeats.some(x=>featKey(x)===featKey(f));
+function toggleFeat(f){
+  if(hasFeat(f))selFeats=selFeats.filter(x=>featKey(x)!==featKey(f));
+  else{
+    if(selFeats.length>=MAXP){setStatus('특징은 최대 '+MAXP+'개까지 고를 수 있어요. 하나를 빼고 골라주세요');return}
+    selFeats.push(Object.assign({},f));
+  }
+  renderFeats();
+}
+function renderFeats(){
+  const cat=(FEATS[curType]||[]).map(featObj),my=myChips[curType]||[];
+  const fill=(box,list,mine)=>{
+    box.innerHTML='';
+    if(!list.length){if(mine)box.innerHTML='<span class="small">아직 없어요. 아래 "직접 추가"에서 저장해 두면 여기에 쌓여요.</span>';return}
+    list.forEach(f=>{
+      const b=document.createElement('button');b.type='button';b.className=hasFeat(f)?'on':'';b.title=f.line;b.textContent=f.big;
+      if(mine){
+        const x=document.createElement('span');x.className='x';x.textContent='✕';x.title='내 칩에서 삭제';
+        x.onclick=e=>{e.stopPropagation();myChips[curType]=(myChips[curType]||[]).filter(y=>featKey(y)!==featKey(f));saveMy();renderFeats()};
+        b.appendChild(x);
+      }
+      b.onclick=()=>toggleFeat(f);box.appendChild(b);
+    });
+  };
+  fill($('featChips'),cat,false);fill($('myChips'),my,true);
+  const box=$('featSel');box.innerHTML='';
+  $('featCnt').textContent='('+selFeats.length+'/'+MAXP+')';
+  if(!selFeats.length)box.innerHTML='<div class="hint">고른 특징이 없어요. 위에서 눌러 고르세요.</div>';
+  selFeats.forEach((f,i)=>{
+    const d=document.createElement('div');d.className='selRow';
+    d.innerHTML='<span class="no">'+(i+1)+'</span><span class="nm">'+esc(f.big)+(f.sub?'<small>'+esc(f.sub)+'</small>':'')+'</span>';
+    const mkb=(t,title,fn,dis)=>{const b=document.createElement('button');b.type='button';b.textContent=t;b.title=title;b.disabled=!!dis;b.onclick=fn;d.appendChild(b)};
+    mkb('↑','위로',()=>{[selFeats[i-1],selFeats[i]]=[selFeats[i],selFeats[i-1]];renderFeats()},i===0);
+    mkb('↓','아래로',()=>{[selFeats[i+1],selFeats[i]]=[selFeats[i],selFeats[i+1]];renderFeats()},i===selFeats.length-1);
+    mkb('✕','빼기',()=>{selFeats.splice(i,1);renderFeats()});
+    box.appendChild(d);
+  });
+  if(selFeats.length){const h=document.createElement('div');h.className='hint';h.textContent='골랐으면 아래 [특징으로 대본 만들기]를 누르세요.';box.appendChild(h)}
+}
+function addCustomFeat(){
+  const big=$('cfBig').value.trim(),sub=$('cfSub').value.trim();
+  if(!big){setStatus('큰 글자를 먼저 적어주세요');return}
+  const f={big,sub,line:big+(sub?', '+sub:'')+'.'};
+  let saved=false;
+  if($('cfSave').checked){
+    const arr=myChips[curType]=myChips[curType]||[];
+    if(!arr.some(y=>featKey(y)===featKey(f)))arr.push(f);
+    saveMy();saved=true;
+  }
+  if(!hasFeat(f)){
+    if(selFeats.length>=MAXP){
+      setStatus(saved?'특징이 이미 '+MAXP+'개예요. 내 칩에는 저장했어요. 하나를 빼면 고를 수 있어요':'특징은 최대 '+MAXP+'개예요. 하나를 빼고 추가해주세요');
+      if(!saved)return;
+    }else selFeats.push(f);
+  }
+  $('cfBig').value='';$('cfSub').value='';renderFeats();
+}
+$('cfAdd').onclick=addCustomFeat;
+['cfBig','cfSub'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addCustomFeat()}}));
+
+/* ===================== 강조색 팔레트 ===================== */
+function markAcc(){document.querySelectorAll('#accSw button').forEach(b=>b.classList.toggle('on',b.dataset.c.toLowerCase()===String(G.accent).toLowerCase()))}
+function setAccent(hex){G.accent=hex;$('gAccent').value=hex;markAcc();TLc=null;draw()}
+(function(){
+  const box=$('accSw');
+  ACCENTS.forEach(([n,c])=>{const b=document.createElement('button');b.type='button';b.dataset.c=c;b.textContent=n;b.style.background=c;b.style.color=inkOn(c);b.onclick=()=>setAccent(c);box.appendChild(b)});
+})();
+
 /* 매물 종류 */
 const typeStore={};let curType='아파트';
 function applyType(tp){
   const P=PRESETS[tp];
   Object.entries(P.labels).forEach(([k,v])=>{const l=$('lb_'+k);if(l)l.textContent=v});
-  const st=typeStore[tp]||{v:P.v,script:P.script.join('\n')};
+  let st=typeStore[tp];
+  if(!st){
+    /* 처음 여는 종류: 미리 골라 둔 특징 3개로 포인트·대본을 채워요 */
+    const df=(DEFAULT_FEATS[tp]||[]).map(nm=>(FEATS[tp]||[]).find(a=>a[0]===nm)).filter(Boolean).map(featObj);
+    const v=Object.assign({},P.v);
+    for(let n=1;n<=MAXP;n++){const f=df[n-1];v['f'+n]=f?f.big:'';v['s'+n]=f?f.sub:''}
+    const sc=df.length?[P.script[0],P.script[1]].concat(df.map(x=>x.line),[CALL]):P.script;
+    st={v,script:sc.join('\n'),feats:df};
+  }
   FIELD_IDS.forEach(k=>$(k).value=st.v[k]||'');
   $('script').value=st.script;curType=tp;
+  selFeats=(st.feats||[]).map(x=>Object.assign({},x));
+  renderFeats();
 }
 $('ptype').addEventListener('change',()=>{
   const o={};FIELD_IDS.forEach(k=>o[k]=$(k).value);
-  typeStore[curType]={v:o,script:$('script').value};
-  applyType($('ptype').value);makeListingCuts();
-  setStatus($('ptype').value+' 항목으로 바꿨어요. 사진과 내용을 확인해주세요');
+  typeStore[curType]={v:o,script:$('script').value,feats:selFeats.map(x=>Object.assign({},x))};
+  const tp=$('ptype').value;
+  applyType(tp);makeListingCuts();setAccent(TYPE_ACCENT[tp]||'#ffd400');
+  setStatus(tp+' 항목으로 바꿨어요. 강조색도 종류에 맞게 바뀌었어요. 사진과 내용을 확인해주세요');
 });
 $('btnMakeCuts').onclick=makeListingCuts;
 
@@ -818,8 +1066,8 @@ function setMode(m){
   G.mode=m;
   const st=modeStore[m];
   $('modeListing').classList.toggle('on',m==='listing');$('modeInfo').classList.toggle('on',m==='info');
-  $('btnRefill').style.display=m==='listing'?'':'none';$('fillNote').textContent='';
-  $('listingCard').style.display=m==='listing'?'':'none';$('infoCard').style.display=m==='info'?'':'none';
+  document.querySelectorAll('.lm').forEach(e=>e.style.display=m==='listing'?'':'none');$('fillNote').textContent='';
+  $('infoCard').style.display=m==='info'?'':'none';$('left').classList.toggle('info',m==='info');
   if(st){$('script').value=st.script;cuts=st.cuts;sel=st.sel;Object.assign(V,st.V)}
   else if(m==='info'){
     $('script').value=INFO_SAMPLE.join('\n');cuts=[];sel=0;
@@ -862,7 +1110,7 @@ function renderThumbs(){
 
 /* ===================== 컷 목록 / 편집 ===================== */
 const LAYOUTS={title:'제목형',price:'가격형',point:'포인트형',card:'카드형',outro:'마무리형'};
-const LBL={title:{chip:'상단 작은 라벨',big:'큰 글자',pill:'',sub:'작은 글자'},price:{chip:'',big:'큰 글자(금색)',pill:'강조 박스',sub:'작은 글자'},
+const LBL={title:{chip:'상단 작은 라벨',big:'큰 글자',pill:'',sub:'작은 글자'},price:{chip:'',big:'큰 글자(강조색)',pill:'강조 박스',sub:'작은 글자'},
   point:{chip:'상단 작은 라벨',big:'큰 글자',pill:'',sub:'작은 글자'},card:{chip:'상단 작은 라벨',big:'큰 글자 (줄바꿈 가능)',pill:'',sub:'작은 글자'},
   outro:{chip:'하단 문구',big:'상호 (비우면 전체설정 상호)',pill:'전화 박스 (비우면 전체설정 번호)',sub:'상단 작은 글자'}};
 function cutLabel(c){return c.big||c.narr||c.sub||c.chip||'(비어 있음)'}
@@ -1190,13 +1438,14 @@ function syncG(){
   $('vSize').textContent=Math.round(G.sizeK*100)+'%';$('vLead').textContent=G.lead.toFixed(2)+'초';
   FONT=FONTS[G.font]||FONTS.basic;
   $('infoStyle').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===G.infoStyle));
+  markAcc();
 }
 function bindG(id,key,conv,after){
   const e=$(id);const h=()=>{G[key]=conv(e);$('vSize').textContent=Math.round(G.sizeK*100)+'%';$('vLead').textContent=G.lead.toFixed(2)+'초';saveG();if(after)after();TLc=null;draw();updateUI();refreshCutList()};
   e.addEventListener('input',h);e.addEventListener('change',h);
 }
 bindG('gFont','font',e=>e.value,()=>{FONT=FONTS[G.font];document.fonts&&document.fonts.load('900 60px '+FONTS[G.font].split(',')[0]).then(()=>draw())});
-bindG('gStroke','stroke',e=>+e.value);bindG('gMain','main',e=>e.value);bindG('gAccent','accent',e=>e.value);
+bindG('gStroke','stroke',e=>+e.value);bindG('gMain','main',e=>e.value);bindG('gAccent','accent',e=>e.value,markAcc);
 bindG('gSize','sizeK',e=>e.value/100);bindG('gY','yOff',e=>+e.value);bindG('gLead','lead',e=>e.value/100);
 bindG('gBiz','biz',e=>e.value.trim());bindG('gTel','tel',e=>e.value.trim());
 bindG('gWmPos','wmPos',e=>e.value);bindG('gWmStyle','wmStyle',e=>e.value);
@@ -1212,7 +1461,7 @@ const ADJ_NAMES={chip:'상단 작은 라벨',big:'큰 글자(제목)',sub:'작�
 function adjName(key){
   const c=cuts[E.cutI];
   if(c&&c.layout==='outro'){if(key==='chip')return '하단 문구';if(key==='sub')return '상단 작은 글자'}
-  if(c&&c.layout==='price'&&key==='big')return '큰 글자(금색)';
+  if(c&&c.layout==='price'&&key==='big')return '큰 글자(강조색)';
   return ADJ_NAMES[key]||'';
 }
 function updateAdjUI(){
@@ -1278,6 +1527,7 @@ $('wmReset').onclick=()=>{G.wmDx=0;G.wmDy=0;G.wmS=1;saveG();updateAdjUI();draw()
 syncG();
 applyType('아파트');
 makeListingCuts();
+setAccent(TYPE_ACCENT['아파트']);
 renderCutList();renderInspector();checkVoice();curT=2;draw();updateUI();updateAdjUI();
 document.fonts&&document.fonts.ready.then(()=>{FONT=FONTS[G.font]||FONTS.basic;draw()});
 draw();
