@@ -149,8 +149,8 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
     <button id="btnSave" class="btn-gold">⏺ 영상 저장 (음성·배경음 포함)</button>
     <div id="status">대본을 확인하고 음성을 올려보세요</div>
     <button id="btnYT" class="wide mt">📤 유튜브 올리기 글 만들기 (제목·설명·태그)</button>
-    <div class="card" id="ytCard" style="display:none">
-      <h2>📤 유튜브 스튜디오에 붙여넣을 글</h2>
+    <div class="card" id="ytCard" style="display:none;position:fixed;z-index:60;top:3vh;left:50%;transform:translateX(-50%);width:min(680px,94vw);max-height:94vh;overflow:auto;box-shadow:0 0 0 100vmax rgba(0,0,0,.6),0 20px 60px rgba(0,0,0,.7)">
+      <h2>📤 유튜브 스튜디오에 붙여넣을 글 <button id="ytClose" style="float:right;padding:2px 10px">✕ 닫기</button></h2>
       <label>제목 <span class="small" id="ytTitleLen"></span></label>
       <textarea id="ytTitle" rows="2"></textarea>
       <button class="wide mt" data-copy="ytTitle">📋 제목 복사</button>
@@ -722,8 +722,8 @@ function showYT(){
   const y=buildYT();$('ytTitle').value=y.title;$('ytDesc').value=y.desc;$('ytTags').value=y.tags;ytLen();
 }
 function ytLen(){$('ytTitleLen').textContent='('+$('ytTitle').value.length+'/100자)';$('ytTagLen').textContent='('+$('ytTags').value.length+'/500자)'}
-$('btnYT').onclick=()=>{const c=$('ytCard');const open=c.style.display==='none';c.style.display=open?'':'none';if(open){showYT();c.scrollIntoView({behavior:'smooth',block:'nearest'})}};
-$('ytRe').onclick=showYT;$('ytExtra').addEventListener('input',showYT);
+$('btnYT').onclick=()=>{const c=$('ytCard');const open=c.style.display==='none';c.style.display=open?'':'none';if(open)showYT()};
+$('ytClose').onclick=()=>{$('ytCard').style.display='none'};document.addEventListener('keydown',e=>{if(e.key==='Escape')$('ytCard').style.display='none'});$('ytRe').onclick=showYT;$('ytExtra').addEventListener('input',showYT);
 ['ytTitle','ytTags'].forEach(i=>$(i).addEventListener('input',ytLen));
 document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{
   const t=$(b.dataset.copy),old=b.textContent;
