@@ -372,6 +372,10 @@ function wrapLines(text,size,maxW){
     let best=-1,bd=1e9;const mid=text.length/2;
     for(let i=0;i<text.length;i++)if(text[i]===' '){const d=Math.abs(i-mid);if(d<bd){bd=d;best=i}}
     parts=[text.slice(0,best).trim(),text.slice(best+1).trim()];
+  }else if(parts.length===1&&[...text].length>=5&&ctx.measureText(text).width>maxW){
+    /* 띄어쓰기 없이 긴 이름(예: 힐스테이트더운정)은 글자가 너무 작아지므로 가운데에서 두 줄로 나눔 */
+    const ch=[...text],k=Math.ceil(ch.length/2);
+    parts=[ch.slice(0,k).join(''),ch.slice(k).join('')];
   }
   const mw=Math.max(...parts.map(p=>ctx.measureText(p).width));
   let s=size;if(mw>maxW)s=Math.max(size*0.45,size*maxW/mw);
@@ -889,6 +893,7 @@ function renderInspector(){
     +'<label>화면 모양</label><select id="iLayout">'+Object.entries(LAYOUTS).map(([k,v])=>'<option value="'+k+'"'+(k===c.layout?' selected':'')+'>'+v+'</option>').join('')+'</select>'
     +(L.chip!==''?'<label id="lChip">'+L.chip+'</label><input type="text" id="iChip">':'')
     +'<label id="lBig">'+L.big+'</label><textarea id="iBig" rows="2"></textarea>'
+    +'<button id="iSplit" class="wide mt" title="큰 글자를 가운데에서 두 줄로 나누거나 다시 한 줄로 합쳐요">↵ 두 줄로 나누기 / 한 줄로 합치기</button>'
     +(L.pill!==''?'<label>'+L.pill+'</label><input type="text" id="iPill">':'')
     +'<label>'+L.sub+'</label><input type="text" id="iSub">'
     +'<label>이 컷의 대사 (음성 대본)</label><textarea id="iNarr" rows="2"></textarea>'
@@ -899,6 +904,17 @@ function renderInspector(){
   const bind=(id,key,manual)=>{const e=$(id);if(!e)return;e.oninput=()=>{c[key]=e.value;if(manual){c.autoText=false;c.manual=true}refreshCutList();draw()}};
   bind('iChip','chip',true);bind('iBig','big',true);bind('iPill','pill',true);bind('iSub','sub',true);
   $('iLayout').onchange=()=>{c.layout=$('iLayout').value;c.autoLayout=false;c.adj={};E.sel=null;updateAdjUI();renderCutList();renderInspector();draw()};
+  $('iSplit').onclick=()=>{
+    let v=c.big||'';
+    if(v.includes('\n'))v=v.split('\n').map(x=>x.trim()).filter(Boolean).join(' ');
+    else{
+      const ch=[...v];let best=-1,bd=1e9;
+      ch.forEach((x,i)=>{if(x===' '){const d=Math.abs(i-ch.length/2);if(d<bd){bd=d;best=i}}});
+      if(best>0)v=ch.slice(0,best).join('').trim()+'\n'+ch.slice(best+1).join('').trim();
+      else{const k=Math.ceil(ch.length/2);v=ch.slice(0,k).join('')+'\n'+ch.slice(k).join('')}
+    }
+    c.big=v;c.autoText=false;c.manual=true;$('iBig').value=v;refreshCutList();draw();
+  };
   $('iPhoto').onchange=()=>{c.photo=+$('iPhoto').value;draw()};
   $('iNarr').oninput=()=>{
     c.narr=$('iNarr').value.replace(/\n/g,' ');
