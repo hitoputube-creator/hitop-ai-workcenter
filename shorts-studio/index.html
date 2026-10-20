@@ -154,8 +154,10 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
       <label>제목 <span class="small" id="ytTitleLen"></span></label>
       <textarea id="ytTitle" rows="2"></textarea>
       <button class="wide mt" data-copy="ytTitle">📋 제목 복사</button>
+      <label>이 매물 추가 설명 (직접 적으면 설명에 들어가요: 입주일, 옵션, 특이사항 등)</label>
+      <textarea id="ytExtra" rows="3" placeholder="예) 즉시 입주 가능, 올수리 완료, 반려동물 협의 가능"></textarea>
       <label>설명</label>
-      <textarea id="ytDesc" rows="14"></textarea>
+      <textarea id="ytDesc" rows="16"></textarea>
       <button class="wide mt" data-copy="ytDesc">📋 설명 복사</button>
       <label>태그 (쉼표로 구분 · 유튜브 '태그' 칸) <span class="small" id="ytTagLen"></span></label>
       <textarea id="ytTags" rows="3"></textarea>
@@ -694,6 +696,11 @@ function buildYT(){
     [[f.f1,f.s1],[f.f2,f.s2],[f.f3,f.s3]].forEach(([a,b])=>{if(a)pts.push('✔ '+a+(b?' - '+b:''))});
     const info=[['📍 위치',[f.area,f.name,f.complex].filter(Boolean).join(' ')],['📐 면적',f.size],['💰 '+(f.type||'조건'),f.price]].filter(x=>x[1]).map(x=>x[0]+': '+x[1]);
     pts=info.concat(pts.length?['']:[],pts);
+    /* 이 매물 소개글: 대본 2~5줄을 자연스러운 문장으로 */
+    const story=lines.slice(0,Math.min(5,lines.length-1)).join(' ').trim();
+    const ex=($('ytExtra')?$('ytExtra').value.trim():'');
+    if(story)pts.push('','📝 매물 소개',story);
+    if(ex)pts.push('',ex);
     const base=['파주부동산','운정부동산','운정신도시','파주운정신도시',biz];
     const tp=f.type,nm=f.name,cx=f.complex,ar=f.area;
     tags=base.concat([nm,cx,ar,nm&&tp?nm+' '+tp:'',cx&&tp?cx+' '+tp:'',tp?tp+'매물':'',tp?'파주 '+tp:'',curType+(tp?' '+tp:''),curType+' 매물','부동산쇼츠','공인중개사','부동산'].filter(Boolean));
@@ -716,7 +723,7 @@ function showYT(){
 }
 function ytLen(){$('ytTitleLen').textContent='('+$('ytTitle').value.length+'/100자)';$('ytTagLen').textContent='('+$('ytTags').value.length+'/500자)'}
 $('btnYT').onclick=()=>{const c=$('ytCard');const open=c.style.display==='none';c.style.display=open?'':'none';if(open){showYT();c.scrollIntoView({behavior:'smooth',block:'nearest'})}};
-$('ytRe').onclick=showYT;
+$('ytRe').onclick=showYT;$('ytExtra').addEventListener('input',showYT);
 ['ytTitle','ytTags'].forEach(i=>$(i).addEventListener('input',ytLen));
 document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{
   const t=$(b.dataset.copy),old=b.textContent;
