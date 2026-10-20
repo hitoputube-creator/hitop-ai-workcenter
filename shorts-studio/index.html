@@ -55,7 +55,7 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
   /* 가운데 */
   #center{align-items:center;overflow:hidden}
   #stagewrap{flex:1 1 0;min-height:160px;max-width:100%;aspect-ratio:9/16;background:#000;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.5)}
-  canvas#cv{width:100%;height:100%;display:block}
+  canvas#cv{width:100%;height:100%;display:block;touch-action:none}
   #ctl{display:flex;align-items:center;gap:10px;width:100%;max-width:420px;flex-shrink:0}
   #btnPlay{width:44px;height:44px;border-radius:50%;padding:0;font-size:15px;background:var(--gold);color:#111;flex-shrink:0}
   #scrub{flex:1;accent-color:var(--gold)}
@@ -155,6 +155,14 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
       <div id="cutList"></div>
     </div>
     <div class="card" id="inspector"></div>
+    <div class="card" id="adjCard">
+      <h2>🖱 글자 위치·크기 <span class="small">(화면에서 직접 조절)</span></h2>
+      <div class="hint" style="margin-top:0">가운데 화면의 글자를 <b>끌어서 옮기고</b>, 눌러서 선택하면 나오는 <b>네모 모서리 점을 끌어</b> 크기를 바꿔요. 컷마다 따로 저장돼서 다른 컷은 자동 맞춤 그대로예요. 상호·연락처 바만 모든 컷에 같이 적용돼요.</div>
+      <div class="small" style="margin-top:10px">선택한 글자: <b id="adjName" style="color:var(--gold)"></b></div>
+      <label>크기 <span class="small" id="vAdjScale"></span></label>
+      <input type="range" id="adjScale" min="30" max="300" value="100" disabled>
+      <div class="row mt"><button id="adjResetEl" disabled>이 글자만 원래대로</button><button id="adjResetCut">이 컷 전부 원래대로</button></div>
+    </div>
     <div class="card">
       <h2>🎨 전체 스타일 <span class="small">(자동 저장)</span></h2>
       <div class="row"><div><label>글꼴</label><select id="gFont"><option value="basic">기본 (고딕)</option><option value="black">블랙한산스</option><option value="dohyeon">도현체</option><option value="jua">주아체</option></select></div>
@@ -168,6 +176,7 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
       <h2>🏷 상호·연락처 (항상 표시)</h2>
       <div class="row"><div><label>상호</label><input type="text" id="gBiz"></div><div><label>전화번호</label><input type="text" id="gTel"></div></div>
       <div class="row"><div><label>위치</label><select id="gWmPos"><option value="bottom">아래쪽</option><option value="top">위쪽</option></select></div><div><label>모양</label><select id="gWmStyle"><option value="bar">바 모양</option><option value="text">작은 글자</option></select></div></div>
+      <button class="wide mt" id="wmReset">↺ 상호 바 위치·크기 원래대로</button>
     </div>
     <div class="card">
       <h2>🎵 소리</h2>
@@ -222,16 +231,43 @@ let FONT=FONTS.basic;
 
 /* ---------- 전체 설정 ---------- */
 const G={mode:'listing',infoStyle:'card',font:'basic',main:'#ffffff',accent:'#ffd400',sizeK:1,yOff:0,stroke:10,
-  wmPos:'bottom',wmStyle:'bar',biz:'하이탑부동산',tel:'031-949-8969',lead:0.3,musicOn:true,musicVol:0.8,voiceVol:1.15};
-const SAVE_KEYS=['infoStyle','font','main','accent','sizeK','yOff','stroke','wmPos','wmStyle','biz','tel','lead','musicOn','musicVol','voiceVol'];
+  wmPos:'bottom',wmStyle:'bar',biz:'하이탑부동산',tel:'031-949-8969',lead:0.3,musicOn:true,musicVol:0.8,voiceVol:1.15,wmDx:0,wmDy:0,wmS:1};
+const SAVE_KEYS=['infoStyle','font','main','accent','sizeK','yOff','stroke','wmPos','wmStyle','biz','tel','lead','musicOn','musicVol','voiceVol','wmDx','wmDy','wmS'];
 function saveG(){try{const o={};SAVE_KEYS.forEach(k=>o[k]=G[k]);localStorage.setItem('haitop_studio_v1',JSON.stringify(o))}catch(e){}}
 function loadG(){try{const o=JSON.parse(localStorage.getItem('haitop_studio_v1')||'null');if(o)SAVE_KEYS.forEach(k=>{if(o[k]!==undefined)G[k]=o[k]})}catch(e){}}
+
+/* ---------- 글자 위치·크기 직접 조절 ----------
+   컷마다 c.adj[글자종류]={dx,dy,s} 로 저장 (자동 맞춤 위치에서 얼마나 옮기고 키웠는지).
+   상호·연락처 바('wm')만 전체 공통(G.wmDx/wmDy/wmS). */
+const E={sel:null,cutI:-1,drag:null,snapX:false};
+let HIT=[];
+const NOADJ={dx:0,dy:0,s:1};
+function getAdj(c,key){
+  if(key==='wm')return {dx:G.wmDx||0,dy:G.wmDy||0,s:G.wmS||1};
+  return (c&&c.adj&&c.adj[key])||NOADJ;
+}
+function setAdj(c,key,patch){
+  if(key==='wm'){if('dx' in patch)G.wmDx=patch.dx;if('dy' in patch)G.wmDy=patch.dy;if('s' in patch)G.wmS=patch.s;return}
+  if(!c)return;
+  c.adj=c.adj||{};c.adj[key]=Object.assign({dx:0,dy:0,s:1},c.adj[key],patch);
+}
+function withAdj(c,key,ax,ay,fn){
+  const a=getAdj(c,key);
+  if(a.dx===0&&a.dy===0&&a.s===1){fn();return}
+  ctx.save();ctx.translate(ax+a.dx,ay+a.dy);ctx.scale(a.s,a.s);ctx.translate(-ax,-ay);fn();ctx.restore();
+}
+/* 지금 그리는 글자의 화면 위치(조절 반영 후)를 기록해 두었다가 클릭 판정에 씀 */
+function rec(key,x,y,w,h){
+  const m=ctx.getTransform();
+  const X0=m.a*x+m.c*y+m.e,Y0=m.b*x+m.d*y+m.f,X1=m.a*(x+w)+m.c*(y+h)+m.e,Y1=m.b*(x+w)+m.d*(y+h)+m.f;
+  HIT.push({key,x0:Math.min(X0,X1),y0:Math.min(Y0,Y1),x1:Math.max(X0,X1),y1:Math.max(Y0,Y1)});
+}
 
 /* ---------- 데이터 ---------- */
 let cuts=[],photos=[],sel=0;
 const V={buf:null,b:[],mode:'',peaks:null,files:0,name:''};
 const V0=0.35;
-const mk=(layout,o)=>Object.assign({layout,chip:'',big:'',pill:'',sub:'',narr:'',photo:-1,autoText:false,autoLayout:false},o||{});
+const mk=(layout,o)=>Object.assign({layout,chip:'',big:'',pill:'',sub:'',narr:'',photo:-1,autoText:false,autoLayout:false,adj:{}},o||{});
 const voiceOK=()=>!!(V.buf&&cuts.length>0&&V.b.length===cuts.length+1);
 
 let TLc=null;
@@ -328,15 +364,19 @@ function bigInfo(text,size){
 function bigText(text,cx,cy,size,color,lt,delay,o){
   if(!text)return;
   const r=bigInfo(text,size),n=r.lines.length,lh=r.size*1.18;
+  ctx.save();ctx.font=`900 ${r.size}px ${FONT}`;const bw=Math.min(960,Math.max(...r.lines.map(l=>ctx.measureText(l).width)));ctx.restore();
+  rec('big',cx-bw/2,cy-n*lh/2,bw,n*lh);
   r.lines.forEach((ln,k)=>charsIn(ln,cx,cy+(k-(n-1)/2)*lh,r.size,color,lt,delay+k*0.25,Object.assign({},o,{maxW:960})));
 }
 function pill(text,cx,cy,size,bg,fg,lt,delay){
   if(!text)return;
-  const p=clamp((lt-delay)/0.5);if(p<=0)return;
-  const e=easeOutBack(p);
+  const p=clamp((lt-delay)/0.5);
   ctx.save();ctx.font=`900 ${size}px ${FONT}`;
   let tw=ctx.measureText(text).width;const pad=size*0.6;let w=tw+pad*2,h=size*1.6;
   if(w>980){const k=980/w;size*=k;ctx.font=`900 ${size}px ${FONT}`;tw=ctx.measureText(text).width;w=tw+pad*2*k;h=size*1.6}
+  rec('pill',cx-w/2,cy-h/2,w,h);
+  if(p<=0){ctx.restore();return}
+  const e=easeOutBack(p);
   ctx.translate(cx,cy);ctx.scale(e,e);ctx.globalAlpha=clamp(p*3);
   ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=30;ctx.shadowOffsetY=10;
   ctx.fillStyle=bg;rr(-w/2,-h/2,w,h,h/2);ctx.fill();ctx.shadowColor='transparent';
@@ -348,16 +388,21 @@ function line(cx,cy,maxW,color,lt,delay){
   ctx.save();ctx.fillStyle=color;ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=14;
   rr(cx-maxW*p/2,cy-6,maxW*p,12,6);ctx.fill();ctx.restore();
 }
-function subText(text,cx,cy,size,lt,delay){
+function subText(text,cx,cy,size,lt,delay,key){
   if(!text)return;
-  const p=easeOutCubic(clamp((lt-delay)/0.6));if(p<=0)return;
-  ctx.save();ctx.globalAlpha=p;ctx.font=`700 ${size}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.save();ctx.font=`700 ${size}px ${FONT}`;
   let s=size;while(ctx.measureText(text).width>960&&s>20){s-=2;ctx.font=`700 ${s}px ${FONT}`}
+  const tw=ctx.measureText(text).width;ctx.restore();
+  rec(key||'sub',cx-tw/2,cy-s*0.7,tw,s*1.4);
+  const p=easeOutCubic(clamp((lt-delay)/0.6));if(p<=0)return;
+  ctx.save();ctx.globalAlpha=p;ctx.font=`700 ${s}px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';
   ctx.shadowColor='rgba(0,0,0,.7)';ctx.shadowBlur=20;ctx.shadowOffsetY=5;
   ctx.fillStyle='#fff';ctx.fillText(text,cx,cy+(1-p)*30);ctx.restore();
 }
 function chip(text,cx,cy,lt,delay){
   if(!text)return;
+  ctx.save();ctx.font=`900 40px ${FONT}`;const bw=ctx.measureText(text).width+70;ctx.restore();
+  rec('chip',cx-bw/2,cy-34,bw,68);
   const p=easeOutCubic(clamp((lt-delay)/0.4));if(p<=0)return;
   ctx.save();ctx.globalAlpha=p;ctx.font=`900 40px ${FONT}`;
   const w=ctx.measureText(text).width+70;
@@ -369,30 +414,35 @@ function chip(text,cx,cy,lt,delay){
 const DARK={title:.42,price:.5,point:.4,card:.5,outro:.62};
 function drawCut(c,lt){
   const K=G.sizeK,Y=G.yOff,M=G.main,A=G.accent,ST=G.stroke,cx=W/2;
+  /* AD: 글자마다 (옮긴 만큼, 키운 만큼)을 얹어서 그림. 안 건드린 글자는 예전 그대로 */
+  const AD=(key,ax,ay,fn)=>withAdj(c,key,ax,ay,fn);
   switch(c.layout){
     case 'title':{const d=bigInfo(c.big,250*K).dy;
-      chip(c.chip,cx,620+Y-d,lt,0.2);bigText(c.big,cx,850+Y,250*K,M,lt,0.5,{stroke:ST});
-      line(cx,1010+Y+d,560,A,lt,1.3);subText(c.sub,cx,1100+Y+d,76*K,lt,1.5);break}
+      AD('chip',cx,620+Y-d,()=>chip(c.chip,cx,620+Y-d,lt,0.2));
+      AD('big',cx,850+Y,()=>{bigText(c.big,cx,850+Y,250*K,M,lt,0.5,{stroke:ST});line(cx,1010+Y+d,560,A,lt,1.3)});
+      AD('sub',cx,1100+Y+d,()=>subText(c.sub,cx,1100+Y+d,76*K,lt,1.5));break}
     case 'price':
-      bigText(c.big,cx,720+Y,340*K,A,lt,0.1,{stroke:ST+2,stagger:.12});
-      pill(c.pill,cx,1090+Y,130*K,A,'#111',lt,1.0);
+      AD('big',cx,720+Y,()=>bigText(c.big,cx,720+Y,340*K,A,lt,0.1,{stroke:ST+2,stagger:.12}));
+      AD('pill',cx,1090+Y,()=>pill(c.pill,cx,1090+Y,130*K,A,'#111',lt,1.0));
       if(lt>1.0&&lt<1.2){ctx.fillStyle=`rgba(255,255,255,${(1.2-lt)/0.2*.6})`;ctx.fillRect(0,0,W,H)}
-      subText(c.sub,cx,1280+Y,54*K,lt,2.0);break;
+      AD('sub',cx,1280+Y,()=>subText(c.sub,cx,1280+Y,54*K,lt,2.0));break;
     case 'point':{const d=bigInfo(c.big,230*K).dy;
-      chip(c.chip,cx,640+Y-d,lt,0.1);bigText(c.big,cx,860+Y,230*K,M,lt,0.3,{stroke:ST});
-      line(cx,1000+Y+d,520,A,lt,1.0);subText(c.sub,cx,1090+Y+d,64*K,lt,1.2);break}
+      AD('chip',cx,640+Y-d,()=>chip(c.chip,cx,640+Y-d,lt,0.1));
+      AD('big',cx,860+Y,()=>{bigText(c.big,cx,860+Y,230*K,M,lt,0.3,{stroke:ST});line(cx,1000+Y+d,520,A,lt,1.0)});
+      AD('sub',cx,1090+Y+d,()=>subText(c.sub,cx,1090+Y+d,64*K,lt,1.2));break}
     case 'outro':{
-      subText(c.sub,cx,600+Y,56*K,lt,0.1);
-      bigText(c.big||G.biz,cx,780+Y,190*K,M,lt,0.3,{stroke:ST,stagger:.07});
-      const p=clamp((lt-1.2)/.5);
-      if(p>0){const pulse=1+0.04*Math.sin(lt*8);ctx.save();ctx.translate(cx,1010+Y);ctx.scale(pulse,pulse);ctx.translate(-cx,-(1010+Y));
-        pill(c.pill||('☎ '+G.tel),cx,1010+Y,110*K,A,'#111',lt,1.2);ctx.restore()}
-      subText(c.chip,cx,1200+Y,60*K,lt,2.0);break}
+      AD('sub',cx,600+Y,()=>subText(c.sub,cx,600+Y,56*K,lt,0.1));
+      AD('big',cx,780+Y,()=>bigText(c.big||G.biz,cx,780+Y,190*K,M,lt,0.3,{stroke:ST,stagger:.07}));
+      AD('pill',cx,1010+Y,()=>{
+        const p=clamp((lt-1.2)/.5),pulse=p>0?1+0.04*Math.sin(lt*8):1;
+        ctx.save();ctx.translate(cx,1010+Y);ctx.scale(pulse,pulse);ctx.translate(-cx,-(1010+Y));
+        pill(c.pill||('☎ '+G.tel),cx,1010+Y,110*K,A,'#111',lt,1.2);ctx.restore()});
+      AD('chip',cx,1200+Y,()=>subText(c.chip,cx,1200+Y,60*K,lt,2.0,'chip'));break}
     default:{ // card
       const d=bigInfo(c.big,180*K).dy;
-      chip(c.chip,cx,560+Y-d,lt,0.1);
-      bigText(c.big,cx,880+Y,180*K,M,lt,0.3,{stroke:ST});
-      line(cx,1110+Y+d,520,A,lt,1.2);subText(c.sub,cx,1210+Y+d,60*K,lt,1.4)}
+      AD('chip',cx,560+Y-d,()=>chip(c.chip,cx,560+Y-d,lt,0.1));
+      AD('big',cx,880+Y,()=>{bigText(c.big,cx,880+Y,180*K,M,lt,0.3,{stroke:ST});line(cx,1110+Y+d,520,A,lt,1.2)});
+      AD('sub',cx,1210+Y+d,()=>subText(c.sub,cx,1210+Y+d,60*K,lt,1.4))}
   }
 }
 function photoFor(i){
@@ -401,29 +451,35 @@ function photoFor(i){
   return photos[k].img;
 }
 function watermark(t){
-  const p=easeOutCubic(clamp((t-0.3)/0.6));if(p<=0)return;
-  ctx.save();ctx.globalAlpha=p;
-  if(G.wmStyle==='bar'){
-    const w=900,h=120,x=(W-w)/2,y=(G.wmPos==='top'?110:1560)+(1-p)*(G.wmPos==='top'?-40:40);
-    ctx.fillStyle='rgba(10,14,28,.82)';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=24;rr(x,y,w,h,60);ctx.fill();ctx.shadowColor='transparent';
-    ctx.fillStyle=G.accent;ctx.beginPath();ctx.arc(x+60,y+60,34,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#111';ctx.font=`900 36px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☎',x+60,y+62);
-    ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=`900 42px ${FONT}`;ctx.fillText(G.biz,x+118,y+60);
-    ctx.textAlign='right';ctx.fillStyle=G.accent;ctx.font=`900 52px ${FONT}`;ctx.fillText(G.tel,x+w-40,y+62);
-  }else{
-    const y=G.wmPos==='top'?150:1700;
-    ctx.font=`900 44px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=14;ctx.shadowOffsetY=3;
-    ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillText(G.biz+'  ☎ '+G.tel,W/2,y);
-  }
-  ctx.restore();
+  const p=easeOutCubic(clamp((t-0.3)/0.6)),bar=G.wmStyle==='bar',top=G.wmPos==='top';
+  const w=900,h=120,x0=(W-w)/2,y0=top?110:1560,ty=top?150:1700;
+  withAdj(null,'wm',W/2,bar?y0+h/2:ty,()=>{
+    if(bar)rec('wm',x0,y0,w,h);
+    else{ctx.save();ctx.font=`900 44px ${FONT}`;const tw=ctx.measureText(G.biz+'  ☎ '+G.tel).width;ctx.restore();rec('wm',W/2-tw/2,ty-30,tw,60)}
+    if(p<=0)return;
+    ctx.save();ctx.globalAlpha=p;
+    if(bar){
+      const x=x0,y=y0+(1-p)*(top?-40:40);
+      ctx.fillStyle='rgba(10,14,28,.82)';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=24;rr(x,y,w,h,60);ctx.fill();ctx.shadowColor='transparent';
+      ctx.fillStyle=G.accent;ctx.beginPath();ctx.arc(x+60,y+60,34,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#111';ctx.font=`900 36px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('☎',x+60,y+62);
+      ctx.fillStyle='#fff';ctx.textAlign='left';ctx.font=`900 42px ${FONT}`;ctx.fillText(G.biz,x+118,y+60);
+      ctx.textAlign='right';ctx.fillStyle=G.accent;ctx.font=`900 52px ${FONT}`;ctx.fillText(G.tel,x+w-40,y+62);
+    }else{
+      ctx.font=`900 44px ${FONT}`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.shadowColor='rgba(0,0,0,.8)';ctx.shadowBlur=14;ctx.shadowOffsetY=3;
+      ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillText(G.biz+'  ☎ '+G.tel,W/2,ty);
+    }
+    ctx.restore();
+  });
 }
 function draw(){renderFrame(curT)}
 let curT=0;
 function renderFrame(t){
-  const T=TL();ctx.clearRect(0,0,W,H);
-  if(!T.N){cardBG(0,t);ctx.fillStyle='#8b949e';ctx.font=`700 44px ${FONT}`;ctx.textAlign='center';ctx.fillText('왼쪽에 대본을 입력해주세요',W/2,H/2);watermark(t);return}
+  const T=TL();ctx.clearRect(0,0,W,H);HIT=[];
+  if(!T.N){cardBG(0,t);ctx.fillStyle='#8b949e';ctx.font=`700 44px ${FONT}`;ctx.textAlign='center';ctx.fillText('왼쪽에 대본을 입력해주세요',W/2,H/2);watermark(t);drawEditOverlay();return}
   let i=T.s.findIndex((s,k)=>t>=s&&t<T.e[k]);if(i<0)i=T.N-1;
+  if(E.cutI!==i){E.cutI=i;if(E.sel){E.sel=null;E.drag=null;updateAdjUI()}} // 다른 컷으로 넘어가면 선택 해제
   const c=cuts[i],dur=T.e[i]-T.s[i],lt=clamp(t-T.s[i],0,dur);
   const usePhoto=(G.mode==='listing'||G.infoStyle==='photo')&&photoFor(i);
   ctx.save();
@@ -435,6 +491,20 @@ function renderFrame(t){
   ctx.restore();
   if(lt<0.18&&i>0){ctx.fillStyle=`rgba(255,255,255,${(1-lt/0.18)*.55})`;ctx.fillRect(0,0,W,H)}
   watermark(t);
+  drawEditOverlay();
+}
+/* 선택 표시(점선 네모·모서리 점·가운데 안내선). 재생·저장 중에는 절대 그리지 않아서 영상에 안 들어가요 */
+const PADBOX=12;
+function selBox(){const h=E.sel&&HIT.filter(x=>x.key===E.sel).pop();return h||null}
+function drawEditOverlay(){
+  if(typeof playing!=='undefined'&&(playing||recorder))return;
+  if(E.drag&&E.snapX){ctx.save();ctx.strokeStyle='rgba(77,210,255,.9)';ctx.lineWidth=3;ctx.setLineDash([18,14]);ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.restore()}
+  const h=selBox();if(!h)return;
+  const x0=h.x0-PADBOX,y0=h.y0-PADBOX,x1=h.x1+PADBOX,y1=h.y1+PADBOX;
+  ctx.save();ctx.strokeStyle='#4dd2ff';ctx.lineWidth=4;ctx.setLineDash([16,10]);ctx.strokeRect(x0,y0,x1-x0,y1-y0);ctx.setLineDash([]);
+  ctx.fillStyle='#4dd2ff';ctx.strokeStyle='#04202b';ctx.lineWidth=3;
+  [[x0,y0],[x1,y0],[x0,y1],[x1,y1]].forEach(([x,y])=>{ctx.fillRect(x-16,y-16,32,32);ctx.strokeRect(x-16,y-16,32,32)});
+  ctx.restore();
 }
 
 /* ===================== 대본 ↔ 컷 ===================== */
@@ -483,7 +553,7 @@ function makeListingCuts(){
   }
   cuts=cuts.slice(0,Math.max(lines.length,0)||6);
   syncFromScript();
-  sel=0;TLc=null;renderCutList();renderInspector();checkVoice();draw();
+  sel=0;TLc=null;E.sel=null;E.drag=null;updateAdjUI();renderCutList();renderInspector();checkVoice();draw();
 }
 /* 매물 종류 */
 const typeStore={};let curType='아파트';
@@ -521,6 +591,7 @@ function setMode(m){
   if(st&&st.wm){G.wmPos=st.wm.pos;G.wmStyle=st.wm.style}
   syncG();
   $('photoHint').textContent=m==='info'?'사진 배경 스타일을 쓸 때만 필요해요. 글자 카드는 사진 없이도 돼요.':'컷마다 사진이 차례로 돌아가며 들어가요. 컷마다 바꾸려면 오른쪽 컷 편집에서 고르세요.';
+  E.sel=null;E.drag=null;E.cutI=-1;updateAdjUI();
   TLc=null;renderCutList();renderInspector();checkVoice();drawWave();draw();updateUI();
   setStatus(m==='info'?'정보 영상: 대본을 내용에 맞게 바꿔주세요 (지금은 예시예요)':'매물 영상 모드');
 }
@@ -591,7 +662,7 @@ function renderInspector(){
   set('iChip',c.chip);set('iBig',c.big);set('iPill',c.pill);set('iSub',c.sub);set('iNarr',c.narr);
   const bind=(id,key,manual)=>{const e=$(id);if(!e)return;e.oninput=()=>{c[key]=e.value;if(manual)c.autoText=false;refreshCutList();draw()}};
   bind('iChip','chip',true);bind('iBig','big',true);bind('iPill','pill',true);bind('iSub','sub',true);
-  $('iLayout').onchange=()=>{c.layout=$('iLayout').value;c.autoLayout=false;renderCutList();renderInspector();draw()};
+  $('iLayout').onchange=()=>{c.layout=$('iLayout').value;c.autoLayout=false;c.adj={};E.sel=null;updateAdjUI();renderCutList();renderInspector();draw()};
   $('iPhoto').onchange=()=>{c.photo=+$('iPhoto').value;draw()};
   $('iNarr').oninput=()=>{
     c.narr=$('iNarr').value.replace(/\n/g,' ');
@@ -812,6 +883,7 @@ function startPlayback(rec){
   if(!cuts.length){setStatus('대본을 먼저 입력해주세요');return}
   let from=curT;if(rec||from>=TL().total-0.05)from=0;
   curT=from;ensureAudio();
+  if(rec){E.sel=null;E.drag=null;E.snapX=false;updateAdjUI();draw()} // 저장 전에 선택 표시를 지워서 영상에 안 찍히게
   const t0=scheduleAudio(from),T=TL().total;let mr=null,chunks=[],ext='webm';
   if(rec){
     if(!window.MediaRecorder){setStatus('이 브라우저는 저장을 지원하지 않아요. 크롬이나 엣지에서 열어주세요');return}
@@ -882,11 +954,78 @@ $('btnCopy').onclick=async()=>{
   setStatus('대본 복사 완료 ✔ AI Studio에 붙여넣으세요',true);
 };
 
+/* ===================== 글자 직접 조절 (끌어서 이동 · 모서리로 크기) ===================== */
+const ADJ_NAMES={chip:'상단 작은 라벨',big:'큰 글자(제목)',sub:'작은 글자(부제)',pill:'강조 박스',wm:'상호·연락처 바'};
+function adjName(key){
+  const c=cuts[E.cutI];
+  if(c&&c.layout==='outro'){if(key==='chip')return '하단 문구';if(key==='sub')return '상단 작은 글자'}
+  if(c&&c.layout==='price'&&key==='big')return '큰 글자(금색)';
+  return ADJ_NAMES[key]||'';
+}
+function updateAdjUI(){
+  const k=E.sel,c=cuts[E.cutI],a=k?getAdj(c,k):NOADJ;
+  $('adjName').textContent=k?adjName(k)+(k==='wm'?' · 모든 컷 공통':' · 컷 '+(E.cutI+1)):'없음 (화면의 글자를 눌러보세요)';
+  $('adjScale').disabled=!k;$('adjResetEl').disabled=!k;
+  $('adjScale').value=Math.round(a.s*100);$('vAdjScale').textContent=k?Math.round(a.s*100)+'%':'';
+}
+const cvPoint=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}};
+function hitElement(p){
+  let best=null,ba=1e12;const PAD=22;
+  HIT.forEach(h=>{if(p.x>=h.x0-PAD&&p.x<=h.x1+PAD&&p.y>=h.y0-PAD&&p.y<=h.y1+PAD){const a=(h.x1-h.x0)*(h.y1-h.y0);if(a<=ba){ba=a;best=h}}});
+  return best;
+}
+function hitHandle(p){
+  const h=selBox();if(!h)return null;
+  const x0=h.x0-PADBOX,y0=h.y0-PADBOX,x1=h.x1+PADBOX,y1=h.y1+PADBOX;
+  return [[x0,y0],[x1,y0],[x0,y1],[x1,y1]].some(([x,y])=>Math.abs(p.x-x)<=44&&Math.abs(p.y-y)<=44)?h:null;
+}
+cv.addEventListener('pointerdown',e=>{
+  if(playing||recorder)return;
+  const p=cvPoint(e);let mode='scale',h=hitHandle(p);
+  if(!h){h=hitElement(p);mode='move'}
+  if(!h){if(E.sel){E.sel=null;updateAdjUI();draw()}return}
+  e.preventDefault();
+  if(cuts.length&&E.cutI>=0&&E.cutI<cuts.length&&E.cutI!==sel)selectCut(E.cutI,false); // 오른쪽 컷 편집도 이 컷으로 맞춤
+  E.sel=h.key;
+  const a=getAdj(cuts[E.cutI],h.key),mx=(h.x0+h.x1)/2,my=(h.y0+h.y1)/2;
+  E.drag={mode,p0:p,a0:{dx:a.dx,dy:a.dy,s:a.s},c:{x:mx,y:my},d0:Math.hypot(p.x-mx,p.y-my)||1};
+  try{cv.setPointerCapture(e.pointerId)}catch(err){}
+  updateAdjUI();draw();
+});
+cv.addEventListener('pointermove',e=>{
+  const p=cvPoint(e);
+  if(!E.drag){cv.style.cursor=(playing||recorder)?'':(hitHandle(p)?'nwse-resize':(hitElement(p)?'move':'default'));return}
+  const d=E.drag,c=cuts[E.cutI];
+  if(d.mode==='move'){
+    let dx=d.a0.dx+(p.x-d.p0.x);const dy=d.a0.dy+(p.y-d.p0.y);
+    const centerX=d.c.x+(dx-d.a0.dx);                     // 가운데선에 가까우면 딱 붙임
+    E.snapX=Math.abs(centerX-W/2)<14;if(E.snapX)dx+=W/2-centerX;
+    setAdj(c,E.sel,{dx:Math.round(dx),dy:Math.round(dy)});
+  }else{
+    const ratio=Math.hypot(p.x-d.c.x,p.y-d.c.y)/d.d0;
+    setAdj(c,E.sel,{s:r2(clamp(d.a0.s*ratio,0.3,3))});
+  }
+  draw();updateAdjUI();
+});
+const endDrag=()=>{if(!E.drag)return;const wm=E.sel==='wm';E.drag=null;E.snapX=false;if(wm)saveG();draw()};
+cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
+$('adjScale').addEventListener('input',()=>{
+  if(!E.sel)return;const s=r2($('adjScale').value/100);
+  setAdj(cuts[E.cutI],E.sel,{s});if(E.sel==='wm')saveG();$('vAdjScale').textContent=Math.round(s*100)+'%';draw();
+});
+$('adjResetEl').onclick=()=>{
+  if(!E.sel)return;const c=cuts[E.cutI];
+  if(E.sel==='wm'){G.wmDx=0;G.wmDy=0;G.wmS=1;saveG()}else if(c&&c.adj)delete c.adj[E.sel];
+  updateAdjUI();draw();
+};
+$('adjResetCut').onclick=()=>{const c=cuts[E.cutI];if(c)c.adj={};updateAdjUI();draw();setStatus('이 컷의 글자를 자동 맞춤으로 되돌렸어요',true)};
+$('wmReset').onclick=()=>{G.wmDx=0;G.wmDy=0;G.wmS=1;saveG();updateAdjUI();draw();setStatus('상호 바를 원래 위치·크기로 되돌렸어요',true)};
+
 /* ===================== 시작 ===================== */
 loadG();syncG();
 applyType('아파트');
 makeListingCuts();
-renderCutList();renderInspector();checkVoice();curT=2;draw();updateUI();
+renderCutList();renderInspector();checkVoice();curT=2;draw();updateUI();updateAdjUI();
 document.fonts&&document.fonts.ready.then(()=>{FONT=FONTS[G.font]||FONTS.basic;draw()});
 draw();
 
