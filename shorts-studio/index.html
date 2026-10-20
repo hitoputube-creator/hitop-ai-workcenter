@@ -164,7 +164,7 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
       <div class="row mt"><button id="adjResetEl" disabled>이 글자만 원래대로</button><button id="adjResetCut">이 컷 전부 원래대로</button></div>
     </div>
     <div class="card">
-      <h2>🎨 전체 스타일 <span class="small">(자동 저장)</span></h2>
+      <h2>🎨 전체 스타일 <span class="small">(새로 열면 처음 상태)</span></h2>
       <div class="row"><div><label>글꼴</label><select id="gFont"><option value="basic">기본 (고딕)</option><option value="black">블랙한산스</option><option value="dohyeon">도현체</option><option value="jua">주아체</option></select></div>
       <div><label>테두리 굵기</label><input type="range" id="gStroke" min="0" max="20" value="10"></div></div>
       <div class="row"><div><label>글자색</label><input type="color" id="gMain" value="#ffffff"></div><div><label>강조색</label><input type="color" id="gAccent" value="#ffd400"></div></div>
@@ -233,8 +233,9 @@ let FONT=FONTS.basic;
 const G={mode:'listing',infoStyle:'card',font:'basic',main:'#ffffff',accent:'#ffd400',sizeK:1,yOff:0,stroke:10,
   wmPos:'bottom',wmStyle:'bar',biz:'하이탑부동산',tel:'031-949-8969',lead:0.3,musicOn:true,musicVol:0.8,voiceVol:1.15,wmDx:0,wmDy:0,wmS:1};
 const SAVE_KEYS=['infoStyle','font','main','accent','sizeK','yOff','stroke','wmPos','wmStyle','biz','tel','lead','musicOn','musicVol','voiceVol','wmDx','wmDy','wmS'];
-function saveG(){try{const o={};SAVE_KEYS.forEach(k=>o[k]=G[k]);localStorage.setItem('haitop_studio_v1',JSON.stringify(o))}catch(e){}}
-function loadG(){try{const o=JSON.parse(localStorage.getItem('haitop_studio_v1')||'null');if(o)SAVE_KEYS.forEach(k=>{if(o[k]!==undefined)G[k]=o[k]})}catch(e){}}
+/* 열 때마다 처음 상태로 시작: 설정을 브라우저에 저장하지 않고, 예전에 저장돼 있던 값도 지움 */
+function saveG(){}
+try{localStorage.removeItem('haitop_studio_v1')}catch(e){}
 
 /* ---------- 글자 위치·크기 직접 조절 ----------
    컷마다 c.adj[글자종류]={dx,dy,s} 로 저장 (자동 맞춤 위치에서 얼마나 옮기고 키웠는지).
@@ -1022,7 +1023,7 @@ $('adjResetCut').onclick=()=>{const c=cuts[E.cutI];if(c)c.adj={};updateAdjUI();d
 $('wmReset').onclick=()=>{G.wmDx=0;G.wmDy=0;G.wmS=1;saveG();updateAdjUI();draw();setStatus('상호 바를 원래 위치·크기로 되돌렸어요',true)};
 
 /* ===================== 시작 ===================== */
-loadG();syncG();
+syncG();
 applyType('아파트');
 makeListingCuts();
 renderCutList();renderInspector();checkVoice();curT=2;draw();updateUI();updateAdjUI();
