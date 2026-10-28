@@ -1888,7 +1888,7 @@ draw();
     var FX0=70,FX1=W-70,FY0=260,FY1=1600;
     brk(FX0,FY0,1,1,GC,fp);brk(FX1,FY0,-1,1,GC,fp);brk(FX0,FY1,1,-1,GC,fp);brk(FX1,FY1,-1,-1,GC,fp);
     /* 위 번호표 */
-    var no=(G.seriesNo||'').trim(),chipTxt=(G.biz||'')+' 매물'+(no?' No.'+no:'');
+    var no=(G.seriesNo||'').trim(),chipTxt='추천매물'+(no?' No.'+no:'');
     ctx.save();ctx.globalAlpha=fp;ctx.font='900 40px '+FONT;var cw=ctx.measureText(chipTxt).width+60;
     ctx.fillStyle=GC;rr(W/2-cw/2,FY0-6-34+0,cw,68,34);ctx.fill();ctx.fillStyle='#1a1400';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(chipTxt,W/2,FY0+2);ctx.restore();
     /* 왼쪽 아래 3줄 */
