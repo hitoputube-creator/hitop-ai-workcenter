@@ -136,7 +136,7 @@ textarea:focus{border-color:var(--blue)}
       setStatus('복사했습니다. ChatGPT를 열어 대화창에 붙여넣어 주세요.');
     }catch(e){setStatus('자동 복사가 안 됐습니다. 지시문을 선택해 직접 복사해 주세요.')}
   });
-  showRole(location.hash.slice(1));
+  showRole(location.hash.slice(1)||new URLSearchParams(location.search).get('role'));
 })();
 </script>
 </body>
