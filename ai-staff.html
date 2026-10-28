@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 직원 | 하이탑 AI 부동산 업무센터</title>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<script src="admin-guard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="auth.js"></script>
+<style>
+:root{--bg:#071625;--panel:#101f32;--panel2:#15283d;--line:#35516c;--txt:#f5f8fb;--sub:#b4c2d2;--muted:#8fa2b8;--gold:#d8b84a;--blue:#5f9fd8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--txt);font-family:Pretendard,"Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif}
+button,textarea{font:inherit}
+a{color:inherit;text-decoration:none}
+.shell{width:min(1120px,calc(100% - 40px));margin:auto;padding:28px 0 56px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-bottom:20px;border-bottom:1px solid rgba(216,184,74,.35)}
+.back{color:var(--gold);font-size:13px;font-weight:800}
+h1{margin:12px 0 6px;font-size:30px}
+.lead{margin:0;color:var(--sub);line-height:1.6}
+.stage{margin:22px 0;padding:16px 20px;border:1px solid rgba(216,184,74,.35);border-radius:14px;background:rgba(216,184,74,.08);display:flex;flex-wrap:wrap;gap:10px 22px;color:var(--sub);font-size:13px}
+.stage b{color:var(--gold)}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
+.roster,.desk{background:linear-gradient(180deg,#101f32,#0f1d2f);border:1px solid var(--line);border-radius:16px;padding:18px}
+.roster h2,.desk h2{margin:0;font-size:18px}
+.roster p{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 16px}
+.person{width:100%;display:block;margin:8px 0;padding:14px;border:1px solid #294057;border-radius:12px;background:#15283d;color:var(--txt);text-align:left;cursor:pointer}
+.person:hover,.person[aria-current="true"]{border-color:var(--gold);background:#1b324c}
+.person strong{display:block;font-size:15px}
+.person small{display:block;margin-top:5px;color:var(--sub);line-height:1.4}
+.person em{display:inline-block;margin-top:9px;font-style:normal;font-size:11px;color:var(--gold)}
+.desk-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.badge{border:1px solid rgba(95,159,216,.5);border-radius:999px;padding:5px 9px;font-size:11px;color:var(--blue);white-space:nowrap}
+.summary{margin:10px 0 20px;color:var(--sub);font-size:14px;line-height:1.55}
+.flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:20px}
+.flow div{padding:11px;border-radius:10px;background:#15283d;color:var(--sub);font-size:12px;line-height:1.5}
+.flow b{display:block;color:var(--gold);margin-bottom:3px}
+label{display:block;margin:0 0 8px;font-size:13px;font-weight:800}
+textarea{display:block;width:100%;min-height:260px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:14px;background:#0a1929;color:var(--txt);line-height:1.65;outline:none}
+textarea:focus{border-color:var(--blue)}
+.hint{color:var(--muted);font-size:12px;line-height:1.55;margin:9px 0 0}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+.btn{min-height:39px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:#172b42;color:var(--txt);font-weight:750;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.btn:hover{border-color:var(--blue);background:#1b324c}
+.btn.primary{border-color:var(--gold);background:var(--gold);color:#071625}
+.btn.primary:hover{background:#e6c960}
+.status{min-height:20px;margin-top:13px;color:var(--gold);font-size:12px}
+.limits{margin-top:20px;padding:14px;border:1px solid #294057;border-radius:12px;color:var(--sub);font-size:12px;line-height:1.65}
+.limits strong{color:var(--txt)}
+@media(max-width:760px){.shell{width:calc(100% - 24px);padding-top:16px}.layout{grid-template-columns:1fr}.roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.roster h2,.roster p{grid-column:1/-1}.person{margin:0}.flow{grid-template-columns:1fr}}
+@media(max-width:520px){h1{font-size:24px}.roster{grid-template-columns:1fr}.desk-head{flex-direction:column}.actions .btn{flex:1}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div>
+      <a class="back" href="./index.html">← 업무센터로 돌아가기</a>
+      <h1>AI 직원</h1>
+      <p class="lead">직원을 선택하고 오늘 할 일을 적어 주세요.</p>
+    </div>
+    <span class="badge">수동 실행 단계</span>
+  </header>
+
+  <div class="stage" aria-label="사용 순서">
+    <span><b>1</b> 직원 선택</span><span><b>2</b> 업무 지시문 확인·수정</span><span><b>3</b> 복사해서 ChatGPT에 전달</span>
+  </div>
+
+  <main class="layout">
+    <nav class="roster" aria-label="AI 직원 목록">
+      <h2>직원 목록</h2>
+      <p>한 명씩 시험해 보고, 필요한 업무만 맡기세요.</p>
+      <button class="person" type="button" data-role="blog"><strong>블로그 담당</strong><small>지난 글 점검 · 새 글 초안</small><em>업무지시 보기 →</em></button>
+      <button class="person" type="button" data-role="listing"><strong>매물 점검 담당</strong><small>매물 정보 누락 · 확인 날짜 점검</small><em>업무지시 보기 →</em></button>
+      <button class="person" type="button" data-role="inquiry"><strong>상담 비서</strong><small>문의 요약 · 답장 초안</small><em>업무지시 보기 →</em></button>
+    </nav>
+
+    <section class="desk" aria-labelledby="roleName">
+      <div class="desk-head"><h2 id="roleName"></h2><span class="badge">초안 검토 후 실행</span></div>
+      <p class="summary" id="roleSummary"></p>
+      <div class="flow"><div><b>자료</b><span id="roleSource"></span></div><div><b>받을 결과</b><span id="roleOutput"></span></div><div><b>대표님 확인</b><span id="roleReview"></span></div></div>
+      <label for="instruction">오늘의 업무 지시문</label>
+      <textarea id="instruction" spellcheck="false"></textarea>
+      <p class="hint">이 지시문은 현재 브라우저에만 저장됩니다. 버튼을 눌러 복사한 뒤 ChatGPT 대화창에 붙여넣어 실행하세요.</p>
+      <div class="actions">
+        <button class="btn" type="button" id="saveBtn">지시문 저장</button>
+        <button class="btn primary" type="button" id="copyBtn">지시문 복사</button>
+        <a class="btn" href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer">ChatGPT 열기 ↗</a>
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+      <div class="limits"><strong>현재 단계</strong><br>직원 카드와 업무 지시문을 준비하는 화면입니다. 이 버튼만으로 AI가 자동 실행되거나 블로그·매물정보가 수정되지는 않습니다. 고객에게 보내는 메시지와 게시물은 대표님이 검토해 주세요.</div>
+    </section>
+  </main>
+</div>
+<script>
+(function(){
+  'use strict';
+  var roles={
+    blog:{name:'블로그 담당',summary:'블로그 글을 점검하고 다음 글의 초안을 준비합니다.',source:'하이탑부동산 네이버 블로그와 확인된 최신 자료',output:'지난 일정·오타 목록, 새 글 주제와 초안',review:'날짜·매물 상태·사진·게시 전 최종 확인',prompt:'너는 하이탑부동산의 블로그 담당 AI 직원이다.\n\n블로그: https://blog.naver.com/newpajucity\n\n오늘 할 일:\n1. 최근 글 5개에서 지난 일정, 오타, 확인이 필요한 매물 상태를 찾아 글 링크와 함께 표로 보고해줘.\n2. 이번 주에 쓸 만한 파주·운정 부동산 글 주제 2개를 제안해줘.\n3. 내가 고른 주제의 글 초안을 작성해줘.\n\n규칙: 확인되지 않은 가격, 공급 여부, 법규, 수익률은 추측하지 말고 “확인 필요”로 표시해줘. 글은 게시하지 말고 내가 검토할 초안만 보여줘.'},
+    listing:{name:'매물 점검 담당',summary:'매물 자료의 오래된 정보와 빠진 항목을 찾습니다.',source:'대표님이 제공한 매물 목록 또는 승인된 매물관리 화면',output:'매물별 확인 필요 항목과 우선순위',review:'거래 가능 여부·가격·면적·계약 조건 확인',prompt:'너는 하이탑부동산의 매물 점검 AI 직원이다.\n\n내가 제공하는 매물 목록을 검토해서 확인 날짜가 오래됐거나 가격·면적·상태·연락 기록이 빠진 항목을 표로 정리해줘. 각 항목에 확인할 질문과 우선순위를 붙여줘.\n\n규칙: 매물 상태를 임의로 바꾸지 말고, 거래 가능 여부나 계약 조건을 추측하지 마. 고객 개인정보는 결과에 다시 적지 말고 필요한 부분만 요약해줘. 매물관리 화면을 수정하기 전에 내 검토를 받아줘.\n\n매물 자료: [여기에 개인정보를 제외한 목록이나 자료 링크를 넣어 주세요]'},
+    inquiry:{name:'상담 비서',summary:'상담 내용을 정리하고 답장 초안을 만듭니다.',source:'대표님이 제공한 문의 내용과 확인된 매물 정보',output:'문의 요약, 추가 질문, 답장 초안',review:'고객 발송·일정 확정·조건 안내',prompt:'너는 하이탑부동산의 상담 비서 AI 직원이다.\n\n아래 문의를 3줄로 요약하고, 상담 전에 확인해야 할 질문을 정리한 뒤 친절한 답장 초안을 작성해줘.\n\n규칙: 확인되지 않은 매물 가격·공실·계약 조건을 약속하지 마. 고객 이름과 전화번호는 결과에 반복하지 마. 메시지를 직접 보내거나 일정을 확정하지 말고 초안만 보여줘.\n\n문의 내용: [여기에 이름·전화번호를 가린 문의 내용을 넣어 주세요]'}
+  };
+  var storageKey='hitop_ai_staff_prompts_v1';
+  var buttons=[].slice.call(document.querySelectorAll('[data-role]'));
+  var instruction=document.getElementById('instruction');
+  var status=document.getElementById('status');
+  var current='blog';
+  function saved(){try{return JSON.parse(localStorage.getItem(storageKey)||'{}')}catch(e){return {}}}
+  function setStatus(message){status.textContent=message}
+  function showRole(id){
+    if(!roles[id])id='blog';
+    current=id;
+    var role=roles[id],draft=saved();
+    document.getElementById('roleName').textContent=role.name;
+    document.getElementById('roleSummary').textContent=role.summary;
+    document.getElementById('roleSource').textContent=role.source;
+    document.getElementById('roleOutput').textContent=role.output;
+    document.getElementById('roleReview').textContent=role.review;
+    instruction.value=typeof draft[id]==='string'?draft[id]:role.prompt;
+    buttons.forEach(function(button){button.setAttribute('aria-current',button.dataset.role===id?'true':'false')});
+    setStatus('');
+  }
+  buttons.forEach(function(button){button.addEventListener('click',function(){location.hash=button.dataset.role})});
+  window.addEventListener('hashchange',function(){showRole(location.hash.slice(1))});
+  instruction.addEventListener('input',function(){setStatus('수정한 내용은 저장 버튼을 누르면 이 브라우저에 보관됩니다.')});
+  document.getElementById('saveBtn').addEventListener('click',function(){
+    try{var draft=saved();draft[current]=instruction.value;localStorage.setItem(storageKey,JSON.stringify(draft));setStatus('지시문을 이 브라우저에 저장했습니다.')}catch(e){setStatus('저장하지 못했습니다. 브라우저 저장공간 설정을 확인해 주세요.')}
+  });
+  document.getElementById('copyBtn').addEventListener('click',async function(){
+    var value=instruction.value.trim();
+    if(!value){setStatus('먼저 업무 지시문을 입력해 주세요.');return}
+    try{
+      if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(value)}
+      else{instruction.focus();instruction.select();if(!document.execCommand('copy'))throw new Error('copy failed')}
+      setStatus('복사했습니다. ChatGPT를 열어 대화창에 붙여넣어 주세요.');
+    }catch(e){setStatus('자동 복사가 안 됐습니다. 지시문을 선택해 직접 복사해 주세요.')}
+  });
+  showRole(location.hash.slice(1)||new URLSearchParams(location.search).get('role'));
+})();
+</script>
+</body>
+</html>
+
