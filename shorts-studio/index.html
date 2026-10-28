@@ -100,6 +100,23 @@ if(!ok&&location.protocol!=="file:"){location.replace("../login.html?redirect="+
   .flex{display:flex;align-items:center;gap:8px}
   .grow{flex:1}
   @media(max-width:1100px){body{overflow:auto;height:auto}main{grid-template-columns:1fr}.col{overflow:visible}#stagewrap{height:70vh;flex:none}}
+
+/* ===== 심플 화면 패치 ===== */
+.num{display:none}
+#left .hint:not(#fillNote){display:none}
+main{grid-template-columns:minmax(340px,440px) minmax(300px,1fr)}
+#right{display:none}
+body.adv main{grid-template-columns:minmax(340px,440px) minmax(300px,1fr) minmax(340px,400px)}
+body.adv #right{display:flex}
+#btnAdv{margin-left:8px}
+#btnRefill{display:none}
+details.more{margin-top:10px;border:1px dashed var(--line);border-radius:10px;padding:8px 10px}
+details.more summary{cursor:pointer;color:var(--mut);font-size:13px}
+#advTitle{margin:0 0 4px;font-size:13px;color:var(--mut)}
+
+#photoCard{display:none!important}
+#photoBox{margin-bottom:10px}
+#photoBox #btnPhoto{margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -1531,6 +1548,523 @@ setAccent(TYPE_ACCENT['아파트']);
 renderCutList();renderInspector();checkVoice();curT=2;draw();updateUI();updateAdjUI();
 document.fonts&&document.fonts.ready.then(()=>{FONT=FONTS[G.font]||FONTS.basic;draw()});
 draw();
+
+</script>
+<script>
+
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  /* 헤더: 고급 설정 버튼 */
+  var seg=document.querySelector('.seg');
+  var b=document.createElement('button');b.id='btnAdv';b.textContent='⚙️ 고급 설정';
+  b.onclick=function(){document.body.classList.toggle('adv');b.classList.toggle('on')};
+  seg.parentNode.appendChild(b);
+  var sub=document.querySelector('header p'); if(sub) sub.textContent='특징 고르기 → 대본 만들기 → 음성 올리기 → 영상 저장';
+  /* 특징: 내 칩은 칩 아래로, 직접 추가는 접기 */
+  var fc=$('featCard'), ch=[].slice.call(fc.children);
+  var lblMy=ch[3], my=$('myChips'), lblAdd=ch[5], row=ch[6], chk=ch[7], add=$('cfAdd'), lblSel=ch[9];
+  lblMy.style.display='none';
+  $('featChips').after(my);
+  var d=document.createElement('details');d.className='more';
+  var sm=document.createElement('summary');sm.textContent='➕ 직접 추가';d.appendChild(sm);
+  [lblAdd,row,chk,add].forEach(function(e){d.appendChild(e)});
+  lblSel.before(d);
+  /* 포인트 카드는 고급 설정으로 */
+  $('right').prepend($('pointsCard'));
+  var pc=$('pointsCard'); pc.style.display='';
+  /* 대본 버튼: 누르면 컷까지 한번에 */
+  $('btnGenScript').textContent='✍️ 대본 만들기';
+  $('btnGenScript').addEventListener('click',function(){ if(G.mode==='listing') $('btnMakeCuts').click(); });
+    $('btnCopy').textContent='📋 대본 복사';
+})();
+
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  /* 2) 고급 설정: 컷 편집이 먼저, 포인트는 그 아래 */
+  $('inspector').after($('pointsCard'));
+  /* 3) 사진 + 음성 한 칸 */
+  var vc=$('btnVoice').parentNode, h=vc.querySelector('h2');
+  h.textContent='사진 · 음성 올리기';
+  var box=document.createElement('div');box.id='photoBox';
+  ['btnPhoto','photoFile','thumbs'].forEach(function(i){box.appendChild($(i))});
+  h.after(box);
+  /* 1) 빈 내 칩 안내문 숨기기 */
+  var my=$('myChips');
+  function chk(){ my.style.display = my.querySelector('button')?'':'none'; }
+  chk(); new MutationObserver(chk).observe(my,{childList:true,subtree:true});
+})();
+
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  FONTS.basic="'Pretendard','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif";var SANS=FONTS.basic, SERIF="'Noto Serif KR','Nanum Myeongjo','Batang',serif";
+  FONTS.serif=SERIF;
+  var GOLD='#b08a3e', INK='#14181f', SUBC='#3b424d', PH=1080;
+  var ORIG_ACC=Object.assign({},TYPE_ACCENT);var STY='white',SUBCUR=SUBC;
+  var lk=document.createElement('link');lk.rel='stylesheet';
+  lk.href='https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700;900&family=Noto+Sans+KR:wght@400;500&display=swap';
+  document.head.appendChild(lk);
+  var pl=document.createElement('link');pl.rel='stylesheet';pl.href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css';document.head.appendChild(pl);pl.onload=function(){fl()};
+  var fl=function(){try{Promise.all(['700 60px "Noto Serif KR"','500 40px Pretendard','600 40px Pretendard','700 40px Pretendard','800 40px Pretendard','500 40px "Noto Sans KR"','700 40px "Noto Sans KR"'].map(function(f){return document.fonts.load(f,'가나다ABC123')})).then(function(){draw()})}catch(e){}};
+  lk.onload=fl; fl();
+  var gf=$('gFont');var ob=gf.querySelector('option[value=basic]');if(ob)ob.textContent='기본 (프리텐다드 고딕)';
+  var card=gf.closest('.card'),h2=card.querySelector('h2');
+  var wrap=document.createElement('div');
+  wrap.innerHTML='<label>화면 스타일</label><select id="gTheme"><option value="news">뉴스형 (유튜브 쇼츠 추천)</option><option value="series">시리즈형 (인스타 릴스 추천)</option><option value="float">① 플로팅 카드 (추천)</option><option value="cine">② 풀사진 시네마</option><option value="white">③ 위아래 분할 (이전)</option><option value="dark">다크 (기존)</option></select>';
+  h2.after(wrap);
+  function setTheme(th){
+    G.theme=th;STY=th;
+    if(th==='dark'){G.font='basic';G.main='#ffffff';Object.assign(TYPE_ACCENT,ORIG_ACC);G.accent=TYPE_ACCENT[curType]||'#4cc3ff'}
+    else{var ac=th==='cine'?'#d9b56a':th==='news'?'#ffc83d':th==='series'?'#f2b932':GOLD,wh=(th==='cine'||th==='news'||th==='series');G.font='basic';G.main=wh?'#ffffff':INK;SUBCUR=wh?'#ffffff':SUBC;Object.keys(TYPE_ACCENT).forEach(function(k){TYPE_ACCENT[k]=ac});G.accent=ac}
+    $('gTheme').value=th; syncG(); setAccent(G.accent);
+  }
+  $('gTheme').onchange=function(){setTheme(this.value)};
+
+  function wBG(ph){
+    if(STY==='cine'&&!ph){var dg=ctx.createLinearGradient(0,0,0,H);dg.addColorStop(0,'#232b3d');dg.addColorStop(1,'#0b0e15');ctx.fillStyle=dg;ctx.fillRect(0,0,W,H);return}
+    var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#ffffff');g.addColorStop(1,'#f4f0e8');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    if(!ph){
+      var rg=ctx.createRadialGradient(W/2,H*0.45,0,W/2,H*0.45,900);rg.addColorStop(0,hexA(G.accent,.10));rg.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+      ctx.strokeStyle=hexA(G.accent,.75);ctx.lineWidth=3;ctx.strokeRect(48,48,W-96,H-96);
+      ctx.lineWidth=1.5;ctx.strokeStyle=hexA(G.accent,.4);ctx.strokeRect(66,66,W-132,H-132);
+    }
+  }
+  function wPhoto(cam,lt,dur,img,full){var PHx=full?H:PH;
+    var p=easeInOut(clamp(lt/dur)),a=cam.a,b=cam.b;
+    var bx=a[0]+(b[0]-a[0])*.6,by=a[1]+(b[1]-a[1])*.6,bz=a[2]+(b[2]-a[2])*.6;
+    var cx=a[0]+(bx-a[0])*p,cy=a[1]+(by-a[1])*p,z=a[2]+(bz-a[2])*p;
+    var iw=img.width,ih=img.height,s=Math.max(PHx/ih,W/iw)*z,sw=W/s,sh=PHx/s,hw=sw/2/iw,hh=sh/2/ih;
+    cx=clamp(cx,hw,1-hw);cy=clamp(cy,hh,1-hh);
+    ctx.save();ctx.beginPath();ctx.rect(0,0,W,PHx);ctx.clip();
+    ctx.globalAlpha=easeOutCubic(clamp(lt/0.5));
+    ctx.drawImage(img,cx*iw-sw/2,cy*ih-sh/2,sw,sh,0,0,W,PHx);
+    ctx.restore();
+    if(!full){ctx.fillStyle=G.accent;ctx.fillRect(0,PH,W,5)}
+  }
+  function wA(lt,d,dur){return easeOutCubic(clamp((lt-d)/(dur||0.7)))}
+  function wMeasure(text,size){
+    if(!text)return {lines:[],size:size,h:0};
+    ctx.save();ctx.font='700 '+size+'px '+FONT;
+    var parts=text.split('\n').map(function(s){return s.trim()}).filter(Boolean);
+    var mw=function(){return Math.max.apply(null,parts.map(function(p){return ctx.measureText(p).width}))};
+    if(parts.length===1&&mw()>940){
+      var tx=parts[0],split=null;
+      if(tx.indexOf(' ')>=0){var best=-1,bd=1e9,mid=tx.length/2;for(var i=0;i<tx.length;i++)if(tx[i]===' '){var d=Math.abs(i-mid);if(d<bd){bd=d;best=i}}split=[tx.slice(0,best).trim(),tx.slice(best+1).trim()]}
+      else if([...tx].length>=6){var ch=[...tx],k=Math.ceil(ch.length/2);split=[ch.slice(0,k).join(''),ch.slice(k).join('')]}
+      if(split){parts=split;size*=0.82;ctx.font='700 '+size+'px '+FONT}
+    }
+    var w=mw(),s=size;if(w>940)s=size*940/w;
+    ctx.restore();
+    return {lines:parts,size:s,h:parts.length*s*1.25};
+  }
+  function wBig(m,cx,cy,lt,delay,key,color){
+    if(!m.lines.length)return;
+    var n=m.lines.length,lh=m.size*1.25;
+    ctx.save();ctx.font='700 '+m.size+'px '+FONT;
+    var bw=Math.max.apply(null,m.lines.map(function(l){return ctx.measureText(l).width}));ctx.restore();
+    rec(key,cx-bw/2,cy-n*lh/2,bw,n*lh);
+    m.lines.forEach(function(ln,k){
+      var p=wA(lt,delay+k*0.15,0.8);if(p<=0)return;
+      ctx.save();ctx.globalAlpha=p;ctx.font='700 '+m.size+'px '+FONT;ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(ln,cx,cy+(k-(n-1)/2)*lh+(1-p)*34);ctx.restore();
+    });
+  }
+  function wLabel(text,cx,cy,lt,delay,key){
+    if(!text)return;var size=52;
+    ctx.save();ctx.font='700 '+size+'px '+SANS;ctx.letterSpacing='6px';var tw=ctx.measureText(text).width;ctx.restore();
+    rec(key||'chip',cx-tw/2-100,cy-42,tw+200,84);
+    var p=wA(lt,delay),yy=cy+(1-p)*16;if(p<=0)return;
+    ctx.save();ctx.globalAlpha=p;ctx.font='700 '+size+'px '+SANS;ctx.letterSpacing='6px';
+    ctx.fillStyle=G.accent;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,cx+3,yy);
+    var lw=70*p;ctx.fillRect(cx-tw/2-30-lw,yy-1,lw,2);ctx.fillRect(cx+tw/2+30,yy-1,lw,2);ctx.restore();
+  }
+  function wSub(text,cx,cy,size,lt,delay,key){
+    if(!text)return;
+    ctx.save();var s=size;ctx.font='500 '+s+'px '+SANS;
+    while(ctx.measureText(text).width>960&&s>20){s-=2;ctx.font='500 '+s+'px '+SANS}
+    var tw=ctx.measureText(text).width;ctx.restore();
+    rec(key||'sub',cx-tw/2,cy-s*0.7,tw,s*1.4);
+    var p=wA(lt,delay);if(p<=0)return;
+    ctx.save();ctx.globalAlpha=p;ctx.font='500 '+s+'px '+SANS;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillStyle=SUBCUR;ctx.fillText(text,cx,cy+(1-p)*22);ctx.restore();
+  }
+  function wLine(cx,cy,lt,delay){
+    var p=easeOutCubic(clamp((lt-delay)/0.6));if(p<=0)return;
+    ctx.save();ctx.fillStyle=G.accent;ctx.fillRect(cx-60*p,cy-1.5,120*p,3);ctx.restore();
+  }
+  function wPill(text,cx,cy,size,lt,delay,key){
+    if(!text)return;
+    ctx.save();ctx.font='700 '+size+'px '+SANS;var pad=size*0.7,w=ctx.measureText(text).width+pad*2,s=size;
+    if(w>960){var k=960/w;s=size*k;ctx.font='700 '+s+'px '+SANS;w=ctx.measureText(text).width+pad*2*k}
+    var h=s*1.7;rec(key||'pill',cx-w/2,cy-h/2,w,h);
+    var p=wA(lt,delay);if(p<=0){ctx.restore();return}
+    ctx.globalAlpha=p;ctx.translate(0,(1-p)*24);
+    ctx.shadowColor='rgba(60,40,0,.25)';ctx.shadowBlur=30;ctx.shadowOffsetY=10;
+    ctx.fillStyle=G.accent;rr(cx-w/2,cy-h/2,w,h,h/2);ctx.fill();ctx.shadowColor='transparent';
+    ctx.fillStyle=inkOn(G.accent);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,cx,cy+s*0.04);ctx.restore();
+  }
+
+  function wFooter(x0,w,y,lt){
+    var p=wA(lt,0.2),fl=(STY==='float');
+    ctx.save();ctx.globalAlpha=p;
+    withAdj(null,'wm',W/2,y,function(){
+      rec('wm',x0,y-50,w,100);
+      ctx.fillStyle=hexA(G.accent,.6);ctx.fillRect(x0,y-52,w,2);
+      ctx.font='900 42px '+FONT;ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillStyle=fl?INK:'#ffffff';ctx.fillText(G.biz,x0,y+8);
+      ctx.font='900 46px '+FONT;ctx.textAlign='right';ctx.fillStyle=G.accent;ctx.fillText('☎ '+G.tel,x0+w,y+9);
+    });
+    ctx.restore();
+  }
+  function drawCutW(c,lt,ph){
+    var K=G.sizeK,Y=G.yOff,M=G.main,A=G.accent,cx=W/2,fl=(STY==='float'||STY==='cine'),bs=fl?1:(ph?1:1.2);
+    var Q=[];
+    var AD=function(key,ax,ay,fn){if(fl)Q.push(function(){withAdj(c,key,ax,ay,fn)});else withAdj(c,key,ax,ay,fn)};
+    var ctr=(ph?(PH+20+1545)/2:900)+Y,minTop=ph?PH+30:80,y,top;
+    var place=function(tot){
+      if(STY==='float')return 1205+Y-tot/2;
+      if(STY==='cine')return 1490+Y-tot;
+      return Math.max(minTop,ctr-tot/2);
+    };
+    if(c.layout==='price'){
+      var m1=wMeasure(c.big,72*K*bs),m2=wMeasure(c.pill,150*K*bs);
+      var total=m1.h+(m1.h?10:0)+m2.h+(c.sub?(36+60):0);
+      y=top=place(total);
+      var c1=y+m1.h/2;y+=m1.h+(m1.h?10:0);var c2=y+m2.h/2;y+=m2.h;var ln=y+8;y+=36;var cs=y+30;
+      AD('big',cx,c1,function(){wBig(m1,cx,c1,lt,0.1,'big',M)});
+      AD('pill',cx,c2,function(){wBig(m2,cx,c2,lt,0.5,'pill',A);wLine(cx,ln,lt,1.2)});
+      AD('sub',cx,cs,function(){wSub(c.sub,cx,cs,60*K*bs,lt,1.4)});
+    }else if(c.layout==='outro'){
+      var mo=wMeasure(c.big||G.biz,120*K*bs),ph2=c.pill||('☎ '+G.tel),pillH=82*K*bs*1.7;
+      var tot=(c.sub?92:0)+mo.h+30+pillH+(c.chip?(30+56):0);
+      y=top=place(tot);
+      var cl=y+34;y+=c.sub?92:0;var cb=y+mo.h/2;y+=mo.h+30;var cp=y+pillH/2;y+=pillH+30;var cc=y+28;
+      AD('sub',cx,cl,function(){wLabel(c.sub,cx,cl,lt,0.1,'sub')});
+      AD('big',cx,cb,function(){wBig(mo,cx,cb,lt,0.3,'big',M)});
+      AD('pill',cx,cp,function(){wPill(ph2,cx,cp,82*K*bs,lt,1.0,'pill')});
+      AD('chip',cx,cc,function(){wSub(c.chip,cx,cc,48*K*bs,lt,1.6,'chip')});
+    }else{
+      var sz=({title:128,point:124})[c.layout]||116;
+      var mb=wMeasure(c.big,sz*K*bs),hc=!!c.chip,hs=!!c.sub,CH=hc?92:0,SH=hs?70:0;
+      var tt=CH+mb.h+(mb.h?58:0)+SH,avail=fl?470:(ph?(1545-(PH+30)):1500);
+      if(tt>avail&&mb.h){var ff=Math.max(.55,(avail-CH-58-SH)/mb.h);mb=wMeasure(c.big,sz*K*bs*ff);tt=CH+mb.h+58+SH}
+      y=top=place(tt);
+      var yc=y+34;y+=CH;var yb=y+mb.h/2;y+=mb.h+22;var yl=y;y+=36;var ys=y+34;
+      AD('chip',cx,yc,function(){wLabel(c.chip,cx,yc,lt,0.1,'chip')});
+      AD('big',cx,yb,function(){wBig(mb,cx,yb,lt,0.3,'big',M);if(mb.h)wLine(cx,yl,lt,1.0)});
+      AD('sub',cx,ys,function(){wSub(c.sub,cx,ys,66*K*bs,lt,1.2)});
+    }
+    if(fl){
+      ctx.save();
+      if(STY==='float'){
+        ctx.shadowColor='rgba(0,0,0,.28)';ctx.shadowBlur=44;ctx.shadowOffsetY=16;
+        ctx.fillStyle='rgba(255,255,255,.96)';rr(56,960,968,640,40);ctx.fill();
+        ctx.shadowColor='transparent';
+        ctx.strokeStyle=hexA(A,.55);ctx.lineWidth=2;rr(72,976,936,608,30);ctx.stroke();
+      }else{
+        var gg=ctx.createLinearGradient(0,600,0,H);gg.addColorStop(0,'rgba(6,8,12,0)');gg.addColorStop(.5,'rgba(6,8,12,.72)');gg.addColorStop(1,'rgba(6,8,12,.9)');
+        ctx.fillStyle=gg;ctx.fillRect(0,600,W,H-600);
+      }
+      ctx.restore();
+      Q.forEach(function(f){f()});
+      if(STY==='float')wFooter(112,856,1530,lt);else wFooter(80,W-160,1610,lt);
+    }
+  }
+
+  
+  function fitText(txt,font,size,maxW){ctx.font=font.replace('%s',size);var s=size;while(ctx.measureText(txt).width>maxW&&s>24){s-=2;ctx.font=font.replace('%s',s)}return s}
+  function wBand(cam,lt,dur,img,alpha){
+    var BY=560,BH=800,p=easeInOut(clamp(lt/dur)),a=cam.a,b=cam.b;
+    var bx=a[0]+(b[0]-a[0])*.6,by=a[1]+(b[1]-a[1])*.6,bz=a[2]+(b[2]-a[2])*.6;
+    var cx=a[0]+(bx-a[0])*p,cy=a[1]+(by-a[1])*p,z=a[2]+(bz-a[2])*p;
+    var iw=img.width,ih=img.height,s=Math.max(BH/ih,W/iw)*z,sw=W/s,sh=BH/s,hw=sw/2/iw,hh=sh/2/ih;
+    cx=clamp(cx,hw,1-hw);cy=clamp(cy,hh,1-hh);
+    ctx.save();ctx.beginPath();ctx.rect(0,BY,W,BH);ctx.clip();ctx.globalAlpha=alpha;
+    ctx.drawImage(img,cx*iw-sw/2,cy*ih-sh/2,sw,sh,0,BY,W,BH);ctx.restore();
+  }
+  function newsHead(){
+    var f={};FIELD_IDS.forEach(function(k){f[k]=$(k).value.trim()});
+    if(G.mode==='listing'){
+      return [[f.name,f.complex].filter(Boolean).join(' ')||f.area, [f.size,f.type,f.price].filter(Boolean).join(' ')];
+    }
+    var c0=cuts[0]||{};return [c0.big||'',c0.sub||''];
+  }
+  function newsCaption(c){
+    var j=function(a,s){return a.filter(Boolean).join(s)};
+    if(c.layout==='title')return j([c.chip,c.big],'  ');
+    if(c.layout==='price')return j([c.big,c.pill],' · ');
+    if(c.layout==='outro')return c.sub||c.chip||'';
+    return j([c.big,c.sub],' · ');
+  }
+  function renderNews(t){
+    var T=TL();ctx.clearRect(0,0,W,H);HIT=[];
+    var bg=ctx.createLinearGradient(0,0,W*0.5,H);bg.addColorStop(0,'#0c2a8a');bg.addColorStop(.45,'#071650');bg.addColorStop(1,'#030a24');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.fillStyle='rgba(80,130,255,.10)';ctx.beginPath();ctx.moveTo(0,1450);ctx.lineTo(W,1050);ctx.lineTo(W,1250);ctx.lineTo(0,1750);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(80,130,255,.07)';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(W,0);ctx.lineTo(W,200);ctx.lineTo(0,420);ctx.closePath();ctx.fill();ctx.restore();
+    var hd=newsHead(),hp=wA(t,0.1,0.8),HC='#ffc83d';
+    ctx.save();ctx.globalAlpha=hp;ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=16;ctx.shadowOffsetY=4;
+    var hy=G.yOff;
+    var s1=fitText(hd[0],'700 %spx '+FONT,100*G.sizeK,960);ctx.fillStyle='#ffffff';ctx.fillText(hd[0],W/2,350+hy+(1-hp)*24);
+    var s2=fitText(hd[1],'700 %spx '+FONT,100*G.sizeK,960);ctx.fillStyle=HC;ctx.fillText(hd[1],W/2,480+hy+(1-hp)*24);
+    ctx.restore();
+    var BY=560,BH=800;
+    if(!T.N){ctx.fillStyle='#9fb0e0';ctx.font='700 44px '+SANS;ctx.textAlign='center';ctx.fillText('왼쪽에 대본을 입력해주세요',W/2,BY+BH/2);newsFoot(t);drawEditOverlay();return}
+    var i=T.s.findIndex(function(s,k){return t>=s&&t<T.e[k]});if(i<0)i=T.N-1;
+    if(E.cutI!==i){E.cutI=i;if(E.sel){E.sel=null;E.drag=null;updateAdjUI()}}
+    var c=cuts[i],dur=T.e[i]-T.s[i],lt=clamp(t-T.s[i],0,dur),img=photoFor(i);
+    var usePh=(G.mode==='listing'||G.infoStyle==='photo')&&img;
+    var cap=newsCaption(c);
+    if(usePh){
+      if(i>0&&lt<0.5){var pi=photoFor(i-1);if(pi)wBand(CAMS[(i-1)%6],1,1,pi,1)}
+      wBand(CAMS[i%6],lt,dur,img,i>0?easeOutCubic(clamp(lt/0.5)):1);
+    }else{
+      var pg=ctx.createLinearGradient(0,BY,0,BY+BH);pg.addColorStop(0,'#1a3aa8');pg.addColorStop(1,'#0e2270');ctx.fillStyle=pg;ctx.fillRect(0,BY,W,BH);
+      var bp=wA(lt,0.1,0.7);
+      ctx.save();ctx.globalAlpha=bp;ctx.textAlign='center';ctx.textBaseline='middle';
+      var bs1=fitText(c.big||'','700 %spx '+FONT,120,900);ctx.fillStyle='#fff';ctx.fillText(c.big||'',W/2,BY+BH/2-30+(1-bp)*26);
+      var bs2=fitText(c.sub||c.pill||'','600 %spx '+SANS,58,900);ctx.fillStyle=HC;ctx.fillText(c.sub||c.pill||'',W/2,BY+BH/2+90+(1-bp)*26);ctx.restore();
+    }
+    /* 아래 자막 바 */
+    var BARY=BY+BH-124,BARH=124,LW=190;
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,BARY,W,BARH);
+    ctx.fillStyle='#0a1a5c';ctx.fillRect(0,BARY,LW,BARH);
+    ctx.fillStyle=HC;ctx.fillRect(LW,BARY,5,BARH);
+    ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    var lg=(G.biz||'').replace(/부동산$/,'');
+    ctx.font='900 40px '+FONT;ctx.fillText(lg||G.biz,LW/2,BARY+BARH/2-20);ctx.font='700 30px '+SANS;ctx.fillStyle=HC;ctx.fillText('부동산',LW/2,BARY+BARH/2+24);ctx.restore();
+    var cp=wA(lt,0.15,0.6);
+    ctx.save();ctx.beginPath();ctx.rect(LW+5,BARY,W-LW-5,BARH);ctx.clip();
+    ctx.globalAlpha=cp;ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillStyle='#0a1233';
+    fitText(cap,'700 %spx '+FONT,54,W-LW-5-70);ctx.fillText(cap,LW+5+36+(1-cp)*30,BARY+BARH/2+3);ctx.restore();
+    newsFoot(t);
+    if(lt<0.18&&i>0){ctx.fillStyle='rgba(255,255,255,'+((1-lt/0.18)*.25)+')';ctx.fillRect(0,BY,W,BH)}
+    drawEditOverlay();
+  }
+  function newsFoot(t){
+    var p=wA(t,0.4,0.8);
+    withAdj(null,'wm',W/2,1560,function(){
+      rec('wm',140,1440,W-280,220);
+      if(p<=0)return;
+      ctx.save();ctx.globalAlpha=p;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillStyle='rgba(255,200,61,.8)';ctx.fillRect(W/2-60,1452,120,3);
+      ctx.font='700 44px '+SANS;ctx.fillStyle='#ffffff';ctx.letterSpacing='4px';ctx.fillText(G.biz,W/2+2,1510);ctx.letterSpacing='0px';
+      ctx.font='800 84px '+FONT;ctx.fillStyle='#ffc83d';ctx.shadowColor='rgba(0,0,0,.45)';ctx.shadowBlur=14;ctx.fillText('☎ '+G.tel,W/2,1600);
+      ctx.restore();
+    });
+  }
+
+  
+  function wFull(cam,lt,dur,img,alpha){
+    var p=easeInOut(clamp(lt/dur)),a=cam.a,b=cam.b;
+    var bx=a[0]+(b[0]-a[0])*.6,by=a[1]+(b[1]-a[1])*.6,bz=a[2]+(b[2]-a[2])*.6;
+    var cx=a[0]+(bx-a[0])*p,cy=a[1]+(by-a[1])*p,z=a[2]+(bz-a[2])*p;
+    var iw=img.width,ih=img.height,s=Math.max(H/ih,W/iw)*z,sw=W/s,sh=H/s,hw=sw/2/iw,hh=sh/2/ih;
+    cx=clamp(cx,hw,1-hw);cy=clamp(cy,hh,1-hh);
+    ctx.save();ctx.globalAlpha=alpha;ctx.drawImage(img,cx*iw-sw/2,cy*ih-sh/2,sw,sh,0,0,W,H);ctx.restore();
+  }
+  function brk(x,y,dx,dy,col,al){
+    ctx.save();ctx.globalAlpha=al;ctx.strokeStyle=col;ctx.lineWidth=9;ctx.lineCap='square';
+    ctx.beginPath();ctx.moveTo(x+dx*130,y);ctx.lineTo(x,y);ctx.lineTo(x,y+dy*130);ctx.stroke();ctx.restore();
+  }
+  function renderSeries(t){
+    var T=TL();ctx.clearRect(0,0,W,H);HIT=[];
+    var GC='#f2b932',hd=newsHead();
+    var bg=ctx.createLinearGradient(0,0,W*0.4,H);bg.addColorStop(0,'#14513d');bg.addColorStop(1,'#04120d');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    var i=-1,c=null,dur=1,lt=0,img=null;
+    if(T.N){
+      i=T.s.findIndex(function(s,k){return t>=s&&t<T.e[k]});if(i<0)i=T.N-1;
+      if(E.cutI!==i){E.cutI=i;if(E.sel){E.sel=null;E.drag=null;updateAdjUI()}}
+      c=cuts[i];dur=T.e[i]-T.s[i];lt=clamp(t-T.s[i],0,dur);img=photoFor(i);
+    }
+    var usePh=c&&(G.mode==='listing'||G.infoStyle==='photo')&&img;
+    if(usePh){
+      if(i>0&&lt<0.5){var pi=photoFor(i-1);if(pi)wFull(CAMS[(i-1)%6],1,1,pi,1)}
+      wFull(CAMS[i%6],lt,dur,img,i>0?easeOutCubic(clamp(lt/0.5)):1);
+    }
+    var g1=ctx.createLinearGradient(0,0,0,520);g1.addColorStop(0,'rgba(0,0,0,.5)');g1.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g1;ctx.fillRect(0,0,W,520);
+    var g2=ctx.createLinearGradient(0,820,0,H);g2.addColorStop(0,'rgba(0,0,0,0)');g2.addColorStop(.55,'rgba(0,0,0,.72)');g2.addColorStop(1,'rgba(0,0,0,.88)');ctx.fillStyle=g2;ctx.fillRect(0,820,W,H-820);
+    var fp=wA(t,0.1,0.7);
+    var FX0=70,FX1=W-70,FY0=260,FY1=1600;
+    brk(FX0,FY0,1,1,GC,fp);brk(FX1,FY0,-1,1,GC,fp);brk(FX0,FY1,1,-1,GC,fp);brk(FX1,FY1,-1,-1,GC,fp);
+    /* 위 번호표 */
+    var no=(G.seriesNo||'').trim(),chipTxt=(G.biz||'')+' 매물'+(no?' No.'+no:'');
+    ctx.save();ctx.globalAlpha=fp;ctx.font='900 40px '+FONT;var cw=ctx.measureText(chipTxt).width+60;
+    ctx.fillStyle=GC;rr(W/2-cw/2,FY0-6-34+0,cw,68,34);ctx.fill();ctx.fillStyle='#1a1400';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(chipTxt,W/2,FY0+2);ctx.restore();
+    /* 왼쪽 아래 3줄 */
+    var X=120,MW=W-240,hy=G.yOff;
+    ctx.save();ctx.globalAlpha=fp;ctx.textAlign='left';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=18;ctx.shadowOffsetY=4;
+    fitText(hd[0],'800 %spx '+FONT,88*G.sizeK,MW);ctx.fillStyle='#ffffff';ctx.fillText(hd[0],X,1170+hy+(1-fp)*20);
+    fitText(hd[1],'800 %spx '+FONT,124*G.sizeK,MW);ctx.fillStyle=GC;ctx.fillText(hd[1],X,1300+hy+(1-fp)*20);
+    ctx.restore();
+    if(c){
+      var cap=newsCaption(c),cp=wA(lt,0.15,0.6);
+      ctx.save();ctx.globalAlpha=cp;ctx.textAlign='left';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=14;ctx.shadowOffsetY=3;
+      fitText(cap,'700 %spx '+FONT,56*G.sizeK,MW);ctx.fillStyle='#ffffff';ctx.fillText(cap,X+(1-cp)*40,1405+hy);ctx.restore();
+      if(lt<0.18&&i>0){ctx.fillStyle='rgba(255,255,255,'+((1-lt/0.18)*.18)+')';ctx.fillRect(0,0,W,H)}
+    }else{
+      ctx.fillStyle='#9fd6c2';ctx.font='700 44px '+SANS;ctx.textAlign='center';ctx.fillText('왼쪽에 대본을 입력해주세요',W/2,H/2);
+    }
+    var outro=c&&c.layout==='outro',fy=1510,p2=wA(t,0.4,0.8);
+    withAdj(null,'wm',W/2,fy,function(){
+      rec('wm',X-20,fy-50,W-2*X+40,100);
+      if(p2<=0)return;
+      ctx.save();ctx.globalAlpha=p2;ctx.textBaseline='middle';ctx.textAlign='left';ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=14;
+      ctx.fillStyle=hexA(GC,.7);ctx.fillRect(X,fy-52,100,3);
+      ctx.font='700 42px '+SANS;ctx.fillStyle='#ffffff';ctx.fillText(G.biz,X,fy+2);
+      var bw=ctx.measureText(G.biz).width;
+      ctx.font=(outro?'800 64px ':'800 50px ')+FONT;ctx.fillStyle=GC;ctx.fillText('☎ '+G.tel,X+bw+36,fy+3);
+      ctx.restore();
+    });
+    drawEditOverlay();
+  }
+
+  var _rf=renderFrame, _wm=watermark;
+  renderFrame=function(t){
+    if(G.theme==='dark')return _rf(t);
+    if(STY==='news')return renderNews(t);
+    if(STY==='series')return renderSeries(t);
+    var T=TL();ctx.clearRect(0,0,W,H);HIT=[];
+    var busy=(typeof playing!=='undefined'&&(playing||recorder));
+    if(!T.N){wBG(false);ctx.fillStyle='#6b7280';ctx.font='700 44px '+SANS;ctx.textAlign='center';ctx.fillText('왼쪽에 대본을 입력해주세요',W/2,H/2);watermark(t);drawEditOverlay();return}
+    var i=T.s.findIndex(function(s,k){return t>=s&&t<T.e[k]});if(i<0)i=T.N-1;
+    if(E.cutI!==i){E.cutI=i;if(E.sel){E.sel=null;E.drag=null;updateAdjUI()}}
+    var c=cuts[i],dur=T.e[i]-T.s[i],lt=clamp(t-T.s[i],0,dur);
+    var ph=(G.mode==='listing'||G.infoStyle==='photo')&&photoFor(i);
+    wBG(!!ph);
+    if(ph)wPhoto(CAMS[i%6],lt,dur,ph,STY!=='white');
+    else if(G.mode==='listing'&&!photos.length&&!busy){ctx.fillStyle='#9aa0aa';ctx.font='700 36px '+SANS;ctx.textAlign='center';ctx.fillText('사진을 추가하면 위쪽에 크게 들어가요',W/2,H-120)}
+    var fade=1-clamp((lt-(dur-0.25))/0.25);
+    ctx.save();ctx.globalAlpha=i===T.N-1?1:fade;drawCutW(c,lt,!!ph);ctx.restore();
+    if(lt<0.3&&i>0){ctx.fillStyle='rgba(255,255,255,'+((1-lt/0.3)*0.75)+')';ctx.fillRect(0,0,W,H)}
+    if(STY==='white'&&c.layout!=='outro')watermark(t);drawEditOverlay();
+  };
+  watermark=function(t){
+    if(G.theme==='white'&&G.wmStyle==='text'){
+      var p=easeOutCubic(clamp((t-0.3)/0.6)),ty=G.wmPos==='top'?150:1700,txt=G.biz+'  ☎ '+G.tel;
+      withAdj(null,'wm',W/2,ty,function(){
+        ctx.save();ctx.font='900 44px '+SANS;var tw=ctx.measureText(txt).width;ctx.restore();rec('wm',W/2-tw/2,ty-30,tw,60);
+        if(p<=0)return;ctx.save();ctx.globalAlpha=p;ctx.font='900 44px '+SANS;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=INK;ctx.fillText(txt,W/2,ty);ctx.restore();
+      });
+    }else _wm(t);
+  };
+  setTheme('news');
+  (function(){
+    var sel=$('gTheme'),cen=$('center');
+    var bar=document.createElement('div');bar.id='styleBar';
+    bar.innerHTML='<div class="seg" style="margin:0 auto"><button data-s="news">📰 뉴스형 · 유튜브</button><button data-s="series">🏷 시리즈형 · 인스타</button></div><div id="noRow" style="display:none;text-align:center;margin-top:8px"><span class="small">번호표 </span><input type="text" id="seriesNo" placeholder="예: 12 (비우면 번호 없이)" style="width:200px;display:inline-block"></div>';
+    cen.insertBefore(bar,cen.firstChild);
+    function mark(){bar.querySelectorAll('button').forEach(function(b){b.classList.toggle('on',b.dataset.s===sel.value)});$('noRow').style.display=sel.value==='series'?'':'none'}
+    bar.querySelectorAll('button').forEach(function(b){b.onclick=function(){sel.value=b.dataset.s;sel.dispatchEvent(new Event('change'))}});
+    sel.addEventListener('change',mark);mark();
+    $('seriesNo').addEventListener('input',function(){G.seriesNo=this.value;draw()});
+  })();
+
+})();
+
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var EXT={"아파트":{"넓은 거실":"거실이 정말 넓어서 탁 트인 개방감이 느껴지고, 가족이 함께 지내기에 여유롭습니다.","채광 좋은 집":"채광이 아주 좋아서 하루 종일 집안 가득 햇살이 들어오고, 낮에도 불을 켤 필요가 없습니다.","2층 집":"2층이라 계단으로 이용하기 편하고, 엘리베이터를 기다릴 필요 없이 오르내리기 좋습니다.","올수리":"올수리를 깔끔하게 마쳐서 따로 손볼 곳 없이 바로 들어와 살기 좋은 집입니다.","남향":"남향이라 겨울에는 따뜻하고 낮에는 밝아서, 난방비도 아끼고 지내기 쾌적합니다.","로얄층":"로얄층이라 조망이 시원하게 트여 있고, 소음도 적어 조용하게 지내기 좋습니다.","역세권":"역세권이라 출퇴근이 정말 편리하고, 대중교통 이용이 쉬워서 이동 시간이 줄어듭니다.","학교 가까움":"학교가 가까워서 아이들이 걸어서 등하교하기 좋고, 아이 키우는 집에 딱 맞습니다.","주차 편리":"주차가 편리해서 퇴근 후에도 주차 걱정이 없고, 손님이 오셔도 여유롭습니다.","즉시 입주":"즉시 입주가 가능해서 이사 일정을 편하게 잡을 수 있고, 기다리실 필요가 없습니다.","신축급 컨디션":"신축급 컨디션으로 깨끗하게 관리돼서, 눈에 띄는 흠 없이 새집 같은 느낌입니다.","생활편의 우수":"마트와 병원이 가까워서 장 보고 진료받기 편하고, 생활이 한결 여유로워집니다."},"상가":{"대로변 코너":"대로변 코너라서 눈에 확 띄고, 오가는 손님에게 간판 노출이 아주 좋습니다.","1층 상가":"1층이라 접근성이 좋아서, 지나가는 손님이 부담 없이 들어오기 편합니다.","유동인구 풍부":"유동인구가 많고 배후 세대가 탄탄해서, 꾸준한 손님을 기대할 수 있습니다.","주차 편리":"주차가 편리해서 차로 오시는 손님도 부담 없이 방문하기 좋습니다.","권리금 없음":"권리금이 없어서 초기 부담 없이 시작할 수 있고, 창업 비용을 아낄 수 있습니다.","업종 제한 적음":"업종 제한이 적어서 다양한 업종으로 시작할 수 있고, 선택의 폭이 넓습니다.","인테리어 완료":"인테리어가 되어 있어서 바로 영업을 시작할 수 있고, 공사 기간을 줄일 수 있습니다.","넓은 전면":"전면이 넓어서 간판 노출이 좋고, 매장이 훨씬 돋보입니다.","역세권":"역세권이라 출퇴근 수요가 탄탄하고, 유동인구가 꾸준히 이어집니다."},"토지":{"반듯한 정형지":"반듯한 정형지라서 건축하기 좋고, 설계에도 여유가 생깁니다.","도로에 접함":"도로에 접해 있어서 진입이 편리하고, 공사 차량 출입도 수월합니다.","개발 호재":"개발 호재가 있어서 미래 가치가 높고, 앞으로가 더 기대되는 땅입니다.","평탄한 지형":"평탄한 지형이라서 토목 비용을 줄일 수 있고, 바로 건축 준비를 할 수 있습니다.","용도지역 우수":"용도지역이 좋아서 활용도가 높고, 다양한 계획을 세울 수 있습니다.","전기·수도 인접":"전기와 수도가 가까워서 인입이 쉽고, 추가 비용 부담이 적습니다.","주변 개발 활발":"주변 개발이 활발해서 투자 가치가 충분하고, 앞으로 가치 상승이 기대됩니다.","넓은 면적":"면적이 넓어서 활용 폭이 넓고, 다양한 용도로 계획할 수 있습니다."},"공장·창고":{"높은 층고":"층고가 높아서 물건 적재가 편하고, 설비를 들이기에도 여유가 있습니다.","화물차 진입 OK":"화물차와 대형 차량도 진입이 쉬워서, 물류 작업이 훨씬 수월합니다.","전기 증설 가능":"전기 증설이 가능해서 설비 걱정이 없고, 사업 규모를 키우기에도 좋습니다.","호이스트 설치":"호이스트가 설치되어 있어서 중량물 작업이 편리하고, 작업 효율이 높아집니다.","넓은 마당":"넓은 마당이 있어서 상하차 공간이 충분하고, 차량 대기도 여유롭습니다.","도로 접함":"도로에 접해 있어서 물류 이동이 편리하고, 출입이 아주 수월합니다.","사무실 완비":"사무실이 갖춰져 있어서 바로 업무를 시작할 수 있고, 추가 공사가 필요 없습니다.","IC 가까움":"고속도로 IC가 가까워서 물류 접근성이 우수하고, 이동 시간이 크게 줄어듭니다."},"오피스텔":{"풀옵션":"풀옵션이라서 몸만 들어오시면 되고, 가전과 가구를 따로 살 필요가 없습니다.","역세권":"역세권이라 출퇴근이 편리하고, 대중교통 이용이 쉬워서 시간이 절약됩니다.","신축급 컨디션":"신축급 컨디션으로 깨끗하게 관리돼서, 새집처럼 쾌적하게 지내실 수 있습니다.","높은 층":"높은 층이라 조망이 좋고, 탁 트인 전망과 함께 조용하게 지내기 좋습니다.","편의시설 가까움":"편의시설이 가까워서 생활이 편리하고, 장보기와 외식도 부담이 없습니다.","보안 우수":"보안이 우수해서 안심하고 지낼 수 있고, 혼자 사시는 분께도 든든합니다.","주차 가능":"주차가 가능해서 차량 걱정이 없고, 드나들기도 편리합니다.","즉시 입주":"즉시 입주가 가능해서 이사 일정을 편하게 잡을 수 있고, 기다릴 필요가 없습니다."},"기타":{"즉시 입주":"즉시 입주가 가능해서 일정을 편하게 잡을 수 있고, 기다릴 필요가 없습니다.","교통 편리":"교통이 편리해서 이동이 쉽고, 어디든 오가기 부담이 없습니다.","주차 편리":"주차가 편리해서 걱정이 없고, 방문하시는 분들도 편하게 오실 수 있습니다.","상태 양호":"상태가 양호하고 깨끗하게 관리돼서, 바로 사용하셔도 불편함이 없습니다.","가격 협의 가능":"가격 협의가 가능하니, 부담 없이 먼저 문의해 보세요."}};
+  Object.keys(FEATS).forEach(function(tp){(FEATS[tp]||[]).forEach(function(a){var m=EXT[tp]&&EXT[tp][a[0]];if(m)a[2]=m})});
+  selFeats.forEach(function(f){var m=EXT[curType]&&EXT[curType][f.big];if(m)f.line=m});
+  var LONGCALL='관심 있으시면 편하게 연락 주세요. 상담은 하이탑부동산, 공삼일 구사구 팔구육구!';
+  var _bs=buildScript;
+  buildScript=function(){var L=_bs();if(L.length&&L[L.length-1]===CALL)L[L.length-1]=LONGCALL;return L};
+  if(G.mode==='listing')$('btnGenScript').click();
+})();
+
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var yb=$('btnYT'),btn=document.createElement('button');
+  btn.className='wide mt';btn.id='btnIG';btn.textContent='📸 인스타 글 만들기 (설명·해시태그)';yb.after(btn);
+  var card=document.createElement('div');card.className='card';card.id='igCard';
+  card.style.cssText='display:none;position:fixed;z-index:60;top:3vh;left:50%;transform:translateX(-50%);width:min(680px,94vw);max-height:94vh;overflow:auto;box-shadow:0 0 0 100vmax rgba(0,0,0,.6),0 20px 60px rgba(0,0,0,.7)';
+  card.innerHTML='<h2>📸 인스타에 붙여넣을 글 <button id="igClose" style="float:right;padding:2px 10px">✕ 닫기</button></h2>'
+   +'<label>이 매물 추가 설명 (입주일, 옵션, 특이사항 등 · 적으면 아래 글에 들어가요)</label>'
+   +'<textarea id="igExtra" rows="2" placeholder="예) 즉시 입주 가능, 올수리 완료"></textarea>'
+   +'<label>설명 (캡션) <span class="small" id="igCapLen"></span></label><textarea id="igCap" rows="13"></textarea>'
+   +'<button class="wide mt" data-ig="igCap">📋 설명 복사</button>'
+   +'<label>해시태그 <span class="small" id="igTagLen"></span></label><textarea id="igTags" rows="3"></textarea>'
+   +'<button class="wide mt" data-ig="igTags">📋 해시태그 복사</button>'
+   +'<div class="flex mt"><button class="grow" id="igRe">🔄 매물 정보로 다시 만들기</button><a class="grow" href="https://www.instagram.com/" target="_blank" rel="noopener" style="text-align:center;align-self:stretch;display:flex;align-items:center;justify-content:center;background:#ffd400;color:#1a1400;font-weight:700;text-decoration:none;border-radius:10px;padding:10px 12px">▶ 인스타 열기</a></div>'
+   +'<div class="hint">인스타는 글 안의 링크를 누를 수 없어서 블로그·지도 링크는 넣지 않았어요. 프로필 링크에 넣어 주세요. 설명은 칸에서 바로 고쳐서 복사하세요.</div>';
+  yb.parentNode.appendChild(card);
+  function build(){
+    var f={};FIELD_IDS.forEach(function(k){f[k]=$(k).value.trim()});
+    var lines=scriptLines(),biz=(G.biz||'하이탑부동산').replace(/TV$/,''),ns=function(s){return s.replace(/\s+/g,'')};
+    var cap=[],hash=[],ex=$('igExtra').value.trim();
+    if(G.mode==='listing'){
+      var loc=[f.area,f.name,f.complex].filter(Boolean).join(' ');
+      cap.push('🏠 '+loc);
+      var pl=[f.size,f.type,f.price].filter(Boolean).join(' ');if(pl)cap.push('💰 '+pl);
+      var pts=[];for(var n=1;n<=5;n++){if(f['f'+n])pts.push('✔ '+f['f'+n]+(f['s'+n]?' - '+f['s'+n]:''))}
+      if(pts.length)cap.push('',...pts);
+      if(ex)cap.push('',ex);
+      var tp=f.type;
+      hash=['#'+ns(biz),'#운정부동산','#파주부동산','#운정신도시',f.name&&'#'+ns(f.name),f.complex&&'#'+ns(f.complex),tp&&'#'+ns(curType+tp),'#부동산매물','#부동산릴스','#릴스','#공인중개사','#부동산재테크'];
+    }else{
+      var t0=((cuts[0]&&cuts[0].big)||lines[0]||'부동산 정보').replace(/[!?.。]+$/,'');
+      cap.push('📰 '+t0,'');
+      lines.slice(0,Math.max(1,lines.length-1)).forEach(function(x){cap.push('✔ '+x)});
+      if(ex)cap.push('',ex);
+      hash=['#'+ns(biz),'#부동산정보','#부동산팁','#공인중개사','#운정부동산','#파주부동산','#부동산릴스','#릴스','#부동산재테크'];
+    }
+    cap.push('','📞 상담 문의 '+G.tel,'📍 경기도 파주시 책향기로 830 · '+biz,'🔗 블로그·네이버 플레이스는 프로필 링크에서 확인하세요');
+    hash=hash.concat(['#하이탑부동산']).filter(Boolean);
+    return {cap:cap.join('\n'),tags:[...new Set(hash)].slice(0,15).join(' ')};
+  }
+  function show(){var r=build();$('igCap').value=r.cap;$('igTags').value=r.tags;len()}
+  function len(){$('igCapLen').textContent='('+$('igCap').value.length+'/2200자)';$('igTagLen').textContent='('+($('igTags').value.match(/#/g)||[]).length+'/30개)'}
+  btn.onclick=function(){var open=card.style.display==='none';card.style.display=open?'':'none';if(open)show()};
+  $('igClose').onclick=function(){card.style.display='none'};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')card.style.display='none'});
+  $('igRe').onclick=show;$('igExtra').addEventListener('input',show);
+  ['igCap','igTags'].forEach(function(i){$(i).addEventListener('input',len)});
+  card.querySelectorAll('[data-ig]').forEach(function(b){b.onclick=async function(){
+    var tx=$(b.dataset.ig),old=b.textContent;
+    try{await navigator.clipboard.writeText(tx.value)}catch(e){tx.select();document.execCommand('copy')}
+    b.textContent='✅ 복사했어요';setTimeout(function(){b.textContent=old},1400);
+  }});
+})();
+
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var sel=$('gWmStyle');
+  [['band','네이비 띠'],['card','흰 카드']].forEach(function(o){var op=document.createElement('option');op.value=o[0];op.textContent=o[1];sel.insertBefore(op,sel.firstChild)});
+  var _w2=watermark;
+  watermark=function(t){
+    var st=G.wmStyle;
+    if(st!=='card'&&st!=='band')return _w2(t);
+    var p=easeOutCubic(clamp((t-0.3)/0.6)),top=G.wmPos==='top',h=st==='band'?124:120;
+    var w=st==='band'?W:900,x0=(W-w)/2,y0=top?110:1560;
+    withAdj(null,'wm',W/2,y0+h/2,function(){
+      rec('wm',x0,y0,w,h);
+      if(p<=0)return;
+      var y=y0+(1-p)*(top?-40:40);
+      ctx.save();ctx.globalAlpha=p;
+      var f1='900 44px '+FONT,f2='900 54px '+FONT;
+      if(st==='card'){
+        ctx.shadowColor='rgba(20,24,31,.22)';ctx.shadowBlur=34;ctx.shadowOffsetY=12;
+        ctx.fillStyle='#ffffff';rr(x0,y,w,h,26);ctx.fill();ctx.shadowColor='transparent';
+        ctx.strokeStyle=G.accent;ctx.lineWidth=2.5;rr(x0,y,w,h,26);ctx.stroke();
+        ctx.fillStyle=G.accent;rr(x0+22,y+26,7,h-52,3);ctx.fill();
+        ctx.font=f1;ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillStyle='#14181f';ctx.fillText(G.biz,x0+52,y+h/2+2);
+        var bw=ctx.measureText(G.biz).width;
+        ctx.fillStyle=hexA(G.accent,.45);ctx.fillRect(x0+52+bw+34,y+34,2,h-68);
+        ctx.font=f2;ctx.textAlign='right';ctx.fillStyle=G.accent;ctx.fillText('☎ '+G.tel,x0+w-44,y+h/2+3);
+      }else{
+        ctx.fillStyle='#14181f';ctx.fillRect(0,y,W,h);
+        ctx.fillStyle=G.accent;ctx.fillRect(0,y,W,5);
+        ctx.font=f1;ctx.textBaseline='middle';ctx.textAlign='left';ctx.fillStyle='#ffffff';ctx.fillText(G.biz,64,y+h/2+3);
+        ctx.font=f2;ctx.textAlign='right';ctx.fillStyle='#e3c27a';ctx.fillText('☎ '+G.tel,W-64,y+h/2+4);
+      }
+      ctx.restore();
+    });
+  };
+  function setWm(){G.wmStyle=($('gTheme').value!=='dark')?'band':'bar';syncG();draw()}
+  $('gTheme').addEventListener('change',setWm);
+  setWm();
+})();
 
 </script>
 </body>
