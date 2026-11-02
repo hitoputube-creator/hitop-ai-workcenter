@@ -139,6 +139,64 @@ h2{margin:0;font-size:16px}
 @media(max-width:980px){.side{grid-template-columns:1fr}.pub-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible}.core{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.shell{width:calc(100% - 24px);padding-top:10px}.top{flex-direction:column;align-items:flex-start}.brand{align-items:flex-start}h1{font-size:18px;white-space:normal}.top-actions{justify-content:flex-start}.today{align-items:flex-start}.date{text-align:left}.core,.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.work-item.secondary{grid-column:1/-1}.pub-list{grid-template-columns:1fr}.head{flex-direction:column}.tile{min-height:50px}.tile.major{min-height:108px}.btn{min-height:38px}.name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.acc-top{grid-template-columns:1fr}.acc-cat-actions{padding:0 12px 10px}.edit-controls{width:100%}.edit-controls .mini{flex:1;min-width:48px}.pub .name{display:block}.today-summary{white-space:normal}}
 @media(max-width:480px){.storage-btn{padding:0 12px;gap:0}.storage-btn .label{display:none}}
+
+/* 2026-11-02 케이탑과 같은 화이트 바탕 + 블루 제목줄 */
+:root{--bg:#f3f6fa;--panel:#fff;--panel2:#f8fafc;--card:#fff;--card2:#eaf0f7;--line:#e0e7ef;--line2:#cbd5e1;--txt:#23364c;--sub:#52667b;--muted:#66788c;--gold:#254767;--gold2:rgba(37,71,103,.10);--blue:#245c91;--blue2:#eaf1f8;--danger:#b42318}
+html,body{background:#f3f6fa!important;color:#23364c!important;color-scheme:light}
+.top{border-bottom:1px solid #dce5ef!important;background:#fff}
+.top:after{display:none!important}
+.logo{background:#f1f5f9!important;border-color:#cbd5e1!important;color:#254767!important;box-shadow:none!important}
+.btn,.mini{background:#fff!important;color:#294867!important;border-color:#cbd5e1!important}
+.btn:hover,.mini:hover{background:#eaf0f7!important}
+.today-summary{background:#eaf0f7!important;border-color:#cbd5e1!important;color:#254767!important}
+input,select,textarea{background:#fff!important;color:#23364c!important;border-color:#cbd5e1!important;color-scheme:light}
+
+.top{background:transparent!important}
+.logo{background:#f1f5f9!important}
+.search input{background:#fff!important;border-color:#cbd5e1!important;color:#23364c!important}
+.search input:focus{background:#fff!important;border-color:#365f88!important}
+.storage-btn{background:#fff!important;border-color:#cbd5e1!important;color:#254767!important}
+.storage-btn:hover{background:#eaf0f7!important;border-color:#254767!important}
+.results,.modal,.toast{background:#fff!important;border-color:#cbd5e1!important;box-shadow:0 12px 30px rgba(24,44,71,.14)!important}
+.sr:hover{background:#eaf0f7!important}
+.panel,.side-card{background:#fff!important;border:1px solid #e0e7ef!important;box-shadow:0 3px 15px rgba(24,44,71,.055)!important}
+.tile,.small,.pub{background:#fff!important;border-color:#e0e7ef!important;color:#23364c!important}
+.tile.major{background:#f8fafc!important;border-color:#cbd5e1!important}
+.tile.secondary{background:#f8fafc!important;border-left:2px solid #254767!important;color:#52667b!important}
+.small{background:#f8fafc!important}
+.tile:hover,.small:hover{background:#eaf0f7!important;border-color:#254767!important}
+.tile.major:hover{border-color:#254767!important;box-shadow:0 6px 18px rgba(24,44,71,.1)!important}
+.tile.secondary:hover{background:#eaf0f7!important;color:#23364c!important}
+.work-mark,.ai-portal-mark{background:#eaf0f7!important;border-color:#cbd5e1!important;color:#254767!important}
+.ai-portal-tile{background:#f8fafc!important;border-color:#cbd5e1!important}
+.ai-portal-tile:hover{background:#eaf0f7!important;border-color:#254767!important}
+.ai-portal-title{color:#1c344f!important}
+.pub{background:transparent!important;border-color:transparent!important;color:#52667b!important}
+.pub:hover{background:#eaf0f7!important;color:#23364c!important;border-left-color:#254767!important}
+.pub .name:before{border-color:#254767!important}
+.acc,.acc:nth-child(2n),.acc:nth-child(3n){background:#f8fafc!important;border-color:#e0e7ef!important}
+.acc-btn b{color:#1c344f!important}
+.acc-btn:hover{background:#eaf0f7!important}
+.acc-btn b:before{background:#254767!important;box-shadow:none!important}
+.primary{background:#eaf0f7!important;border-color:#cbd5e1!important;color:#254767!important}
+.primary.active{background:#254767!important;border-color:#254767!important;color:#fff!important}
+.hl{background:#fff3c4!important;color:#936515!important}
+.inp{background:#fff!important;color:#23364c!important;border-color:#cbd5e1!important}
+h1,h2,h3{color:#1c344f}
+.date b{color:#1c344f!important}
+.modal-bg{background:rgba(24,44,71,.45)!important}
+.search:before{border-color:#254767!important}.search:after{background:#254767!important}
+
+h2,.head h2,.side-head h2{color:#1c344f!important}
+.top{margin-top:6px;padding:18px 24px!important;border:0!important;border-radius:16px;background:linear-gradient(115deg,#193860,#214c8d 70%,#2465ba)!important;box-shadow:0 7px 24px rgba(31,75,139,.13)!important}
+.top h1{color:#fff!important}
+.top .sub{color:#dbe7f8!important}
+.top .logo{background:rgba(255,255,255,.13)!important;border:1px solid rgba(255,255,255,.35)!important;color:#fff!important}
+.top .date,.top .date b{color:#fff!important}
+.top .today-summary{background:rgba(255,255,255,.12)!important;border-color:rgba(255,255,255,.3)!important;color:#eef5ff!important}
+.top .btn{background:rgba(255,255,255,.1)!important;color:#eef5ff!important;border-color:rgba(255,255,255,.28)!important}
+.top .btn:hover{background:rgba(255,255,255,.2)!important;color:#fff!important}
+
 </style>
 </head>
 <body>
