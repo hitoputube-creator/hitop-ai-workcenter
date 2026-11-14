@@ -4,6 +4,21 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>캘린더 — 하이탑 AI 업무센터</title>
+<script>
+// 관리자 페이지 동기 가드 — content-studio/index.html과 동일한 로직.
+// 이 페이지는 site root보다 한 단계 아래(calendar/)에 있어 login.html
+// 상대 경로가 달라 루트의 admin-guard.js를 그대로 재사용할 수 없다.
+(function () {
+  var SUPABASE_REF = "xaxbkdnrzsghsabkdvzj";
+  var sessionKey = "sb-" + SUPABASE_REF + "-auth-token";
+  var hasSession = false;
+  try { hasSession = !!localStorage.getItem(sessionKey); } catch (e) {}
+  if (!hasSession) {
+    var next = encodeURIComponent("calendar/index.html" + location.search);
+    location.replace("../login.html?redirect=" + next);
+  }
+})();
+</script>
 <link rel="icon" href="../favicon.ico" type="image/x-icon">
 <style>
 /* ══════════════════════════════════════════
@@ -281,6 +296,7 @@ input,textarea,select{font-family:inherit}
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 (function () {
 
@@ -288,8 +304,25 @@ input,textarea,select{font-family:inherit}
   var SB_URL = 'https://xaxbkdnrzsghsabkdvzj.supabase.co';
   var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhheGJrZG5yenNnaHNhYmtkdnpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwNjc5NTIsImV4cCI6MjA4OTY0Mzk1Mn0.l27ZYQHLt48p7EQrZ8gbAOmJHvCfIur84CtgoWlA8Wg';
 
+  /* ── 인증: schedules는 authenticated 전용이라 sbFetch가 anon key 대신
+     로그인 세션의 JWT를 Authorization 헤더로 써야 한다. ── */
+  var _authClient = window.supabase.createClient(SB_URL, SB_KEY);
+  var _authToken = null;
+  function _backToLogin() {
+    var next = encodeURIComponent('calendar/index.html' + location.search);
+    location.replace('../login.html?redirect=' + next);
+  }
+  var _authReady = _authClient.auth.getSession().then(function (res) {
+    if (!res.data.session) { _backToLogin(); return; }
+    _authToken = res.data.session.access_token;
+  });
+  _authClient.auth.onAuthStateChange(function (event, session) {
+    if (event === 'SIGNED_OUT') { _backToLogin(); return; }
+    if (session) _authToken = session.access_token;
+  });
+
   function sbFetch(path, method, body, extra) {
-    var h = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+    var h = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + (_authToken || SB_KEY), 'Content-Type': 'application/json' };
     if (extra) Object.assign(h, extra);
     var opt = { method: method || 'GET', headers: h };
     if (body != null) opt.body = JSON.stringify(body);
@@ -587,7 +620,9 @@ input,textarea,select{font-family:inherit}
   function init() {
     parseUrlDate();
     bindEvents();
-    loadMonth(state.currentYear, state.currentMonth);
+    _authReady.then(function () {
+      if (_authToken) loadMonth(state.currentYear, state.currentMonth);
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
