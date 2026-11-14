@@ -4,25 +4,46 @@
   <meta charset="UTF-8" />
   <title>관리자 로그인 - 하이탑 AI 부동산 업무센터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    :root{--navy-deep:#081840;--navy:#0A1F5C;--bg:#EEF1F7;--surface:#FFFFFF;--line:#E1E5EF;--line-strong:#C7CEDE;--ink:#162041;--mist:#5E6684;--danger:#B6392F}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Pretendard,"Noto Sans KR","Malgun Gothic","Apple SD Gothic Neo",Arial,sans-serif;color:var(--ink);color-scheme:light}
+    :focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+    .card{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:36px 32px;box-shadow:0 1px 2px rgba(10,22,60,.05),0 12px 28px rgba(10,22,60,.07)}
+    .brand{text-align:center;margin-bottom:28px}
+    .logo{width:52px;height:52px;background:var(--navy);color:#fff;border-radius:12px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:900}
+    .brand h1{font-size:1.25rem;font-weight:800;color:var(--navy-deep);letter-spacing:-.01em;margin:0}
+    .brand p{font-size:.8rem;color:var(--mist);margin:5px 0 0}
+    input{width:100%;padding:13px 14px;font-size:1rem;background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;color:var(--ink);outline:none;margin-bottom:10px;font-family:inherit}
+    input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(10,31,92,.1)}
+    input::placeholder{color:#9199B2}
+    #loginError{font-size:.82rem;color:var(--danger);text-align:center;min-height:20px;margin-bottom:6px}
+    .btn{display:block;box-sizing:border-box;width:100%;padding:13px;border-radius:10px;font-size:.95rem;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;font-family:inherit}
+    .btn-primary{background:var(--navy);color:#fff;border:none;margin-top:4px}
+    .btn-primary:hover{background:var(--navy-deep)}
+    .btn-ghost{margin-top:10px;background:transparent;color:var(--navy);border:1px solid var(--line-strong)}
+    .btn-ghost:hover{background:#F6F7FB;border-color:var(--navy)}
+    #resetMessage{font-size:.85rem;color:var(--mist);line-height:1.6;text-align:center;margin:14px 0 0}
+  </style>
 </head>
-<body style="margin:0;background:#071625;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;font-family:Pretendard,'Malgun Gothic',sans-serif;">
-  <div style="width:100%;max-width:320px;">
-    <div style="text-align:center;margin-bottom:36px;">
-      <div style="width:56px;height:56px;background:linear-gradient(135deg,#d8b84a,#f0c040);border-radius:14px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;">🏢</div>
-      <div style="font-size:1.4rem;font-weight:800;color:#d8b84a;letter-spacing:0.5px;">HITOP 부동산</div>
-      <div style="font-size:0.8rem;color:#8193a8;margin-top:4px;">AI 부동산 업무센터 관리자 로그인</div>
+<body>
+  <div class="card">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">HT</div>
+      <h1>HITOP 부동산</h1>
+      <p>AI 부동산 업무센터 관리자 로그인</p>
     </div>
 
-    <input id="loginEmail" type="email" placeholder="이메일" autocomplete="username"
-      style="width:100%;box-sizing:border-box;padding:14px 16px;font-size:1rem;background:#101f32;border:1px solid #294057;border-radius:10px;color:#f5f8fb;outline:none;margin-bottom:10px;" />
-    <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password"
-      style="width:100%;box-sizing:border-box;padding:14px 16px;font-size:1rem;background:#101f32;border:1px solid #294057;border-radius:10px;color:#f5f8fb;outline:none;margin-bottom:10px;" />
-    <div id="loginError" style="font-size:0.82rem;color:#ff8585;text-align:center;min-height:20px;margin-bottom:10px;"></div>
-    <button id="loginBtn" style="width:100%;padding:14px;background:#d8b84a;color:#071423;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">로그인</button>
-    <button id="resetBtn" type="button" style="width:100%;margin-top:12px;padding:12px;background:transparent;color:#d8b84a;border:1px solid #d8b84a;border-radius:10px;font-size:0.95rem;cursor:pointer;">비밀번호 재설정</button>
-    <a id="commonHomeLink" href="https://hitoputube-creator.github.io/haitop-realty-system/login.html" style="display:block;box-sizing:border-box;width:100%;margin-top:12px;padding:12px;background:transparent;color:#b4c2d2;border:1px solid #294057;border-radius:10px;font-size:0.95rem;font-weight:600;text-align:center;text-decoration:none;">공통 홈으로</a>
-    <p id="resetMessage" role="status" aria-live="polite" style="font-size:0.85rem;color:#d8b84a;line-height:1.6;text-align:center;"></p>
+    <input id="loginEmail" type="email" placeholder="이메일" autocomplete="username" />
+    <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password" />
+    <div id="loginError"></div>
+    <button id="loginBtn" class="btn btn-primary">로그인</button>
+    <button id="resetBtn" type="button" class="btn btn-ghost">비밀번호 재설정</button>
+    <a id="commonHomeLink" href="https://hitoputube-creator.github.io/haitop-realty-system/login.html" class="btn btn-ghost">공통 홈으로</a>
+    <p id="resetMessage" role="status" aria-live="polite"></p>
   </div>
 
   <script>
