@@ -117,6 +117,28 @@ details.more summary{cursor:pointer;color:var(--mut);font-size:13px}
 #photoCard{display:none!important}
 #photoBox{margin-bottom:10px}
 #photoBox #btnPhoto{margin-bottom:6px}
+
+/* ===== 화이트 모드 (업무센터·컨텐츠 제작실과 같은 흰 배경 + 네이비) ===== */
+:root{--bg:#EEF1F7;--panel:#fff;--panel2:#F5F7FB;--line:#dce2ee;--txt:#1a2a4d;--mut:#66738f;--gold:#0B2A6B;--gold2:#16367f;--ok:#12805c;--red:#d92d2d}
+body{background:var(--bg)}
+header{background:#fff}
+.logo{color:#fff}
+button{background:#e6ebf5;color:var(--txt)}
+button:hover{filter:brightness(.96)}
+.seg button{background:transparent}
+.seg button.on,.pills button.on,.btn-gold,#btnPlay,.num,.selRow .no,.cutItem.sel .n{color:#fff}
+.pills button{background:var(--panel2)}
+.pills button.on{background:var(--gold)}
+input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(11,42,107,.15)}
+.col::-webkit-scrollbar-thumb{background:#c5cde0}
+.cutItem.sel{background:#eaf0fb}
+.cutItem .n{background:#e3e8f3}
+#wfScroll{background:#f5f7fb}
+.warn{color:#b26a00}
+.sw button.on{border-color:#0B2A6B;box-shadow:0 0 0 2px rgba(11,42,107,.25)}
+#stagewrap{box-shadow:0 10px 30px rgba(8,24,64,.18)}
+#btnSave{box-shadow:0 8px 24px rgba(11,42,107,.2)}
+[style*="background:#ffd400"]{background:#0B2A6B!important;color:#fff!important}
 </style>
 </head>
 <body>
