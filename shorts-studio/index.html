@@ -804,7 +804,7 @@ function applyFieldsToCuts(idxs){
 }
 let prevLines=[];
 const NICE={area:'지역',name:'이름',complex:'동/단지',size:'면적',type:'거래종류',price:'가격',f1:'포인트1',s1:'포인트1 부제',f2:'포인트2',s2:'포인트2 부제',f3:'포인트3',s3:'포인트3 부제',f4:'포인트4',s4:'포인트4 부제',f5:'포인트5',s5:'포인트5 부제'};
-(function(){const st=document.createElement('style');st.textContent='input.chk{outline:2px solid #ffd400;background:#3a3300}';document.head.appendChild(st);
+(function(){const st=document.createElement('style');st.textContent='input.chk{outline:2px solid #C9A53B;background:#fff6d6}';document.head.appendChild(st);
   $('price').addEventListener('input',()=>$('price').classList.remove('chk'))})();
 function fillFromScript(force){
   const lines=scriptLines(),note=$('fillNote');
@@ -1327,16 +1327,16 @@ function drawWave(){
   const ok=V.b.length>=2;
   if(ok){for(let i=0;i<V.b.length-1;i++){
     const x0=V.b[i]*wpps,x1=V.b[i+1]*wpps;
-    wctx.fillStyle=(i===sel)?'rgba(255,212,0,.16)':(i%2?'rgba(255,255,255,.04)':'rgba(255,255,255,.09)');wctx.fillRect(x0,0,x1-x0,h);
+    wctx.fillStyle=(i===sel)?'rgba(201,165,59,.22)':(i%2?'rgba(11,42,107,.04)':'rgba(11,42,107,.10)');wctx.fillRect(x0,0,x1-x0,h);
   }}
   wctx.fillStyle='rgba(120,190,255,.85)';
   for(let x=0;x<w;x+=2){const v=V.peaks[Math.min(V.peaks.length-1,Math.floor(x/wpps*100))];const bh=Math.max(1,v*h*0.78);wctx.fillRect(x,(h-bh)/2,1.4,bh)}
   if(ok){
     wctx.font='bold 12px sans-serif';
     for(let i=0;i<V.b.length;i++){
-      const x=V.b[i]*wpps;wctx.fillStyle='#ffd400';wctx.fillRect(x-1.5,0,3,h);
+      const x=V.b[i]*wpps;wctx.fillStyle='#C9A53B';wctx.fillRect(x-1.5,0,3,h);
       wctx.beginPath();wctx.moveTo(x-6,0);wctx.lineTo(x+6,0);wctx.lineTo(x,9);wctx.fill();
-      if(i<V.b.length-1){wctx.fillStyle='#fff';wctx.fillText(String(i+1),x+6,h-6)}
+      if(i<V.b.length-1){wctx.fillStyle='#0B2A6B';wctx.fillText(String(i+1),x+6,h-6)}
     }
   }
   updateWaveHead();
