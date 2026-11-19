@@ -288,7 +288,7 @@ function render() {
   if (state.materialMode === "news") {
     const fetchBtn = document.createElement("button");
     fetchBtn.className = "ghost-btn";
-    fetchBtn.textContent = state.newsLoading ? "찾는 중..." : "최신 이슈 가져오기";
+    fetchBtn.textContent = state.newsLoading ? "찾는 중..." : "최신 이슈·개발소식 가져오기";
     fetchBtn.disabled = state.newsLoading;
     fetchBtn.onclick = fetchNews;
     area.appendChild(fetchBtn);
@@ -312,7 +312,8 @@ function render() {
         b.type = "button";
         b.className = "news-item" + (state.newsPick === i ? " active" : "");
         b.disabled = state.newsDetailLoading;
-        b.innerHTML = (i + 1) + ". " + esc(n.title) + '<span class="meta">' + esc([n.source, n.date].filter(Boolean).join(" · ")) + "</span>";
+        const kindTag = n.kind ? '<span style="display:inline-block;margin-right:6px;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:700;vertical-align:1px;' + (n.kind === "개발소식" ? 'background:#eaf2ff;color:#1956a3;' : 'background:#f1f5f9;color:#475569;') + '">' + esc(n.kind) + '</span>' : "";
+        b.innerHTML = (i + 1) + ". " + kindTag + esc(n.title) + '<span class="meta">' + esc([n.source, n.date].filter(Boolean).join(" · ")) + "</span>";
         b.onclick = () => pickNews(i);
         list.appendChild(b);
       });
@@ -420,13 +421,15 @@ function parseJsonArray(text) {
 async function fetchNews() {
   state.newsLoading = true; state.newsMaterial = ""; state.newsError = ""; state.newsCandidates = []; state.newsPick = -1; state.newsDetail = null; render();
   try {
-    const text = await callClaude(`최근 한 달 이내 한국 부동산 관련 소식을 웹검색으로 찾아서 서로 다른 소식 5개의 제목을 골라 주세요.
-법령 개정, 전세사기, 중개사고, 임대차, 파주·운정 지역 소식을 우선하세요. 실제로 보도된 기사만 쓰고 지어내지 마세요.
+    const text = await callClaude(`최근 한 달 이내 한국 부동산 관련 소식과 개발 소식을 웹검색으로 찾아서 서로 다른 소식 8개의 제목을 골라 주세요.
+그중 4개 이상은 개발 소식으로 채우세요. 개발 소식은 파주·운정·경기 서북부를 우선하고, GTX-A·지하철·도로 같은 교통망, 신도시·택지 개발, 산업단지·기업 유치, 재개발·재건축, 학교·공원 같은 공공시설 계획을 다룹니다.
+나머지는 법령 개정, 전세사기, 중개사고, 임대차, 시장 동향 같은 부동산 소식으로 채우세요. 실제로 보도된 기사만 쓰고 지어내지 마세요.
 아래 JSON 배열만 출력하세요. 다른 설명이나 마크다운 기호는 쓰지 마세요.
-[{"title":"기사 제목 요약(30자 내외)","source":"매체명","date":"YYYY-MM-DD"}]`, true);
+[{"kind":"개발소식 또는 부동산소식","title":"기사 제목 요약(30자 내외)","source":"매체명","date":"YYYY-MM-DD"}]`, true);
     const arr = parseJsonArray(text);
     if (!arr || arr.length === 0) throw new Error("소식 목록을 읽지 못했어요. 다시 눌러 주세요.");
-    state.newsCandidates = arr.slice(0, 5).map(n => ({ title: String(n.title || "").trim(), source: String(n.source || "").trim(), date: String(n.date || "").trim() })).filter(n => n.title);
+    state.newsCandidates = arr.slice(0, 8).map(n => ({ kind: /개발/.test(String(n.kind || "")) ? "개발소식" : "부동산소식", title: String(n.title || "").trim(), source: String(n.source || "").trim(), date: String(n.date || "").trim() })).filter(n => n.title)
+      .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "개발소식" ? -1 : 1));
     if (state.newsCandidates.length === 0) throw new Error("소식 목록이 비어 있어요. 다시 눌러 주세요.");
   } catch (e) {
     state.newsError = "뉴스를 가져오지 못했어요: " + e.message;
@@ -440,6 +443,7 @@ async function pickNews(i) {
   state.newsPick = i; state.newsDetailLoading = true; state.newsError = ""; render();
   try {
     const text = await callClaude(`아래 기사에 대해 웹검색으로 내용을 확인하고 정리해 주세요.
+소식 종류: ${n.kind || "부동산소식"}
 기사 제목: ${n.title}
 매체: ${n.source}
 날짜: ${n.date}
