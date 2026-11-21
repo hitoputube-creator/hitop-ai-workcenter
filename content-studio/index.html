@@ -75,7 +75,14 @@
   .news-item { text-align:left; cursor:pointer; background:#fff; border:1px solid var(--line); border-radius:8px; padding:9px 11px; color:var(--ink); font-size:12.5px; font-weight:600; line-height:1.4; font-family:inherit; }
   .news-item:hover { border-color:var(--navy); background:var(--soft); }
   .news-item.active { border:2px solid var(--navy); background:var(--soft); }
-  .news-item .meta { display:block; margin-top:3px; color:var(--mute); font-size:10.5px; font-weight:400; }
+  .news-cat-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-bottom:8px; }
+.news-cat-btn { cursor:pointer; border-radius:6px; height:30px; padding:0 6px; font-size:12px; font-weight:700; background:#fff; border:1px solid var(--line); color:var(--mute); font-family:inherit; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.news-cat-btn:hover { border-color:var(--navy); color:var(--navy); }
+.news-cat-btn.active { background:var(--navy); border-color:var(--navy); color:#fff; }
+.news-cat-btn .cnt { font-weight:500; opacity:.8; margin-left:2px; font-size:11px; }
+.news-cat-desc { margin:0 0 8px; font-size:11.5px; color:var(--mute); line-height:1.45; }
+@media (max-width:520px) { .news-cat-row { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+.news-item .meta { display:block; margin-top:3px; color:var(--mute); font-size:10.5px; font-weight:400; }
   .news-card { background:#fff; border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:10px; padding:13px; margin-bottom:8px; }
   .news-card .nc-label { color:var(--mute); font-size:10.5px; margin:0 0 3px; }
   .news-card .nc-title { color:var(--navy); font-size:14px; font-weight:700; line-height:1.4; margin:0 0 11px; }
@@ -156,6 +163,23 @@ _authClient.auth.onAuthStateChange((event, session) => {
   if (session) _authToken = session.access_token;
 });
 
+// 최신 소식 종류: 종류를 고르고 가져오기를 누르면 그 종류의 소식 8개를 웹검색으로 찾아 목록으로 보여 준다.
+const NEWS_CATEGORIES = [
+  { key: "dev", label: "개발소식", color: "background:#eaf2ff;color:#1956a3;", desc: "파주·운정·경기 서북부 교통망, 신도시·택지, 산업단지, 재개발·재건축 소식",
+    ask: "최근 한 달 이내 보도된 개발 소식. 파주·운정·경기 서북부를 우선하고 GTX-A·지하철·도로 같은 교통망, 신도시·택지 개발, 산업단지·기업 유치, 재개발·재건축, 학교·공원 같은 공공시설 계획을 다룹니다." },
+  { key: "market", label: "부동산소식", color: "background:#f1f5f9;color:#475569;", desc: "시장 동향, 정부 대책, 전세·임대차, 청약·분양, 중개사고 소식",
+    ask: "최근 한 달 이내 보도된 부동산 시장 소식. 집값·전월세 동향, 정부 부동산 대책, 전세사기·임대차, 청약·분양, 중개사고 같은 내용을 다룹니다." },
+  { key: "paju", label: "파주시정보", color: "background:#e6f2ef;color:#25675f;", desc: "파주시청 발표, 도시계획·교통·생활 인프라, 시민 지원 사업",
+    ask: "최근 두 달 이내 파주시와 관련된 정보. 파주시청 보도자료·시정 소식, 도시계획·지구단위계획 결정, 교통(버스·도로·GTX 연계), 학교·공원·병원 같은 생활 인프라, 주거·청년·신혼부부 지원 사업처럼 파주에서 집이나 상가를 구하는 사람에게 도움이 되는 정보를 다룹니다." },
+  { key: "tax", label: "부동산세법", color: "background:#fff5e6;color:#946111;", desc: "취득세·양도세·재산세·종부세, 임대소득세 개정과 시행 일정",
+    ask: "최근 석 달 이내 발표됐거나 곧 시행되는 부동산 세금 정보. 취득세, 양도소득세, 재산세, 종합부동산세, 임대소득세, 증여·상속세의 세율·감면·비과세 요건 변경과 시행일, 신고·납부 일정을 다룹니다. 기획재정부·국세청·행정안전부 발표나 언론 보도로 확인되는 것만 씁니다." },
+  { key: "law", label: "관련법령", color: "background:#f3eefe;color:#5b3ea6;", desc: "공인중개사법·주택임대차·상가임대차·거래신고·건축 관련 법 개정",
+    ask: "최근 석 달 이내 개정됐거나 곧 시행되는 부동산 관련 법령 정보. 공인중개사법, 주택임대차보호법, 상가건물 임대차보호법, 부동산 거래신고법, 주택법, 건축법, 국토계획법, 전세사기 특별법 등의 개정 내용과 시행일을 다룹니다. 국토교통부·법제처 발표나 언론 보도로 확인되는 것만 씁니다." },
+  { key: "musts", label: "꼭 알아야할 정보", color: "background:#fff0ee;color:#b42318;", desc: "계약·대출·청약·보증보험 등 지금 꼭 챙겨야 할 실무 정보",
+    ask: "지금 시점에 집을 사고팔거나 임대차 계약을 하는 사람이 꼭 알아야 할 실무 정보. 대출 규제(DSR·LTV) 변경, 전세보증보험 가입 요건, 청약 제도 변경과 일정, 계약 전 확인할 서류, 전입신고·확정일자·거래신고 기한, 각종 신청 마감일처럼 시기가 중요한 내용을 다룹니다. 최근 석 달 이내 발표·보도된 근거가 있는 것만 씁니다." },
+  { key: "mix", label: "골고루", color: "background:#f8fafc;color:#334155;", desc: "위 여섯 가지 종류에서 골고루 섞어서 가져오기",
+    ask: "" },
+];
 const MATERIAL_MODES = [
   { key: "news", label: "뉴스기사" },
   { key: "listing", label: "매물소개" },
@@ -197,6 +221,8 @@ let state = {
   newsMaterial: "",
   newsError: "",
   newsCandidates: [],
+  newsCategory: "dev",
+  newsByCategory: {},
   newsPick: -1,
   newsDetail: null,
   newsDetailLoading: false,
@@ -286,9 +312,35 @@ function render() {
   const area = document.getElementById("materialInputArea");
   area.innerHTML = "";
   if (state.materialMode === "news") {
+    const catNow = NEWS_CATEGORIES.find(c => c.key === state.newsCategory) || NEWS_CATEGORIES[0];
+    const catHint = document.createElement("p");
+    catHint.className = "label-sm";
+    catHint.textContent = "소식 종류 선택";
+    area.appendChild(catHint);
+    const catRow = document.createElement("div");
+    catRow.className = "news-cat-row";
+    catRow.setAttribute("role", "group");
+    catRow.setAttribute("aria-label", "소식 종류");
+    NEWS_CATEGORIES.forEach(c => {
+      const cb = document.createElement("button");
+      cb.type = "button";
+      cb.className = "news-cat-btn" + (state.newsCategory === c.key ? " active" : "");
+      cb.setAttribute("aria-pressed", state.newsCategory === c.key ? "true" : "false");
+      cb.disabled = state.newsLoading || state.newsDetailLoading;
+      const saved = state.newsByCategory[c.key];
+      cb.innerHTML = esc(c.label) + (saved && saved.length ? '<span class="cnt">' + saved.length + '</span>' : "");
+      cb.title = c.desc;
+      cb.onclick = () => selectNewsCategory(c.key);
+      catRow.appendChild(cb);
+    });
+    area.appendChild(catRow);
+    const catDesc = document.createElement("p");
+    catDesc.className = "news-cat-desc";
+    catDesc.textContent = catNow.desc;
+    area.appendChild(catDesc);
     const fetchBtn = document.createElement("button");
     fetchBtn.className = "ghost-btn";
-    fetchBtn.textContent = state.newsLoading ? "찾는 중..." : "최신 이슈·개발소식 가져오기";
+    fetchBtn.textContent = state.newsLoading ? catNow.label + " 찾는 중..." : (state.newsCandidates.length ? catNow.label + " 다시 가져오기" : catNow.label + " 가져오기");
     fetchBtn.disabled = state.newsLoading;
     fetchBtn.onclick = fetchNews;
     area.appendChild(fetchBtn);
@@ -312,7 +364,8 @@ function render() {
         b.type = "button";
         b.className = "news-item" + (state.newsPick === i ? " active" : "");
         b.disabled = state.newsDetailLoading;
-        const kindTag = n.kind ? '<span style="display:inline-block;margin-right:6px;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:700;vertical-align:1px;' + (n.kind === "개발소식" ? 'background:#eaf2ff;color:#1956a3;' : 'background:#f1f5f9;color:#475569;') + '">' + esc(n.kind) + '</span>' : "";
+        const kc = NEWS_CATEGORIES.find(c => c.label === n.kind);
+        const kindTag = n.kind ? '<span style="display:inline-block;margin-right:6px;padding:1px 6px;border-radius:4px;font-size:11px;font-weight:700;vertical-align:1px;' + (kc ? kc.color : 'background:#f1f5f9;color:#475569;') + '">' + esc(n.kind) + '</span>' : "";
         b.innerHTML = (i + 1) + ". " + kindTag + esc(n.title) + '<span class="meta">' + esc([n.source, n.date].filter(Boolean).join(" · ")) + "</span>";
         b.onclick = () => pickNews(i);
         list.appendChild(b);
@@ -418,21 +471,45 @@ function parseJsonArray(text) {
   try { const a = JSON.parse(m[0]); return Array.isArray(a) ? a : null; } catch (e) { return null; }
 }
 
+function selectNewsCategory(key) {
+  if (state.newsLoading || state.newsDetailLoading) return;
+  if (state.newsCandidates.length) state.newsByCategory[state.newsCategory] = state.newsCandidates;
+  state.newsCategory = key;
+  state.newsCandidates = state.newsByCategory[key] || [];
+  state.newsPick = -1; state.newsDetail = null; state.newsMaterial = ""; state.newsError = "";
+  render();
+}
+
 async function fetchNews() {
+  const cat = NEWS_CATEGORIES.find(c => c.key === state.newsCategory) || NEWS_CATEGORIES[0];
+  const labels = NEWS_CATEGORIES.filter(c => c.key !== "mix").map(c => c.label);
   state.newsLoading = true; state.newsMaterial = ""; state.newsError = ""; state.newsCandidates = []; state.newsPick = -1; state.newsDetail = null; render();
   try {
-    const text = await callClaude(`최근 한 달 이내 한국 부동산 관련 소식과 개발 소식을 웹검색으로 찾아서 서로 다른 소식 8개의 제목을 골라 주세요.
-그중 4개 이상은 개발 소식으로 채우세요. 개발 소식은 파주·운정·경기 서북부를 우선하고, GTX-A·지하철·도로 같은 교통망, 신도시·택지 개발, 산업단지·기업 유치, 재개발·재건축, 학교·공원 같은 공공시설 계획을 다룹니다.
-나머지는 법령 개정, 전세사기, 중개사고, 임대차, 시장 동향 같은 부동산 소식으로 채우세요. 실제로 보도된 기사만 쓰고 지어내지 마세요.
+    const today = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+    const scope = cat.key === "mix"
+      ? "아래 여섯 종류에서 골고루(종류마다 1~2개) 서로 다른 항목 8개를 고르세요.\n" + NEWS_CATEGORIES.filter(c => c.key !== "mix").map(c => "- " + c.label + ": " + c.ask).join("\n")
+      : "종류: " + cat.label + "\n" + cat.ask + "\n이 종류에 맞는 서로 다른 항목 8개를 고르세요.";
+    const kindRule = cat.key === "mix" ? labels.join(", ") + " 중 하나" : cat.label;
+    const text = await callClaude(`오늘은 ${today}입니다. 하이탑부동산(파주 운정)의 블로그·SNS 글감으로 쓸 한국 부동산 관련 소식을 웹검색으로 찾아 주세요.
+${scope}
+실제로 보도되거나 공식 발표된 내용만 쓰고 지어내지 마세요. 같은 내용을 두 번 넣지 마세요.
 아래 JSON 배열만 출력하세요. 다른 설명이나 마크다운 기호는 쓰지 마세요.
-[{"kind":"개발소식 또는 부동산소식","title":"기사 제목 요약(30자 내외)","source":"매체명","date":"YYYY-MM-DD"}]`, true);
+[{"kind":"${kindRule}","title":"제목 요약(30자 내외)","source":"매체명 또는 발표 기관","date":"YYYY-MM-DD"}]`, true);
     const arr = parseJsonArray(text);
     if (!arr || arr.length === 0) throw new Error("소식 목록을 읽지 못했어요. 다시 눌러 주세요.");
-    state.newsCandidates = arr.slice(0, 8).map(n => ({ kind: /개발/.test(String(n.kind || "")) ? "개발소식" : "부동산소식", title: String(n.title || "").trim(), source: String(n.source || "").trim(), date: String(n.date || "").trim() })).filter(n => n.title)
-      .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === "개발소식" ? -1 : 1));
+    const toKind = (k) => {
+      if (cat.key !== "mix") return cat.label;
+      const s = String(k || "").replace(/\s+/g, "");
+      const hit = NEWS_CATEGORIES.find(c => c.key !== "mix" && s.includes(c.label.replace(/\s+/g, "")));
+      return hit ? hit.label : "부동산소식";
+    };
+    const order = labels;
+    state.newsCandidates = arr.slice(0, 8).map(n => ({ kind: toKind(n.kind), title: String(n.title || "").trim(), source: String(n.source || "").trim(), date: String(n.date || "").trim() })).filter(n => n.title)
+      .sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
     if (state.newsCandidates.length === 0) throw new Error("소식 목록이 비어 있어요. 다시 눌러 주세요.");
+    state.newsByCategory[cat.key] = state.newsCandidates;
   } catch (e) {
-    state.newsError = "뉴스를 가져오지 못했어요: " + e.message;
+    state.newsError = cat.label + "을(를) 가져오지 못했어요: " + e.message;
   }
   state.newsLoading = false; render();
 }
@@ -449,7 +526,7 @@ async function pickNews(i) {
 날짜: ${n.date}
 아래 형식을 정확히 지키세요. 마크다운 기호는 쓰지 마세요. 확인되지 않은 내용은 쓰지 마세요.
 제목: (기사 제목 요약, 30자 내외)
-요약: (핵심 내용 3~4문장)
+요약: (핵심 내용 3~4문장${/세법|법령|꼭 알아야/.test(n.kind || "") ? ". 시행일·적용 대상·달라지는 점을 꼭 넣으세요" : ""})
 출처: (매체명, 보도 날짜, 기사 주소가 있으면 주소까지)`, true);
     const t = (text.match(/제목\s*[:：]\s*(.+)/) || [])[1];
     const s = (text.match(/요약\s*[:：]\s*([\s\S]*?)(?:\n\s*출처\s*[:：]|$)/) || [])[1];
