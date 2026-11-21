@@ -158,6 +158,11 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(11,42,107,.15)
       <h2><span class="num"></span>정보 영상 화면 스타일</h2>
       <div class="pills" id="infoStyle"><button data-v="card" class="on">🟦 글자 카드</button><button data-v="photo">🖼 사진 배경</button></div>
       <div class="hint">글자 카드는 사진 없이 큰 글자로 보여줘요. 사진 배경은 아래에 올린 사진 위에 글자가 나와요.</div>
+      <label for="infoTitle">상단 제목 (영상 제목 · 끝까지 고정)</label>
+      <input type="text" id="infoTitle" placeholder="예: 파주에 철도 4개가 온다">
+      <label for="infoSub">상단 부제 (노란 글씨 · 비워도 돼요)</label>
+      <input type="text" id="infoSub" placeholder="예: 제5차 국가철도망 총정리">
+      <div class="hint" id="infoTitleAlts"></div>
     </div>
     <div class="card lm" id="listingCard">
       <h2><span class="num"></span>매물 정보</h2>
@@ -976,7 +981,7 @@ function buildYT(){
     tags=base.concat([nm,cx,ar,nm&&tp?nm+' '+tp:'',cx&&tp?cx+' '+tp:'',tp?tp+'매물':'',tp?'파주 '+tp:'',curType+(tp?' '+tp:''),curType+' 매물','부동산쇼츠','공인중개사','부동산'].filter(Boolean));
     hash=['#'+noSp(biz),'#운정부동산','#파주부동산',nm&&'#'+noSp(nm),cx&&'#'+noSp(cx),tp&&'#'+noSp(curType+tp),'#운정신도시','#Shorts'].filter(Boolean);
   }else{
-    const t0=(cuts[0]&&cuts[0].big)||lines[0]||'부동산 정보';
+    const t0=(G.mode==='info'&&(G.infoTitle||'').trim())||(cuts[0]&&cuts[0].big)||lines[0]||'부동산 정보';
     title=t0.replace(/[!?.。]+$/,'');
     pts=lines.slice(0,Math.max(1,lines.length-1)).map(x=>'✔ '+x);
     tags=[biz,'부동산정보','부동산팁','부동산쇼츠','공인중개사','파주부동산','운정부동산','부동산재테크'];
@@ -1439,7 +1444,7 @@ function startPlayback(rec){
     mr.onstop=()=>{
       const blob=new Blob(chunks,{type:mr.mimeType||'video/webm'});
       const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-      a.download='하이탑_쇼츠_'+((cuts[0]&&cuts[0].big)||'영상').replace(/[\\/:*?"<>|\s]/g,'')+'.'+ext;a.click();
+      a.download='하이탑_쇼츠_'+((G.mode==='info'&&(G.infoTitle||'').trim())||(cuts[0]&&cuts[0].big)||'영상').replace(/[\\/:*?"<>|\s]/g,'')+'.'+ext;a.click();
       setStatus('저장 완료 ✔ ('+ext+') 다운로드 폴더를 확인하세요',true);
       recorder=null;$('btnSave').disabled=false;$('btnSave').textContent='⏺ 영상 저장 (음성·배경음 포함)';
     };
@@ -1527,11 +1532,49 @@ function cleanAiScript(t){
   });
   return out.join('\n');
 }
+// AI 대본 맨 위 "[제목 후보]" 줄(또는 [A], [B] 줄)에서 영상 제목을 뽑는다.
+function extractAiTitles(t){
+  const lines=String(t||'').replace(/\r/g,'').split('\n').map(x=>x.trim());
+  let line='';
+  const k=lines.findIndex(l=>/^\[\s*제목\s*후보[^\]]*\]/.test(l));
+  if(k>=0){line=lines[k].replace(/^\[\s*제목\s*후보[^\]]*\]\s*[:：]?\s*/,'');if(!line){const nx=lines.slice(k+1).find(Boolean);if(nx&&!/^\[\s*TTS/.test(nx))line=nx;}}
+  else{const first=lines.find(Boolean)||'';if(/^(\[[^\]]{1,40}\]\s*,?\s*)+$/.test(first))line=first;}
+  if(!line)return [];
+  let c=(line.match(/\[([^\]]+)\]/g)||[]).map(x=>x.slice(1,-1));
+  if(!c.length)c=/\//.test(line)?line.split('/'):/\|/.test(line)?line.split('|'):[line];
+  return c.map(x=>x.replace(/^\s*\d+[.)]\s*/,'').replace(/^["'“”‘’]+|["'“”‘’]+$/g,'').trim()).filter(Boolean).slice(0,5);
+}
+function splitTitle(s){
+  s=String(s||'').trim();if(s.length<=14)return [s,''];
+  const mid=s.length/2;let best=-1,bd=99;
+  for(let i=4;i<s.length-3;i++){if(/[,，!?]/.test(s[i-1])&&s[i]===' '||s[i]===' '&&!/[,，]/.test(s[i-1])){const d=Math.abs(i-mid)-(/[,，!?]/.test(s[i-1])?3:0);if(d<bd){bd=d;best=i}}}
+  return best<0?[s,'']:[s.slice(0,best).trim().replace(/[,，]$/,''),s.slice(best).trim()];
+}
+function setInfoTitle(title,sub){
+  G.infoTitle=title||'';G.infoSub=sub||'';
+  if($('infoTitle'))$('infoTitle').value=G.infoTitle;if($('infoSub'))$('infoSub').value=G.infoSub;
+  draw();
+}
+function applyAiTitles(raw){
+  const c=extractAiTitles(raw);
+  if(!c.length)return false;
+  let [t,s]=splitTitle(c[0]);
+  if(!s&&c[1]&&c[1].length<=24)s=c[1];
+  setInfoTitle(t,s);
+  const box=$('infoTitleAlts');
+  if(box){box.replaceChildren();
+    if(c.length>1){box.append('다른 제목 후보: ');
+      c.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.textContent=x;b.style.cssText='margin:2px 4px 2px 0;padding:3px 8px;font-size:12px;border-radius:6px';
+        b.onclick=()=>{const p=splitTitle(x);setInfoTitle(p[0],p[1]||(c[i===0?1:0]&&c[i===0?1:0].length<=24?c[i===0?1:0]:''));setStatus('상단 제목을 바꿨어요',true)};box.appendChild(b)});}}
+  return true;
+}
+['infoTitle','infoSub'].forEach(id=>{const e=$(id);if(e)e.addEventListener('input',()=>{G[id]=e.value;draw()})});
 let scriptBeforeClean=null;
 function applyCleanedScript(raw,why){
   const cleaned=cleanAiScript(raw);
   if(!cleaned)return false;
   scriptBeforeClean=raw;
+  applyAiTitles(raw);
   $('script').value=cleaned;
   $('script').dispatchEvent(new Event('input',{bubbles:true}));
   setStatus(why+' 한 줄 = 한 컷으로 정리했어요 ('+cleaned.split('\n').length+'컷). 되돌리려면 대본 칸 아래 "원래 글로 되돌리기"를 누르세요.',true);
@@ -1879,6 +1922,7 @@ draw();
     if(G.mode==='listing'){
       return [[f.name,f.complex].filter(Boolean).join(' ')||f.area, [f.size,f.type,f.price].filter(Boolean).join(' ')];
     }
+    if((G.infoTitle||'').trim()||(G.infoSub||'').trim())return [(G.infoTitle||'').trim(),(G.infoSub||'').trim()];
     var c0=cuts[0]||{};return [c0.big||'',c0.sub||''];
   }
   function newsCaption(c){
@@ -2095,7 +2139,7 @@ draw();
       var tp=f.type;
       hash=['#'+ns(biz),'#운정부동산','#파주부동산','#운정신도시',f.name&&'#'+ns(f.name),f.complex&&'#'+ns(f.complex),tp&&'#'+ns(curType+tp),'#부동산매물','#부동산릴스','#릴스','#공인중개사','#부동산재테크'];
     }else{
-      var t0=((cuts[0]&&cuts[0].big)||lines[0]||'부동산 정보').replace(/[!?.。]+$/,'');
+      var t0=((G.mode==='info'&&(G.infoTitle||'').trim())||(cuts[0]&&cuts[0].big)||lines[0]||'부동산 정보').replace(/[!?.。]+$/,'');
       cap.push('📰 '+t0,'');
       lines.slice(0,Math.max(1,lines.length-1)).forEach(function(x){cap.push('✔ '+x)});
       if(ex)cap.push('',ex);
