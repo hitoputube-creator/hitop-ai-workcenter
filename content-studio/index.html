@@ -211,7 +211,7 @@ const REWRITE_STYLE = {
   cafe: `경기도 파주시 운정신도시 동네 네이버 카페에 쓰는 이웃 주민 톤. 친근한 구어체, 광고처럼 보이지 않게, 500~700자.`,
   insta: `인스타그램 카드뉴스 대본. 8장 구성으로 작성하되 각 장을 "[N장] 제목: 내용" 형식으로 짧게. 1장은 후킹 헤드라인, 마지막 장은 "하이탑부동산 031-949-8969" CTA.`,
   threads: `스레드(Threads)용 짧은 글. 300~400자, 캐주얼하고 솔직한 톤, 첫 문장이 후킹. 해시태그 3~5개로 마무리.`,
-  youtube: `유튜브 쇼츠 대본 (50~60초). "[제목 후보 3개]" 다음 "[TTS 대본]" 형식으로. 마지막에 하이탑부동산 소개 한 줄.`,
+  youtube: `유튜브 쇼츠 대본 (50~60초). 첫 줄에 "[제목 후보]"라고 쓰고 그 줄에 제목 3개를 쉼표로 나열하세요. 다음 줄에 "[TTS 대본]"이라고 쓰고, 그 아래에는 소리 내어 읽을 문장만 쓰세요. TTS 대본은 한 줄에 한 문장, 한 줄 25자 안팎(최대 35자), 10~16줄, 빈 줄 없이 씁니다. 한 줄이 영상 한 컷이 됩니다. 첫 줄은 시선을 끄는 한 문장, 마지막 줄은 "상담은 하이탑부동산, 031-949-8969"로 끝내세요. 마크다운 기호, 괄호 속 연출 지시(배경음·화면 등)는 쓰지 마세요.`,
 };
 
 let state = {
@@ -452,10 +452,32 @@ function render() {
       copyBtn.textContent = "복사";
       copyBtn.onclick = () => copyText(state.resultText, copyBtn);
       resultArea.appendChild(copyBtn);
+      if (state.selectedChannel === "youtube") {
+        const shortsBtn = document.createElement("button");
+        shortsBtn.className = "ghost-btn";
+        shortsBtn.style.cssText = "background:#0B2A6B;color:#fff;border-color:#0B2A6B;";
+        shortsBtn.textContent = "🎬 쇼츠로 보내기 (대본 자동 정리)";
+        shortsBtn.title = "TTS 대본만 골라 한 줄 = 한 컷으로 나눠서 쇼츠 탭의 정보 영상에 넣어요";
+        shortsBtn.onclick = () => sendToShorts(shortsBtn);
+        resultArea.appendChild(shortsBtn);
+      }
     }
   }
 
   renderKanban();
+}
+
+// AI 글쓰기 결과(유튜브 대본)를 쇼츠 탭으로 넘긴다. 같은 사이트라 localStorage로 전달하고, 제작실의 쇼츠 탭을 연다.
+function sendToShorts(btn) {
+  try { localStorage.setItem("hitopShortsImport", JSON.stringify({ text: state.resultText, ts: Date.now() })); }
+  catch (e) { copyText(state.resultText, btn); return; }
+  let moved = false;
+  try {
+    const tab = window.parent && window.parent !== window ? window.parent.document.querySelector('[data-tab="shorts"]') : null;
+    if (tab) { tab.click(); moved = true; window.parent.scrollTo({ top: 0, behavior: "smooth" }); }
+  } catch (e) { moved = false; }
+  if (!moved) window.open("https://hitoputube-creator.github.io/hitop-ai-workcenter/shorts-studio/index.html", "_blank");
+  if (btn) { const o = btn.textContent; btn.textContent = "쇼츠 탭으로 보냈어요"; setTimeout(() => { btn.textContent = o; }, 1500); }
 }
 
 function currentMaterial() {
