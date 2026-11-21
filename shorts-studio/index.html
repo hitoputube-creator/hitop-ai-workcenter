@@ -143,6 +143,41 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(11,42,107,.15)
 /* ===== 미리보기 크기 고정 (제작실 안에서 화면이 계속 커지던 문제) ===== */
 #stagewrap{flex:none!important;height:auto!important;width:min(100%,380px)!important;max-width:380px}
 #center{justify-content:flex-start}
+
+/* ===== 한 화면 정리 (2026-11-21) ===== */
+html,body{height:auto!important;overflow:visible!important}
+main{flex:none!important;grid-template-columns:minmax(360px,1fr) 360px!important;gap:14px!important;padding:10px 14px 12px!important;align-items:start}
+body.adv main{grid-template-columns:minmax(360px,1fr) 360px minmax(320px,380px)!important}
+.col{overflow:visible!important;gap:10px!important}
+#left .card{padding:10px 12px}
+#left .card h2{font-size:13.5px;margin:0 0 6px}
+#left label{margin:6px 0 3px;font-size:11.5px}
+#left input[type=text],#left select,#left textarea{padding:6px 8px;font-size:13px;border-radius:8px}
+#left .hint{margin-top:4px}
+#listingCard .hint{display:none}
+.ls-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px 8px}
+.ls-grid .span2{grid-column:span 2}
+.ls-grid label{margin-top:4px!important}
+#featCard .chips button{padding:4px 10px;font-size:12px}
+#featCard details.more{margin-top:6px;padding:5px 10px}
+#featCard .selRow{padding:3px 8px;margin-top:4px;border-radius:8px}
+#featCard .selRow button{padding:2px 7px}
+#featSel{display:grid;grid-template-columns:1fr 1fr;gap:0 6px}
+#script{min-height:0}
+.btn-row{display:flex;gap:6px;margin-top:6px}
+.btn-row>*{flex:1 1 0;margin-top:0!important;min-width:0}
+#btnGenScript{padding:8px}
+#infoTitleAlts button{font-size:11.5px!important}
+#center{gap:8px!important}
+#styleBar .seg button{padding:6px 12px}
+#stagewrap{width:min(100%,300px)!important;max-width:300px!important;flex:none!important;height:auto!important}
+#ctl,#btnSave,#status{max-width:340px!important}
+header{padding:8px 20px!important}
+#btnSave{padding:11px!important;font-size:14.5px!important}
+#status{min-height:0!important;font-size:12px!important}
+#btnPlay{width:38px!important;height:38px!important}
+.out-row{display:flex;gap:6px;width:100%;max-width:380px}
+.out-row>*{flex:1 1 0;margin:0!important;padding:8px 6px!important;font-size:12px!important;min-width:0}
 </style>
 </head>
 <body>
@@ -1085,14 +1120,15 @@ function applyType(tp){
   Object.entries(P.labels).forEach(([k,v])=>{const l=$('lb_'+k);if(l)l.textContent=v});
   let st=typeStore[tp];
   if(!st){
-    /* 처음 여는 종류: 미리 골라 둔 특징 3개로 포인트·대본을 채워요 */
-    const df=(DEFAULT_FEATS[tp]||[]).map(nm=>(FEATS[tp]||[]).find(a=>a[0]===nm)).filter(Boolean).map(featObj);
+    /* 처음 여는 종류: 샘플 없이 빈 칸으로 시작해요 (예시는 입력칸 안 흐린 글씨로만 보여요) */
     const v=Object.assign({},P.v);
-    for(let n=1;n<=MAXP;n++){const f=df[n-1];v['f'+n]=f?f.big:'';v['s'+n]=f?f.sub:''}
-    const sc=df.length?[P.script[0],P.script[1]].concat(df.map(x=>x.line),[CALL]):P.script;
-    st={v,script:sc.join('\n'),feats:df};
+    ['area','name','complex','size','type','price'].forEach(k=>v[k]='');
+    for(let n=1;n<=MAXP;n++){v['f'+n]='';v['s'+n]=''}
+    st={v,script:'',feats:[]};
   }
   FIELD_IDS.forEach(k=>$(k).value=st.v[k]||'');
+  const PH=tp==='아파트'?{area:'예: 운정신도시',name:'예: ○○마을',complex:'예: ○○단지 101동',size:'예: 34평',type:'예: 전세',price:'예: 3.75억'}:{};
+  ['area','name','complex','size','type','price'].forEach(k=>{$(k).placeholder=PH[k]||(P.v[k]?'예: '+P.v[k]:'')});
   $('script').value=st.script;curType=tp;
   selFeats=(st.feats||[]).map(x=>Object.assign({},x));
   renderFeats();
@@ -2106,7 +2142,7 @@ draw();
   var LONGCALL='관심 있으시면 편하게 연락 주세요. 상담은 하이탑부동산, 공삼일 구사구 팔구육구!';
   var _bs=buildScript;
   buildScript=function(){var L=_bs();if(L.length&&L[L.length-1]===CALL)L[L.length-1]=LONGCALL;return L};
-  if(G.mode==='listing')$('btnGenScript').click();
+
 })();
 
 (function(){
@@ -2202,6 +2238,33 @@ draw();
   setWm();
 })();
 
+</script>
+
+<script>
+/* ===== 한 화면 정리: 입력칸 묶기 · 버튼 한 줄로 ===== */
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  function wrap(l,input,cls){var d=document.createElement('div');if(cls)d.className=cls;if(l)d.appendChild(l);d.appendChild(input);return d}
+  /* 매물 정보: 4칸 격자 (종류·지역·단지명·동/단지 / 평형·거래종류·가격) */
+  var lc=$('listingCard');
+  if(lc&&!lc.querySelector('.ls-grid')){
+    var g=document.createElement('div');g.className='ls-grid';
+    var pt=$('ptype'),ptl=pt.previousElementSibling;
+    g.appendChild(wrap(ptl,pt));
+    ['area','name','complex','size','type','price'].forEach(function(k){var inp=$(k),lab=$('lb_'+k);g.appendChild(wrap(lab,inp,k==='price'?'span2':''))});
+    lc.querySelectorAll(':scope > .row').forEach(function(r){r.remove()});
+    var h=lc.querySelector('h2');h.after(g);
+  }
+  /* 대본: 복사 · TTS 한 줄 */
+  var cp=$('btnCopy'),tts=$('btnTTS');
+  if(cp&&tts){var r=document.createElement('div');r.className='btn-row';cp.before(r);r.appendChild(cp);r.appendChild(tts);tts.textContent='🔊 TTS 사이트 (Qwen3)';}
+  $('script').rows=5;
+  /* 사진 · 음성 버튼 한 줄 */
+  var ph=$('btnPhoto'),vo=$('btnVoice');
+  if(ph&&vo){var r2=document.createElement('div');r2.className='btn-row';ph.before(r2);r2.appendChild(ph);r2.appendChild(vo);ph.textContent='📷 사진 추가';vo.textContent='📂 음성 파일 올리기';}
+  /* 유튜브 · 인스타 글 버튼 한 줄 */
+  setTimeout(function(){var yt=$('btnYT'),ig=$('btnIG');if(yt&&ig&&!yt.parentNode.classList.contains('out-row')){var r3=document.createElement('div');r3.className='out-row';yt.before(r3);r3.appendChild(yt);r3.appendChild(ig);yt.textContent='📤 유튜브 글 만들기';ig.textContent='📸 인스타 글 만들기';}},0);
+})();
 </script>
 </body>
 </html>
