@@ -1490,6 +1490,72 @@ bindG('gBiz','biz',e=>e.value.trim());bindG('gTel','tel',e=>e.value.trim());
 bindG('gWmPos','wmPos',e=>e.value);bindG('gWmStyle','wmStyle',e=>e.value);
 bindG('gMusicOn','musicOn',e=>e.checked,applyVolumes);bindG('gMusic','musicVol',e=>e.value/100,applyVolumes);bindG('gVoice','voiceVol',e=>e.value/100,applyVolumes);
 $('script').addEventListener('input',()=>{fillFromScript();syncFromScript();updateScriptDependent();renderCutList();renderInspector();draw();updateUI()});
+/* ===================== AI 글쓰기 대본 정리 (붙여넣기 · 쇼츠로 보내기) ===================== */
+// AI 글쓰기의 유튜브 결과에는 제목 후보, "[TTS 대본]" 같은 표시와 여러 문장짜리 긴 문단이 섞여 있다.
+// 쇼츠는 한 줄이 한 컷이므로 표시 줄은 지우고, 문장마다 한 줄로(너무 길면 쉼표에서) 나눈다.
+function looksLikeAiScript(t){
+  t=String(t||'');
+  return /\[\s*TTS\s*대본\s*\]|\[\s*제목\s*후보|^\s*(\[[^\]\n]{2,40}\]\s*,?\s*){2,}$/m.test(t)||t.split('\n').some(l=>l.trim().length>70);
+}
+function cleanAiScript(t){
+  let s=String(t||'').replace(/\r/g,'');
+  const tts=s.search(/\[\s*TTS\s*대본\s*\]/);
+  if(tts>=0)s=s.slice(tts).replace(/^\[\s*TTS\s*대본\s*\][^\n]*\n?/,'');
+  const out=[];
+  s.split('\n').forEach(line=>{
+    let l=line.trim();
+    if(!l)return;
+    if(/^(\[[^\]]{1,40}\]\s*,?\s*)+$/.test(l))return;               // [제목 후보], [..] 줄
+    if(/^(제목|썸네일|해시태그|태그|이미지 설명|출처)\s*[:：]/.test(l))return;
+    if(/^#\S/.test(l)||/^https?:\/\//.test(l))return;
+    l=l.replace(/^\(?\s*(나레이션|내레이션|성우|화면|자막)\s*\)?\s*[:：]\s*/,'').replace(/^[-•·▶]\s*/,'');
+    l.split(/(?<=[.!?…。])\s+/).forEach(sent=>{
+      sent=sent.trim();if(!sent)return;
+      while(sent.length>38){
+        let k=-1;for(let j=Math.min(sent.length-8,34);j>=12;j--){if(/[,，]/.test(sent[j])){k=j;break}}
+        if(k<0){for(let j=Math.min(sent.length-8,32);j>=14;j--){if(sent[j]===' '&&/[은는이가을를에로의고며면서도와과]/.test(sent[j-1])){k=j;break}}}
+        if(k<0){for(let j=Math.min(sent.length-8,30);j>=14;j--){if(sent[j]===' '){k=j;break}}}
+        if(k<0)break;
+        out.push(sent.slice(0,k+1).trim());sent=sent.slice(k+1).trim();
+      }
+      if(sent)out.push(sent);
+    });
+  });
+  return out.join('\n');
+}
+let scriptBeforeClean=null;
+function applyCleanedScript(raw,why){
+  const cleaned=cleanAiScript(raw);
+  if(!cleaned)return false;
+  scriptBeforeClean=raw;
+  $('script').value=cleaned;
+  $('script').dispatchEvent(new Event('input',{bubbles:true}));
+  setStatus(why+' 한 줄 = 한 컷으로 정리했어요 ('+cleaned.split('\n').length+'컷). 되돌리려면 대본 칸 아래 "원래 글로 되돌리기"를 누르세요.',true);
+  let undo=$('btnUndoClean');
+  if(!undo){undo=document.createElement('button');undo.id='btnUndoClean';undo.className='wide mt';undo.textContent='↩ 원래 글로 되돌리기';
+    undo.onclick=()=>{if(scriptBeforeClean==null)return;$('script').value=scriptBeforeClean;scriptBeforeClean=null;$('script').dispatchEvent(new Event('input',{bubbles:true}));undo.remove();setStatus('붙여넣은 원래 글로 되돌렸어요');};
+    $('script').insertAdjacentElement('afterend',undo);}
+  return true;
+}
+$('script').addEventListener('paste',e=>{
+  const t=(e.clipboardData||window.clipboardData).getData('text');
+  if(!looksLikeAiScript(t))return;
+  e.preventDefault();
+  if(G.mode!=='info'&&/\[\s*TTS\s*대본/.test(t))setMode('info');
+  applyCleanedScript(t,'붙여넣은 AI 대본을');
+});
+// AI 글쓰기에서 "쇼츠로 보내기"를 누르면 같은 사이트 저장소(localStorage)로 대본이 넘어온다.
+function importFromAiWriter(){
+  let data=null;try{data=JSON.parse(localStorage.getItem('hitopShortsImport')||'null')}catch(e){}
+  if(!data||!data.text||Date.now()-(data.ts||0)>30*60*1000)return;
+  localStorage.removeItem('hitopShortsImport');
+  if(G.mode!=='info')setMode('info');
+  applyCleanedScript(data.text,'AI 글쓰기 대본을 가져와서');
+}
+window.addEventListener('focus',importFromAiWriter);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)importFromAiWriter()});
+window.addEventListener('storage',e=>{if(e.key==='hitopShortsImport'&&e.newValue)importFromAiWriter()});
+setTimeout(importFromAiWriter,800);
 $('btnCopy').onclick=async()=>{
   try{await navigator.clipboard.writeText($('script').value)}catch(e){$('script').select();document.execCommand('copy')}
   setStatus('대본 복사 완료 ✔ AI Studio에 붙여넣으세요',true);
