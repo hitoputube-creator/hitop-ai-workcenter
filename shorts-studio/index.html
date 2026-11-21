@@ -139,6 +139,10 @@ input:focus,select:focus,textarea:focus{box-shadow:0 0 0 3px rgba(11,42,107,.15)
 #stagewrap{box-shadow:0 10px 30px rgba(8,24,64,.18)}
 #btnSave{box-shadow:0 8px 24px rgba(11,42,107,.2)}
 [style*="background:#ffd400"]{background:#0B2A6B!important;color:#fff!important}
+
+/* ===== 미리보기 크기 고정 (제작실 안에서 화면이 계속 커지던 문제) ===== */
+#stagewrap{flex:none!important;height:auto!important;width:min(100%,380px)!important;max-width:380px}
+#center{justify-content:flex-start}
 </style>
 </head>
 <body>
